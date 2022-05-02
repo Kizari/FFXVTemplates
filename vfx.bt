@@ -1,3 +1,5 @@
+// === WORK IN PROGRESS ===
+
 // See SQEX::Luminous::VFXGraph::LmVFXGraphFlatBufferBinary::Initialize
 
 struct Header
