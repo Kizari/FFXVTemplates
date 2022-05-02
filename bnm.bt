@@ -1,3 +1,5 @@
+// === WORK IN PROGRESS ===
+
 struct Header
 {
     char version[12];
