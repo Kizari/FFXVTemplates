@@ -1,0 +1,86 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+void padding(int spacing){
+    local int t;
+    t = FTell();
+    Printf("%d",((-t)%spacing));
+    byte padding[(spacing-((-t)%spacing))%spacing];
+}
+
+struct header{
+    int32 filesize;
+    float scaleMaybe;
+    int32 block1Pointer;
+    int32 pointerCount;
+    uint64 pointer0;
+    uint64 pointer1;
+    uint64 pointer2;
+    padding(0x10);
+    int32 ONE;
+    int32 FOUR;
+    int64 pointer3;
+    int32 pointer4;
+    int32 pointer5;
+    int32 pointer6;
+    int32 paddingF0[9];
+    int32 pointer7;
+    int32 data0;
+    int32 pointer8;
+    int32 data1;
+    int32 padding1[7];
+    int32 paddingF1[21];
+    int32 unkn[6];
+    int32 unkn2[6];
+    int32 countMaybe;
+    int32 data2;
+    int64 pointer9;
+};
+struct Vec4{
+    float vec[4];
+};
+
+struct block1{
+    int64 Null;
+    int64 NullF;
+    Vec4 data[Header.countMaybe+2];//This are wrong, need to find actual lengths
+    Vec4 separator;
+    Vec4 data1[Header.countMaybe];//This are wrong, need to find actual lengths
+    Vec4 separator;
+    Vec4 data2[Header.countMaybe+2];//This are wrong, need to find actual lengths
+    Vec4 separator;
+    byte guard;
+};
+
+
+struct tail{
+    int dataU0;
+    float dataF0;
+    int dataU1;
+    float dataF1;
+};
+
+struct end{
+    float data[5];
+};
+
+header Header;
+
+FSeek(Header.block1Pointer);
+block1 Block1;
+
+FSeek(Header.pointer1);
+tail pdata1;
+
+FSeek(Header.pointer2);
+end pdata2;
