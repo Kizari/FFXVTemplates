@@ -1,0 +1,47 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: pka.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: Animation Packages
+//  Category: Animation
+// File Mask: *.pka
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+int Align(int blockSize)
+{
+    local int offset = FTell();
+    return blockSize + blockSize * (offset / blockSize) - offset;
+}
+
+enum LmEResourceType
+{
+    eResourceType_Unknown  = 0,
+    eResourceType_Animation  = 1,
+    eResourceType_AnimSelection  = 2,
+    eResourceType_AnimTuningSet  = 3,
+    eResourceType_NumTypes  = 4
+};
+
+struct LmResourcePackage
+{
+    uint64 usersOffset;
+    uint guid;
+    uint size;
+    LmEResourceType type;
+    uint resourceIdCount;
+    uint typicalOverridePackagesCount;
+    uint resourceItemsCount;
+};
+
+LmResourcePackage package<bgcolor=0xffff00>;
+uint resourceOffsets[package.resourceItemsCount]<bgcolor=0xff0000>;
+uint resourceIds[package.resourceIdCount]<bgcolor=0x00ffff>;
+uint offsetToEndOfHashes<bgcolor=0xff0000>;
+uint animationHashes[package.resourceItemsCount]<bgcolor=0xff00aa>;
+byte alignment[Align(16)]<bgcolor=0x000000>;
+
+// Everything beyond this is just the ANI files
