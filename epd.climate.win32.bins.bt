@@ -1,0 +1,87 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: epd.climate.win32.bins.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+int Align(int blockSize)
+{
+    local int offset = FTell();
+    return blockSize + blockSize * (offset / blockSize) - offset;
+}
+
+struct ResourceId
+{
+    uint type;
+    uint primary;
+    uint secondary;
+    uint flags;
+};
+
+struct Bin
+{
+    char magic[12];
+    int size;
+    ResourceId resourceId;
+    int index;
+    ResourceId maybeAnotherResourceId<bgcolor=0x00ffff>;
+    uint count<bgcolor=0xff00aa>;
+    uint maybeChildSize<bgcolor=0xff00aa>;
+    uint maybeParentSizeOffset<bgcolor=0xff0000>;
+};
+
+struct Unknown
+{
+    uint maybeId<bgcolor=0xffff00>;
+    ushort alwaysZero<bgcolor=0x0000ff>;
+    ushort index<bgcolor=0xff00aa>;
+};
+
+struct Climate
+{
+    uint climateId<bgcolor=0x00ff00>;
+    uint maybeWeatherKey<bgcolor=0xffff00>;  // Increments by 13 each climate
+    uint maybeNextIndex<bgcolor=0xff00aa>;
+    uint alwaysZero;
+    uint alwaysZero2;
+    uint climateIndex<bgcolor=0xff00aa>;
+    float fadeSeconds<bgcolor=0x0000ff>;
+    uint enterEventId;
+    uint exitEventId;
+    float unknown2<bgcolor=0x0000ff>;   // Always 60
+    float unknown3<bgcolor=0x0000ff>;   // Always 60
+    float unknown4<bgcolor=0x0000ff>;   // Always 60
+    float unknown5<bgcolor=0x0000ff>;   // Always 600
+};
+
+struct StringBin
+{
+    string name;
+};
+
+// Read the first header
+Bin outerBin<bgcolor=0x00ff00>;
+byte padding[Align(256)]<bgcolor=0x000000, hidden=true>;
+
+// Read the second header
+Bin bin<bgcolor=0x00ff00>;
+
+// Data before climates
+int maybeClimatesSize<bgcolor=0xff00aa>;
+uint64 maybeStringBinOffset<bgcolor=0xff0000>;
+Unknown unknowns[12];
+
+// Read the climates
+Climate climates[bin.count]<bgcolor=0x00ffff>;
+
+// Read the strings
+byte null<bgcolor=0xff0000, hidden=true>;
+StringBin names[bin.count]<bgcolor=0xff0000>;
+byte padding2[Align(128)]<bgcolor=0x000000, hidden=true>;
