@@ -1,0 +1,20 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: common.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: Common constructs for FFXV formats
+//  Category: Utilities
+// File Mask: *.*
+//------------------------------------------------
+
+#include "utils.bt";
+
+struct DependencyLink
+{
+    uint64 hash;
+    string uri;
+    Align(8);
+    byte guard<bgcolor=0x000000, hidden=true>;
+};

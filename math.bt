@@ -1,0 +1,26 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: math.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: Mathematical structures
+//  Category: Utilities
+// File Mask: *.*
+//------------------------------------------------
+
+struct Quaternion
+{
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+struct Matrix
+{
+    float row1[4];
+    float row2[4];
+    float row3[4];
+    float row4[4];
+};

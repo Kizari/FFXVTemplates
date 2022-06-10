@@ -1,0 +1,20 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: utils.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: General helper functions
+//  Category: Utilities
+// File Mask: *.*
+//------------------------------------------------
+
+void Align(int blockSize)
+{
+    local int offset = FTell();
+    local int size = blockSize + blockSize * (offset / blockSize) - offset;
+    if (size > 0)
+    {
+        byte padding[size]<bgcolor=0x000000, hidden=true>;
+    }
+}
