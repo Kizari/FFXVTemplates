@@ -1,0 +1,110 @@
+// This is an older attempt at ANI and is being kept in-case any of the structural information is still of use in completing the ANI template
+// Please refer to ani.bt for a more complete version
+
+int Align(int offset, int blockSize)
+{
+    return (blockSize + blockSize * (offset / blockSize)) - offset;
+}
+
+enum UNKNOWN_ENUM1 { VALUE_0 = 0, VALUE_1 = 1, VALUE_2 = 2, VALUE_3 = 3 };
+enum UNKNOWN_ENUM2 { E2_VALUE_0 = 0, E2_VALUE_1 = 1, E2_VALUE_2 = 2, E2_VALUE_3 = 3 };
+
+
+struct FCurve {
+    ushort unknown[8];
+};
+
+struct LongBoye {
+    ushort maybeCount;
+    ushort maybeBoneIndex;
+    ushort maybeOffset;
+    ushort maybeFlag;
+};
+
+struct UnknownStructure {
+    int64 maybeCount<bgcolor=0xff00aa>;
+
+    // This looks like it should be an int64, but the second 4 bytes on ff15_clip_0666.ani are all
+    // FF FF FF FF so that wouldn't work on some files
+    // Keep an eye out in-case some really long animations need the full 8 bytes
+    int maybeCount2<bgcolor=0xff00aa>;
+    byte alignment[Align(FTell(), 8)]<bgcolor=0xaaaaaa>;
+};
+
+struct PreAniHeader {
+    float durationSeconds<bgcolor=0x00ff00>;
+    int maybeHash<bgcolor=0x00bbff>;
+    UNKNOWN_ENUM1 maybeEnum<bgcolor=0xff00aa>;
+    int maybeFramerate<bgcolor=0x00aa00>;   // Always 30
+
+    int someConstant<bgcolor=0x00aa00>;
+    UNKNOWN_ENUM2 maybeEnum2<bgcolor=0xff00aa>;
+    int64 maybeFcurveCount<bgcolor=0x00ff00>;
+
+    int64 offsetToFirstDenseBlockOrZero<bgcolor=0xff0000>;
+    int64 offsetAfterPadding<bgcolor=0xff0000>;
+
+    // Possibly an offset for a rarer construct
+    int64 alwaysZero3<bgcolor=0x00aa00>;
+    int64 offsetWhereMaybeMatricesStart<bgcolor=0xff0000>;
+
+    // Possibly a new set of data starts here
+    // Or might be an offset to a short and int
+    int64 offsetBefore6BytesAndAlignment<bgcolor=0xff0000>;
+    int64 offsetToAlwaysZero<bgcolor=0xff0000>;
+
+    int64 offsetToUnknownStructures<bgcolor=0xff0000>;
+    int unknownStructuresCount<bgcolor=0xff00aa>;
+    int longBoyeCount<bgcolor=0x00ff00>;
+    LongBoye longBoyes[longBoyeCount]<bgcolor=0x00ffff>;
+    FCurve fcurves[maybeFcurveCount]<bgcolor=0xffff00>;
+
+    byte padding[offsetAfterPadding - FTell()]<bgcolor=0xaaaaaa>;
+};
+
+struct AniHeader {
+    int64 offsetWhereMaybeMatricesStart<bgcolor=0xff0000>;
+
+    if (preHeader.maybeEnum == 0 || preHeader.maybeEnum == 1)
+    {
+        local int unknownOffsetsCount = (preHeader.offsetToUnknownStructures - FTell()) / 8;
+        if (unknownOffsetsCount > 0)
+        {
+            int64 unknownOffsets[unknownOffsetsCount - 1]<bgcolor=0xff0000>;
+            byte unknown2[8]<bgcolor=0x0000ff>;
+        }
+        UnknownStructure unknownStructures[preHeader.unknownStructuresCount];
+        
+        if (preHeader.maybeEnum == 0)
+        {
+            if (preHeader.maybeEnum2 == 2)
+                int unknown[20]<bgcolor=0x00ffff>;
+            else if (preHeader.maybeEnum2 == 3)
+                int unknown[4]<bgcolor=0x00ffff>;
+        }
+        else if (preHeader.maybeEnum == 1)
+        {
+            int unknown[5]<bgcolor=0x00ffff>;
+        }
+
+        int alwaysSixteen<bgcolor=0x00aa00>;
+        char magic[4]<bgcolor=0x00ff00>;
+
+        int unknown3[66]<bgcolor=0x0000ff>;
+
+        if (preHeader.maybeEnum2 != 0)
+        {
+            int boneIndices[60]<bgcolor=0x00ffff>;
+        }
+
+        int unknown4[(offsetWhereMaybeMatricesStart - FTell()) / 4]<bgcolor=0x0000ff>;
+    }
+    else if (preHeader.maybeEnum == 3)
+    {
+        // Array count appears to match number of bones used in the animation
+        int64 offsets[(preHeader.offsetToAlwaysZero - FTell()) / 8]<bgcolor=0x00ffff>;
+    }
+};
+
+PreAniHeader preHeader;
+AniHeader header;

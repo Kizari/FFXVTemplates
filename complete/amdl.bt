@@ -9,8 +9,8 @@
 // File Mask: *.amdl
 //------------------------------------------------
 
-#include "math.bt";
-#include "common.bt";
+#include "../utils/math.bt";
+#include "../utils/common.bt";
 
 enum<ushort> LmEAnimatedScaleState
 {

@@ -1,0 +1,27 @@
+// === WORK IN PROGRESS ===
+
+// See SQEX::Luminous::VFXGraph::LmVFXGraphFlatBufferBinary::Initialize
+
+struct Header
+{
+    uint format;
+    Assert(format == 1413565510);
+    byte vfxGraphBinaryOffset;
+    char vfx[3];
+    byte u1;
+    char graph[5];
+    byte u2;
+    byte u3;
+} m_pBinaryHeader;
+
+struct FlatBufferBinaryHeader
+{
+    uint u1[11];
+    ushort u2;
+} m_pFlatBufferBinaryHeader;
+
+struct LmUVFXGraphBinary
+{
+    uint u1;
+    uint u2;
+} m_vfxGraphBinary;

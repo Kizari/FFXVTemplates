@@ -1,0 +1,169 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: sab.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: FFXV Audio Files
+//  Category: Audio
+// File Mask: *.win.sab, *.win.mab
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "../utils/utils.bt";
+
+struct SabHeader
+{
+    char magic[4];
+    ubyte version;
+    ubyte flags;
+    uint16 structSize;
+    ubyte chunkTableCount;
+    ubyte nameLength;
+    uint16 number;  // Some kind of index or ID?
+    uint32 fileSize;
+    char name[nameLength];
+    Align(16);
+};
+
+struct ChunkTableElement
+{
+    char id[4];
+    ubyte version;
+    ubyte reserved;
+    uint16 structSize;
+    uint32 offset;
+    uint32 reserved2;
+};
+
+struct SoundHeader
+{
+    ubyte version;
+    ubyte work;
+    uint16 structSize;
+    ubyte type;
+    ubyte sequenceCount;
+    ubyte category;
+    ubyte priority;
+    uint16 number;
+    ubyte startMacro;
+    ubyte stopMacro;
+    float volume;
+    uint cycleIntervalLow;
+    uint cycleIntervalHigh;
+    ubyte cycleMaxPlayGroups;
+    ubyte flags;
+    uint16 sequenceOffset;
+    float audibleRange;
+    ubyte output;
+    ubyte distanceAttenuationCurve;
+    ubyte port;
+    ubyte nameLength;
+    float playLength;
+    float interiorFactor;
+    float innerRange;
+    char auxSendBusses[4];
+    float auxSendVolumes[4];
+    char numAuxSends;
+    ubyte effectsCount;
+    uint16 effectTableOffset;
+    float dopplerFactor;
+    uint16 zeroOneParamOffset;
+    ubyte numZeroOneParam;
+    ubyte finishMacro;
+    ubyte panningType;
+    ubyte reserved[3];
+    float convergenceFactor;
+    uint reserved2[2];
+    char name[nameLength];
+    Align(16);
+};
+
+struct SequenceHeader
+{
+    ubyte version;
+    ubyte reserved;
+    uint16 structSize;
+    uint16 id;
+    uint16 commandOffset;
+    ubyte zeroOnesCount;
+    ubyte reserved2[3];
+    int reserved3;
+};
+
+struct TrackHeader
+{
+    ubyte version;
+    ubyte type;
+    uint16 structSize;
+    uint16 soundId;
+    uint16 materialId;
+    uint16 id;
+    uint16 childId;
+    uint reserved;
+};
+
+struct MaterialHeader
+{
+    ubyte version;
+    ubyte reserved;
+    uint16 structSize;
+    ubyte channel;
+    ubyte format;
+    uint16 number;
+    uint32 sampleRate;
+    uint32 loopStart;
+    uint32 loopEnd;
+    uint32 extraDataSize;
+    uint32 dataSize;
+    uint16 extraDataId;
+    uint16 reserved3;
+};
+
+struct At9ExtraData
+{
+    ubyte version;
+    ubyte reserved;
+    uint16 structSize;
+    uint16 blockAlign;
+    uint16 samplesPerBlock;
+    uint32 channelMask;
+    ubyte config[4];
+    uint32 totalSamples;
+    uint32 overlapDelay;
+    uint32 encoderDelay;
+    uint32 sampleRate;
+    uint32 loopStart;
+    uint32 loopEnd;
+    uint32 reserved2[2];
+};
+
+SabHeader header<bgcolor=0xffff00>;
+
+local int chunkTableStart = FTell();
+ChunkTableElement chunkTable[header.chunkTableCount]<bgcolor=0x00ffff>;
+
+local int i = 0;
+for (i = 0; i < header.chunkTableCount; i++)
+{
+    FSeek(chunkTableStart + chunkTable[i].offset);
+    if (chunkTable[i].id[0] == 's' && chunkTable[i].id[1] == 'n' && chunkTable[i].id[2] == 'd' && chunkTable[i].id[3] == ' ')
+    {
+        SoundHeader soundHeader<bgcolor=0xff0000>;
+    }
+    else if (chunkTable[i].id[0] == 's' && chunkTable[i].id[1] == 'e' && chunkTable[i].id[2] == 'q' && chunkTable[i].id[3] == ' ')
+    {
+        SequenceHeader sequenceHeader<bgcolor=0xaaaaff>;
+    }
+    else if (chunkTable[i].id[0] == 't' && chunkTable[i].id[1] == 'r' && chunkTable[i].id[2] == 'k' && chunkTable[i].id[3] == ' ')
+    {
+        TrackHeader trackHeader<bgcolor=0x0099ff>;
+    }
+    else if (chunkTable[i].id[0] == 'm' && chunkTable[i].id[1] == 't' && chunkTable[i].id[2] == 'r' && chunkTable[i].id[3] == 'l')
+    {
+        MaterialHeader materialHeader<bgcolor=0xff00aa>;
+    }
+}
+
+At9ExtraData extraData<bgcolor=0x0000ff>;

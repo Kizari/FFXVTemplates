@@ -1,0 +1,68 @@
+LittleEndian();
+
+struct Xmb2Entry
+{
+    uint offset;
+    uint count;
+};
+
+struct Header
+{
+    char identifier[4];
+    Assert(identifier == "XMB2");
+
+    uint fileSize;
+    ushort flags;
+    ushort version;
+    int rootElementOffset;
+    local int realRootElementOffset = ConvertOffset(rootElementOffset);
+} header;
+
+struct Xmb2Element
+{
+    int elementStartOffset;
+    local int realelementStartOffset = ConvertOffset(elementStartOffset);
+
+    int attributeStartOffset;
+    local int realattributeStartOffset = ConvertOffset(attributeStartOffset);
+
+    uint elementCount : 24;
+    uint attributeCount : 8;
+};
+
+struct Xmb2Name
+{
+    int offset;
+};
+
+struct Xmb2VariantValue
+{
+    char b;
+    int i32;
+    uint u32;
+    float f;
+    int offset;
+    Xmb2Name name;
+};
+
+struct Xmb2Variant
+{
+    char type;
+    uint nameHash;
+    Xmb2VariantValue value;
+};
+
+int ConvertOffset(int rawOffset)
+{
+    return rawOffset != 0 ? (FTell() - 4) + rawOffset : 0;
+}
+
+FSeek(header.realRootElementOffset);
+Xmb2Element rootElement;
+
+FSeek(rootElement.realattributeStartOffset);
+int nameAttributeOffset;
+local int realNameAttributeOffset = ConvertOffset(nameAttributeOffset);
+
+FSeek(realNameAttributeOffset);
+Xmb2Variant nameAttribute;

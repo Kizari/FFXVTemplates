@@ -1,0 +1,184 @@
+// === WORK IN PROGRESS ===
+
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: ani.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: FFXV Animation Clips
+//  Category: Animation
+// File Mask: *.ani
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+int Align(int blockSize)
+{
+    local int offset = FTell();
+    return (blockSize + blockSize * (offset / blockSize)) - offset;
+}
+
+enum<uint16> LmETriggerTrackType
+{
+    eTriggerTrackType_LocomotionFeetEventTrack  = 0x0,
+    eTriggerTrackType_ExampleType_RangeBegin  = 0x0B,
+    eTriggerTrackType_ExampleType_RangeEnd  = 0x14,
+    eTriggerTrackType_LuminousMessageTriggerTrack_RangeBegin  = 0x21,
+    eTriggerTrackType_LuminousMessageTriggerTrack_RangeEnd  = 0x100,
+    eTriggerTrackType_LuminousAssetTriggerTrack_RangeBegin  = 0x1001,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Anonymous_RangeBegin  = 0x1001,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Anonymous_RangeEnd  = 0x1100,
+    eTriggerTrackType_LuminousAssetTriggerTrack_InModel_RangeBegin  = 0x1101,
+    eTriggerTrackType_LuminousAssetTriggerTrack_InModel_RangeEnd  = 0x1200,
+    eTriggerTrackType_LuminousAssetTriggerTrack_ModelDrawable_RangeBegin  = 0x1201,
+    eTriggerTrackType_LuminousAssetTriggerTrack_ModelDrawable_RangeEnd  = 0x1300,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Collision_RangeBegin  = 0x1301,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Collision_RangeEnd  = 0x1400,
+    eTriggerTrackType_LuminousAssetTriggerTrack_VFX_RangeBegin  = 0x1401,
+    eTriggerTrackType_LuminousAssetTriggerTrack_VFX_RangeEnd  = 0x1500,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Sound_RangeBegin  = 0x1501,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Sound_RangeEnd  = 0x1600,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Light_RangeBegin  = 0x1601,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Light_RangeEnd  = 0x1700,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Camera_RangeBegin  = 0x1701,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Camera_RangeEnd  = 0x1800,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Scaleform_RangeBegin  = 0x1801,
+    eTriggerTrackType_LuminousAssetTriggerTrack_Scaleform_RangeEnd  = 0x1900,
+    eTriggerTrackType_RequireTrackTypeMatchForRangeEventMatch_RangeEnd  = 0x1FFF,
+    eTriggerTrackType_BlackAssetTriggerTrack_General_RangeBegin  = 0x2001,
+    eTriggerTrackType_BlackAssetTriggerTrack_General_RangeEnd  = 0x2100,
+    eTriggerTrackType_BlackAssetTriggerTrack_VFX_RangeBegin  = 0x2101,
+    eTriggerTrackType_BlackAssetTriggerTrack_VFX_RangeEnd  = 0x2200,
+    eTriggerTrackType_BlackAssetTriggerTrack_Sound_RangeBegin  = 0x2201,
+    eTriggerTrackType_BlackAssetTriggerTrack_Sound_RangeEnd  = 0x2300,
+    eTriggerTrackType_BlackAssetTriggerTrack_Combat_RangeBegin  = 0x2301,
+    eTriggerTrackType_BlackAssetTriggerTrack_Combat_RangeEnd  = 0x2400,
+    eTriggerTrackType_BlackAssetTriggerTrack_Facial_RangeBegin  = 0x2401,
+    eTriggerTrackType_BlackAssetTriggerTrack_Facial_RangeEnd  = 0x2500,
+    eTriggerTrackType_AnyTypeEnumIdx  = 0x0FFFE,
+    eTriggerTrackType_Unknown  = 0x0FFFF,
+};
+
+enum LmEAnimCustomDataType
+{
+    eCustomUserDataType_SkeletalAnimInfo  = 0x0,
+    eCustomUserDataType_PhysicsBoneInfo  = 0x1,
+    eCustomUserDataType_VertexCache_Deprecated  = 0x2,
+    eCustomUserDataType_BeginSubAssetItemTypes  = 0x3,
+    eCustomUserDataType_LuminousTriggeredAssetItem_Generic  = 0x3,
+    eCustomUserDataType_BeginSubAssetContainerTypes  = 0x100,
+    eCustomUserDataType_LuminousAssetTriggerDataCollection  = 0x100,
+    eCustomUserDataType_EndSubAssetContainerTypes  = 0x101,
+    eCustomUserDataType_Obsolete_LuminousIK_ModelData  = 0x102,
+    eCustomUserDataType_BlackTriggerData  = 0x103,
+    eCustomUserDataType_OBSOLETE_Sasquatch_ModelData  = 0x104,
+    eCustomUserDataType_OBSOLETE_Sasquatch_AnimData  = 0x105,
+    eCustomUserDataType_PackedTypeOverrideList  = 0x106,
+    eCustomUserDataType_NoMirrorParts  = 0x107,
+    eCustomUserDataType_AssetRefContainer_SystemInternalUseOnly  = 0x10000,
+    eCustomUserDataType_Obsolete_LuminousWalker_ModelData  = 0x10001,
+    eCustomUserDataType_Obsolete_LuminousWalker_AnimData  = 0x10002,
+    eCustomUserDataType_LuminousMessageTriggerData  = 0x10003,
+    eCustomUserDataType_LuminousAssetTriggerData  = 0x10004,
+    eCustomUserDataType_BeginBuildCoordinatorDependencyTypes  = 0x20000,
+    eCustomUserDataType_LuminousIkRig  = 0x20000,
+    eCustomUserDataType_LuminousTuningSetPack  = 0x20001,
+    eCustomUserDataType_LuminousLinkAnimScenePath  = 0x20002,
+    eCustomUserDataType_VertexCache  = 0x20003,
+    eCustomUserDataType_EndBuildCoordinatorDependencyTypes  = 0x20004,
+    eCustomUserDataType_NumCustomDataTypes  = 0x20005
+};
+
+struct LmSSingleAnimFrame
+{
+    ubyte numKeys[3];
+    ubyte onOffBits;
+};
+
+struct LmSAnimFrameChunkInfo
+{
+    ushort lastFrameStartOffsets[16];
+};
+
+struct LmSAnimTriggerData
+{
+    uint16 triggerFrame;
+    uint16 typeAndMirror;
+    LmETriggerTrackType trackType;
+    int16 customDataIndex;
+};
+
+struct LmSCustomUserDataIndexNode
+{
+    uint64 dataOffset;
+    LmEAnimCustomDataType type;
+    byte alignment[Align(8)];
+};
+
+struct PartsSizeBlock
+{
+    byte unknown[16];
+};
+
+struct LmAnimation
+{
+    float durationSeconds;
+    int id;
+    uint properties;
+    uint keyframeFPS;
+    float version;
+    uint cacheTypesCount;
+    uint partsSizeBlocksCount;
+    short usersCount;
+    short playCount;
+
+    uint64 constantDataOffset;
+    uint64 frameDataChunkStartPointerArrayOffset;
+    uint64 animationFrameChunkInformationPointerArrayOffset;
+    uint64 frameDataOffset;
+    uint64 seedFrameOffset;
+    uint64 unpackConstantsOffset;
+    uint64 customUserDataIndexOffset;
+
+    uint customUserDataCount;
+    uint triggerCount;
+
+    LmSAnimTriggerData triggers[triggerCount]<bgcolor=0x00ffff>;
+    PartsSizeBlock partsSizeBlocks[partsSizeBlocksCount]<bgcolor=0xff00aa>;
+
+    local int count = (durationSeconds * keyframeFPS) + 0.001;
+    local int chunkCount = (count / 16) + 1;
+    
+    FSeek(frameDataChunkStartPointerArrayOffset);
+    uint64 frameDataChunkOffsets[chunkCount];
+    FSeek(unpackConstantsOffset);
+    float unpackConstants<bgcolor=0xff0000>;
+} anim<bgcolor=0xffff00>;
+
+local int count = (anim.durationSeconds * anim.keyframeFPS) + 0.001;
+local int chunkCount = (count / 16) + 1;
+local int i = 0;
+for (i = 0; i < chunkCount; i++)
+{
+    FSeek(anim.frameDataChunkOffsets[i]);
+    struct ChunkData {
+        LmSSingleAnimFrame frame<bgcolor=0x00ffff>;
+        byte unknown[32];
+        local int totalCount = (frame.numKeys[0] & frame.onOffBits) + (frame.numKeys[1] & frame.onOffBits) + (frame.numKeys[2] & frame.onOffBits);
+        local int j = 0;
+        float vector[3 * totalCount];
+    } chunkData<bgcolor=0x00ffff>;
+}
+
+if (anim.animationFrameChunkInformationPointerArrayOffset > 0)
+{
+    FSeek(anim.animationFrameChunkInformationPointerArrayOffset);
+    LmSAnimFrameChunkInfo frameChunkInfo<bgcolor=0xff0000>;
+}
+
+FSeek(anim.seedFrameOffset);
+LmSSingleAnimFrame seedFrame<bgcolor=0xff0000>;
+
+FSeek(anim.customUserDataIndexOffset);
+LmSCustomUserDataIndexNode customUserDataIndexNodes[anim.customUserDataCount]<bgcolor=0xff00aa>;

@@ -1,0 +1,25 @@
+// === WORK IN PROGRESS ===
+
+struct Header
+{
+    char version[12];
+    uint padding;
+
+    uint totalSolvers;
+    uint totalBodies;
+    uint totalLinkNodes;
+    uint totalPlanes;
+
+    uint totalShapeMatchingGroups;
+    uint totalKinematics;
+    uint totalConstraints;
+    uint totalCones;
+
+    uint totalLinks;
+    uint totalCollisions;
+    uint totalSelfCollisions;
+    uint totalChainRootParticles;
+
+    uint totalGrassInteractBodies;
+    uint totalPossessions;
+} header;

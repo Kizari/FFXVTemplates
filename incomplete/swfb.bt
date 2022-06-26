@@ -1,0 +1,65 @@
+// === WORK IN PROGRESS ===
+
+struct Color
+{
+    ubyte r;
+    ubyte g;
+    ubyte b;
+    ubyte a;
+};
+
+struct Rectangle
+{
+  float left;
+  float top;
+  float right;
+  float bottom;
+};
+
+struct Swf
+{
+    struct Header
+    {
+        char magic[4];
+        char version;
+        Assert(version == 6);    
+        char endian;
+        uint16 x;
+        uint16 y;
+        uint16 width;
+        uint16 height;
+        uint16 frameNum;
+        float frameRate;
+        uint16 imageNum;
+        uint16 shapeNum;
+        uint16 editShapeNum;
+        uint16 movieClipNum;
+        uint16 labelNum;
+        uint16 tagNum;
+        uint16 maxDepth;
+        uint16 scalingGridNum;
+        Color background;
+    } header;
+
+    struct ImageArray
+    {
+        struct Image
+        {
+            uint16 ImageId;
+            byte padding[2];
+        } images[header.imageNum];
+    } imageArray;
+
+    struct ShapeDirectory
+    {
+        struct ShapeArray
+        {
+            /*struct Shape
+            {
+                uint16 shapeId;
+                uint16 planeNum;
+                Rectangle bounds;
+            } shapes[header.shapeNum];*/
+        } shapeArray;
+    } shapeDirectory;
+} swf;

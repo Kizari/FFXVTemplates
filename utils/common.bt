@@ -9,12 +9,18 @@
 // File Mask: *.*
 //------------------------------------------------
 
-#include "utils.bt";
-
 struct DependencyLink
 {
     uint64 hash;
     string uri;
-    Align(8);
+
+    local int blockSize = 8;
+    local int offset = FTell();
+    local int size = blockSize + blockSize * (offset / blockSize) - offset;
+    if (size > 0)
+    {
+        byte padding[size]<bgcolor=0x000000, hidden=true>;
+    }
+
     byte guard<bgcolor=0x000000, hidden=true>;
 };
