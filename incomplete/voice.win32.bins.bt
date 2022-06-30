@@ -1,0 +1,88 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "../utils/utils.bt";
+
+struct ResourceId
+{
+    uint type;
+    uint primary;
+    uint secondary;
+    uint flags;
+};
+
+struct Bin
+{
+    char magic[12];
+    int size;
+    ResourceId resourceId;
+    int index;
+    ResourceId maybeAnotherResourceId<bgcolor=0x00ffff>;
+    uint count<bgcolor=0xff00aa>;
+    uint maybeChildSize<bgcolor=0xff00aa>;
+    //uint maybeParentSizeOffset<bgcolor=0xff0000>;
+};
+
+struct StringBinItem
+{
+    string normalisedName;
+    string name;
+    //string location;
+};
+
+struct FixidBinHeader
+{
+    uint firstCount;
+    uint firstOffset;
+    uint secondOffset;
+    uint thirdOffset;
+};
+
+struct Fixid1
+{
+    uint fixid;
+    uint offset;
+    local uint returnAddress = FTell();
+    FSeek(start + fixidBinHeader.firstOffset + offset);
+    string value;
+    FSeek(returnAddress);
+};
+
+struct FixidBin1
+{
+    Fixid1 fixids[fixidBinHeader.firstCount]<optimize=false>;
+};
+
+struct StringBin
+{
+    StringBinItem strings[innerBin.count]<optimize=false>;
+    Align(256);
+};
+
+Bin outerBin<bgcolor=0x00ff00>;
+Align(256);
+
+Bin innerBin<bgcolor=0x00ff00>;
+FixidBinHeader fixidBinHeader<bgcolor=0xff0000>;
+
+local uint start = FTell();
+
+FixidBin1 fixidBin1<bgcolor=0xffff00>;
+
+
+//local uint offset = FTell();
+
+uint next[1000];
+//FixidBin fixidBin<bgcolor=0xffff00>;
+//FSeek(offset + stringBinOffset + 1);
+//StringBin stringBin<bgcolor=0x00ffff>;

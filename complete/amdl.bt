@@ -146,7 +146,7 @@ struct LmAnimModelTypeInfo
 struct BoneName
 {
     string name;
-    Align(48);
+    byte padding[48 - Strlen(name) - 1]<bgcolor=0x000000, hidden=true>;
 };
 
 struct BoneNames
@@ -168,7 +168,7 @@ struct Indices
     uint partsIds[amdl.poseSpec.partsLayersCount]<bgcolor=0x0000ff>;
     Align(8);
 
-    PartsData partsData[15]<bgcolor=0x00ffff>;
+    PartsData partsData[amdl.poseSpec.partsLayersCount]<bgcolor=0x00ffff>;
 };
 
 struct LmSkeletalAnimInfo
@@ -242,6 +242,7 @@ struct LmSRawDataInfo
 struct LmPoseData
 {
     LmSRawDataInfo rawDataInfo[amdl.poseSpec.rawTypesCount]<bgcolor=0xff0000>;
+    Align(16);
     uint64 offset<bgcolor=0xff00aa>;
     Align(16);
     

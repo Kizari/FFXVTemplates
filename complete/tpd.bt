@@ -28,17 +28,15 @@ enum Version {
 
 struct MaterialPaletteColor {
     uint index;
-    uint red;
-    uint blue;
-    uint green;
-    uint uvScale;
+    uint indexRepeated[3];
+    float uvScale;
     float heightThreshold;
     float slopeThreshold;
     float heightDampness;
-    float unknown;
-    float unknown2;
-    float unknown3;
-    float unknown4;
+    float always128;
+    float always1;
+    float always0;
+    float between0And1;
 };
 
 // Material attribute buffer?
@@ -46,7 +44,7 @@ struct ExtraData {
     ushort unknown;
     ushort always256;
     uint alwaysZero;
-    byte unknown3;
+    byte alwaysOne;
     byte reserved[3]<bgcolor=0x000000>;
 };
 
