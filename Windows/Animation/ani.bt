@@ -1,0 +1,145 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: ani.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: FFXV Animation Clips
+//  Category: Animation
+// File Mask: *.ani
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "../../Utilities/utils.bt";
+#include "enums.bt";
+#include "functions.bt";
+
+local LmEPackedKeyType packedKeyType = ePackedKeyType_Quat_48_Deprecated;
+
+/*struct RawTypeInfo
+{
+    LmEPackedKeyType packedKeyType;
+    ushort numInCache;
+    ushort poseStartBit;
+    uint poseDataStartOffset;
+    float decompressRangeScalar;
+};*/
+
+/*struct LmSCachedPartInfo
+{
+    float fromKey;
+    float intervalRecip;
+    uint posePartIndex;
+    uint nextKeyIndex;
+};*/
+
+struct PackedKey
+{
+    byte data[GetPackedKeySize(packedKeyType)];
+};
+
+struct LmSSingleAnimFrame
+{
+    ubyte numKeys[3]<bgcolor=0x00ff00>;
+    ubyte onOffBits<bgcolor=0x00ff00>;
+    PackedKey packedKeys[onOffBits]<optimize=false>;
+    PadRecursively();
+};
+
+struct LmSAnimFrameChunkInfo
+{
+    ushort lastFrameStartOffsets[16];
+};
+
+struct LmSAnimTriggerData
+{
+    uint16 triggerFrame;
+    uint16 typeAndMirror;
+    LmETriggerTrackType trackType;
+    int16 customDataIndex;
+};
+
+struct LmSCustomUserDataIndexNode
+{
+    uint64 dataOffset; // This is the offset from the position before this value to where the data begins
+    LmEAnimCustomDataType type;
+    Align(8);
+
+    if (type == eCustomUserDataType_BlackTriggerData)
+    {
+        uint unknown[10];
+        LmEPackedKeyType type;
+        packedKeyType = type;
+        uint unknown2;
+        string uri;
+    }
+};
+
+struct PartsSizeBlock
+{
+    uint unknown[6];
+};
+
+struct LmAnimation
+{
+    float durationSeconds;
+    int id;
+    LmEAnimPropertyBits properties;
+    uint keyframeFPS;
+    float version;
+    uint cacheTypesCount;
+    uint partsSizeBlocksCount;
+    short usersCount;
+    short playCount;
+
+    uint64 constantDataOffset;
+    uint64 frameDataChunkStartPointerArrayOffset;
+    uint64 animationFrameChunkInformationPointerArrayOffset;
+    uint64 frameDataOffset;
+    uint64 seedFrameOffset;
+    uint64 unpackConstantsOffset;
+    uint64 customUserDataIndexOffset;
+
+    uint customUserDataCount;
+    uint triggerCount;
+
+    LmSAnimTriggerData triggers[triggerCount]<bgcolor=0x00ffff>;
+    PartsSizeBlock partsSizeBlocks[partsSizeBlocksCount]<bgcolor=0xff00aa>;
+
+    local int count = (durationSeconds * keyframeFPS) + 0.001;
+    local int chunkCount = (count / 16) + 1;
+    
+    FSeek(frameDataChunkStartPointerArrayOffset);
+    uint64 frameDataChunkOffsets[chunkCount];
+    FSeek(unpackConstantsOffset);
+    float unpackConstants[cacheTypesCount]<bgcolor=0xff0000>;
+    float decompressRangeScalar<bgcolor=0x0088ff>; // Will sometimes be NaN
+
+    local uint customDataSize = frameDataOffset - FTell();
+    byte customData[customDataSize]<bgcolor=0x0000ff>;
+};
+
+//------------------------------------------------
+
+LmAnimation anim<bgcolor=0xffff00>;
+
+local uint returnAddress = FTell();
+FSeek(anim.customUserDataIndexOffset);
+LmSCustomUserDataIndexNode customUserDataIndexNodes[anim.customUserDataCount]<bgcolor=0xff00aa>;
+FSeek(returnAddress);
+
+local uint elementCount = GetNumberInCache(anim.partsSizeBlocksCount, FTell());
+byte keyData[6 * elementCount]<bgcolor=0xccccff>;
+//Printf("numInCache: %d", );
+
+//LmSSingleAnimFrame frames[44]<bgcolor=0xccccff, optimize=false>;
+
+if (anim.animationFrameChunkInformationPointerArrayOffset > 0)
+{
+    FSeek(anim.animationFrameChunkInformationPointerArrayOffset);
+    LmSAnimFrameChunkInfo frameChunkInfo<bgcolor=0xff0000>;
+}
+
+FSeek(anim.seedFrameOffset);
+LmSSingleAnimFrame seedFrame<bgcolor=0xff0000>;

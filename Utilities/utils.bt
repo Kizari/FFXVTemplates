@@ -13,8 +13,24 @@ void Align(int blockSize)
 {
     local int offset = FTell();
     local int size = blockSize + blockSize * (offset / blockSize) - offset;
-    if (size > 0)
+    if (size > 0 && size < blockSize)
     {
         byte padding[size]<bgcolor=0x000000, hidden=true>;
     }
+}
+
+void Align2(int blockSize)
+{
+    local int offset = FTell();
+    local int size = blockSize + blockSize * (offset / blockSize) - offset;
+    if (size > 0 && size < blockSize)
+    {
+        byte padding2[size]<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+int GetBytesToAlignment(int blockSize)
+{
+    local int offset = FTell();
+    return blockSize + blockSize * (offset / blockSize) - offset;
 }

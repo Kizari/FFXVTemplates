@@ -1,0 +1,296 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: amdl.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: Animation Model
+//  Category: Animation
+// File Mask: *.amdl
+//
+//     Notes: This format is identical to the Windows version
+//            Except there is an extra 40 bytes of padding after the header
+//            And therefore offsets are also different between versions
+//------------------------------------------------
+
+#include "../Utilities/math.bt";
+#include "../Utilities/common.bt";
+#include "../Utilities/utils.bt";
+
+enum<ushort> LmEAnimatedScaleState
+{
+    eAnimatedScaleState_Inactive  = 0,
+    eAnimatedScaleState_Scale_XSI_GS_Data_Playing  = 1,
+    eAnimatedScaleState_Scale_XSI_GS_Data_Playing_Force  = 2
+};
+
+enum LmEAnimCustomDataType
+{
+    eCustomUserDataType_SkeletalAnimInfo  = 0,
+    eCustomUserDataType_PhysicsBoneInfo  = 1,
+    eCustomUserDataType_VertexCache_Deprecated  = 2,
+    eCustomUserDataType_BeginSubAssetItemTypes  = 3,
+    eCustomUserDataType_LuminousTriggeredAssetItem_Generic  = 3,
+    eCustomUserDataType_BeginSubAssetContainerTypes  = 0x100,
+    eCustomUserDataType_LuminousAssetTriggerDataCollection  = 0x100,
+    eCustomUserDataType_EndSubAssetContainerTypes  = 0x101,
+    eCustomUserDataType_Obsolete_LuminousIK_ModelData  = 0x102,
+    eCustomUserDataType_BlackTriggerData  = 0x103,
+    eCustomUserDataType_OBSOLETE_Sasquatch_ModelData  = 0x104,
+    eCustomUserDataType_OBSOLETE_Sasquatch_AnimData  = 0x105,
+    eCustomUserDataType_PackedTypeOverrideList  = 0x106,
+    eCustomUserDataType_NoMirrorParts  = 0x107,
+    eCustomUserDataType_AssetRefContainer_SystemInternalUseOnly  = 0x10000,
+    eCustomUserDataType_Obsolete_LuminousWalker_ModelData  = 0x10001,
+    eCustomUserDataType_Obsolete_LuminousWalker_AnimData  = 0x10002,
+    eCustomUserDataType_LuminousMessageTriggerData  = 0x10003,
+    eCustomUserDataType_LuminousAssetTriggerData  = 0x10004,
+    eCustomUserDataType_BeginBuildCoordinatorDependencyTypes  = 0x20000,
+    eCustomUserDataType_LuminousIkRig  = 0x20000,
+    eCustomUserDataType_LuminousTuningSetPack  = 0x20001,
+    eCustomUserDataType_LuminousLinkAnimScenePath  = 0x20002,
+    eCustomUserDataType_VertexCache  = 0x20003,
+    eCustomUserDataType_EndBuildCoordinatorDependencyTypes  = 0x20004,
+    eCustomUserDataType_NumCustomDataTypes  = 0x20005
+};
+
+enum LmERawType
+{
+    eRawType_Quaternion  = 0,
+    eRawType_UncompressedVector3  = 1,
+    eRawType_Vector3_Range0  = 2,
+    eRawType_Vector3_Range1  = 3,
+    eRawType_Vector3_Range2  = 4,
+    eRawType_Vector3_NoScale  = 5,
+    eRawType_Num_Raw_Types  = 6
+};
+
+enum<ushort> LmEAnimProcessCutdownMode
+{
+    None=0,
+    Entity=1,
+    Camera=2,
+    Menu=3,
+    Swf=4,
+    Actor=5
+};
+
+struct LmSDataChannelInfo
+{
+    uint entriesCount;
+    uint dataOffset;
+    uint64 modelTypeSpecificInfoOffset;
+    uint partMaskStartBitIndex;
+    Align(8);
+};
+
+struct LmPoseSpec
+{
+    uint poseSize;
+    uint rawTypesCount;
+    uint rawDataInfoOffset;
+    uint partsSizeBlocks;
+
+    // SQEX::Luminous::Animation::LmPoseSpec::LmPosePoolPtr_PaddedMemberType m_pPosePool;
+    uint64 padding1<bgcolor=0x000000, hidden=true>;
+    // SQEX::Luminous::Animation::LmPoseSpec::LmPlaybackCachePoolPtr_PaddedMemberType m_pPlaybackCachePool;
+    uint64 padding2<bgcolor=0x000000, hidden=true>;    
+    // SQEX::Luminous::Animation::LmPoseSpec::LmPartsBitsPoolPtr_PaddedMemberType m_pPartsBitsPool;
+    uint64 padding3<bgcolor=0x000000, hidden=true>;
+
+    uint postProcessesCount;
+    int reserved<bgcolor=0x000000, hidden=true>;
+    
+    Align(280);
+
+    LmSDataChannelInfo channels[9]<bgcolor=0x00ffff>;
+    
+    uint64 skeletalBoneNamesOffset;
+    uint skeletalPartNamesCount;
+    uint partsLayersCount;
+    uint totalParts;
+};
+
+struct LmSCustomUserDataIndexNode
+{
+    uint64 offset;
+    LmEAnimCustomDataType type;
+    Align(8);
+};
+
+struct LmSTransitionParams
+{
+    float blendTime;
+    float playbackRate;
+    float startTime;
+    uint flags;
+    uint useCount;
+};
+
+struct LmAnimModelTypeInfo
+{
+    uint fileSize;
+    float version;
+    uint bindPoseOffset;
+    uint customUserDataCount;
+    uint64 customUserDataOffset;
+    uint64 defaultInstanceDataFileBinOffset;
+    uint64 transitionsOffset;
+    uint64 defaultTransitionOffset;
+    uint transitionCount;
+    uint instanceDataTypesCount;
+    uint totalInstanceDataSize;
+    int instanceDataOffsets[instanceDataTypesCount];
+    int activeInstances;
+
+    Align(56);
+
+    LmPoseSpec poseSpec<bgcolor=0xff00aa>;
+};
+
+struct BoneName
+{
+    string name;
+    byte padding[48 - Strlen(name) - 1]<bgcolor=0x000000, hidden=true>;
+};
+
+struct BoneNames
+{
+    BoneName names[amdl.poseSpec.skeletalPartNamesCount]<bgcolor=0x00ffff, optimize=false>;
+};
+
+struct PartsData
+{
+    uint64 indices[amdl.poseSpec.partsSizeBlocks];
+};
+
+struct Indices
+{
+    ushort indices[customUserData.skeletalAnimInfo.boneCount + 1]<bgcolor=0xffff00>;
+    ushort indices2[customUserData.skeletalAnimInfo.boneCount + 1]<bgcolor=0xff00aa>;
+    ushort indices3[customUserData.skeletalAnimInfo.boneCount]<bgcolor=0x9999ff>;
+
+    uint partsIds[amdl.poseSpec.partsLayersCount]<bgcolor=0x0000ff>;
+    Align(8);
+
+    PartsData partsData[amdl.poseSpec.partsLayersCount]<bgcolor=0x00ffff>;
+};
+
+struct LmSkeletalAnimInfo
+{
+    uint boneCount;
+    uint boneCountFullSkeleton;
+    ushort boneCountBindOnly;
+    ushort afterBonamikStartIndex;
+    ushort kdBonesStartIndex;
+    ushort dummy;
+    short childInfoOffset[boneCount]<bgcolor=0xffff00>;
+    ushort unknownIndices[boneCount]<bgcolor=0xff00aa>;
+    short parentIndices[boneCountFullSkeleton]<bgcolor=0x5555ff>;
+    short maybeParentIndexOffsets[boneCountFullSkeleton]<bgcolor=0xffff00>;
+    ushort unknownIndices2[boneCountFullSkeleton]<bgcolor=0xff00aa>;
+    uint unknownIndices3[boneCountFullSkeleton]<bgcolor=0x5555ff>;
+    Align(16);
+    
+    Quaternion unknownRotations[boneCountFullSkeleton]<bgcolor=0xffff00>;
+    Quaternion unknownRotations2[boneCountFullSkeleton]<bgcolor=0xff00aa>;
+
+    Matrix transformations[boneCountFullSkeleton]<bgcolor=0x0099ff>;
+    local int finalMatricesCount = boneCountBindOnly - boneCountFullSkeleton;
+    Matrix unknownTransformations[finalMatricesCount]<bgcolor=0x00ffff>;
+};
+
+struct CustomUserData
+{
+    local int start = FTell();
+    local int i = 0;
+    LmSCustomUserDataIndexNode customUserDataIndexNodes[amdl.customUserDataCount]<bgcolor=0xff0000>;
+    for (i = 0; i < amdl.customUserDataCount; i++)
+    {
+        FSeek(start + customUserDataIndexNodes[i].offset);
+        if (customUserDataIndexNodes[i].type == eCustomUserDataType_SkeletalAnimInfo)
+        {
+            LmSkeletalAnimInfo skeletalAnimInfo<bgcolor=0x00ffff>;
+        }
+        else if (customUserDataIndexNodes[i].type == eCustomUserDataType_LuminousIkRig)
+        {
+            DependencyLink dependency<bgcolor=0xff00aa>;
+            Align(16);
+        }
+        else
+        {
+            DependencyLink dependency<bgcolor=0xff00aa>;
+        }
+    }
+};
+
+struct Transitions
+{
+    LmSTransitionParams transitions[amdl.transitionCount];
+};
+
+struct LmSkeletalAnimInstanceData
+{
+    LmEAnimatedScaleState scaleAnimState;
+    LmEAnimProcessCutdownMode processCutdownMode;
+    float rotationX;
+    int rotationY;
+    float rotationZ;
+};
+
+struct LmSRawDataInfo
+{
+    LmERawType type;
+    uint entriesCount;
+};
+
+struct LmPoseData
+{
+    LmSRawDataInfo rawDataInfo[amdl.poseSpec.rawTypesCount]<bgcolor=0xff0000>;
+    Align(16);
+    uint64 offset<bgcolor=0xff00aa>;
+    Align2(16);
+    
+
+    local int i;
+    for (i = 0; i < amdl.poseSpec.rawTypesCount; i++)
+    {
+        if (rawDataInfo[i].type == eRawType_Quaternion)
+        {
+            Quaternion quaternions[rawDataInfo[i].entriesCount]<bgcolor=0x00ffff>;
+        }
+        else if (rawDataInfo[i].type == eRawType_Vector3_Range0)
+        {
+            Quaternion range0s[rawDataInfo[i].entriesCount]<bgcolor=0xff9999>;
+        }
+        else if (rawDataInfo[i].type == eRawType_Vector3_Range1)
+        {
+            Quaternion range1s[rawDataInfo[i].entriesCount]<bgcolor=0x55ff00>;
+        }
+        else if (rawDataInfo[i].type == eRawType_Vector3_NoScale)
+        {
+            Quaternion noScales[rawDataInfo[i].entriesCount]<bgcolor=0xffff00>;
+        }
+    }
+};
+
+LmAnimModelTypeInfo amdl<bgcolor=0xffff00>;
+local int indicesOffset = FTell();
+
+FSeek(amdl.poseSpec.rawDataInfoOffset + 112);
+LmPoseData poseData;
+
+FSeek(amdl.poseSpec.skeletalBoneNamesOffset + 112);
+BoneNames boneNames;
+
+FSeek(amdl.customUserDataOffset);
+CustomUserData customUserData;
+
+FSeek(amdl.defaultInstanceDataFileBinOffset);
+LmSkeletalAnimInstanceData defaultInstanceData<bgcolor=0x0099ff>;
+
+FSeek(amdl.transitionsOffset);
+Transitions transitions<bgcolor=0xff0000>;
+
+FSeek(indicesOffset);
+Indices indices<bgcolor=0xffaa55>;

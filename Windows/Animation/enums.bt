@@ -1,18 +1,3 @@
-//------------------------------------------------
-//--- 010 Editor v12.0.1 Binary Template
-//
-//      File: ani.bt
-//   Authors: Kizari
-//   Version: 1
-//   Purpose: FFXV Animation Clips
-//  Category: Animation
-// File Mask: *.ani
-//  ID Bytes: 
-//   History: 
-//------------------------------------------------
-
-#include "utils.bt";
-
 enum<uint16> LmETriggerTrackType
 {
     eTriggerTrackType_LocomotionFeetEventTrack  = 0x0,
@@ -90,6 +75,8 @@ enum LmEAnimPropertyBits
     eAnimAbsoluteMode  = 2
 };
 
+// Packed key type seems to be somewhere in the custom data if it is present
+// Packed key type seems to default to 2 if no custom data is present
 enum LmEPackedKeyType
 {
     ePackedKeyType_Quat_40  = 0,
@@ -103,113 +90,16 @@ enum LmEPackedKeyType
     ePackedKeyType_Num_PK_Types  = 8
 };
 
-struct LmSSingleAnimFrame
+// The index required to get this seems to come from the poseSpec in the AMDL
+// See SQEX::Luminous::Animation::LmSimplePlaybackCache::InitForAnimation
+LmEPackedKeyType GetDefaultPackedKeyType(int index)
 {
-    ubyte numKeys[3];
-    ubyte onOffBits;
-};
-
-struct LmSAnimFrameChunkInfo
-{
-    ushort lastFrameStartOffsets[16];
-};
-
-struct LmSAnimTriggerData
-{
-    uint16 triggerFrame;
-    uint16 typeAndMirror;
-    LmETriggerTrackType trackType;
-    int16 customDataIndex;
-};
-
-struct LmSCustomUserDataIndexNode
-{
-    uint64 dataOffset;
-    LmEAnimCustomDataType type;
-    Align(8);
-};
-
-struct PartsSizeBlock
-{
-    byte unknown[16];
-};
-
-/*struct RawTypeInfo
-{
-    LmEPackedKeyType packedKeyType;
-    ushort numInCache;
-    ushort poseStartBit;
-    uint poseDataStartOffset;
-    float decompressRangeScalar;
-};*/
-
-struct LmAnimation
-{
-    float durationSeconds;
-    int id;
-    LmEAnimPropertyBits properties;
-    uint keyframeFPS;
-    float version;
-    uint cacheTypesCount;
-    uint partsSizeBlocksCount;
-    short usersCount;
-    short playCount;
-
-    uint64 constantDataOffset;
-    uint64 frameDataChunkStartPointerArrayOffset;
-    uint64 animationFrameChunkInformationPointerArrayOffset;
-    uint64 frameDataOffset;
-    uint64 seedFrameOffset;
-    uint64 unpackConstantsOffset;
-    uint64 customUserDataIndexOffset;
-
-    uint customUserDataCount;
-    uint triggerCount;
-
-    LmSAnimTriggerData triggers[triggerCount]<bgcolor=0x00ffff>;
-    PartsSizeBlock partsSizeBlocks[partsSizeBlocksCount]<bgcolor=0xff00aa>;
-
-    local int count = (durationSeconds * keyframeFPS) + 0.001;
-    local int chunkCount = (count / 16) + 1;
-
-    Align(976);
-    float unknown<bgcolor=0x0000ff>;
-    float unknown2<bgcolor=0x0000ff>;
-    
-    FSeek(frameDataChunkStartPointerArrayOffset);
-    uint64 frameDataChunkOffsets[chunkCount];
-    FSeek(unpackConstantsOffset);
-    float unpackConstants[cacheTypesCount]<bgcolor=0xff0000>;
-} anim<bgcolor=0xffff00>;
-
-FSeek(anim.frameDataChunkOffsets[0]);
-local int frameCount = (anim.durationSeconds * anim.keyframeFPS) + 0.001;
-local int chunkCountRoundedDown = frameCount / 16;
-local int chunkCount = chunkCountRoundedDown + 1;
-local int i = 0;
-
-/*struct Keys
-{
-    byte keys[130]<bgcolor=0xffff00>;
-};
-
-do
-{
-    LmSSingleAnimFrame frame<bgcolor=0x00ffff>;
-    Keys keys;
-    i += 1;
+    local LmEPackedKeyType types[6];
+    types[0] = ePackedKeyType_Quat_48_Deprecated;
+    types[1] = ePackedKeyType_Vector3_128;
+    types[2] = ePackedKeyType_Vector3_48;
+    types[3] = ePackedKeyType_Vector3_48;
+    types[4] = ePackedKeyType_Vector3_48;
+    types[5] = ePackedKeyType_Vector3_48_NoScale;
+    return types[index];
 }
-while (i <= frameCount);*/
-
-
-if (anim.animationFrameChunkInformationPointerArrayOffset > 0)
-{
-    FSeek(anim.animationFrameChunkInformationPointerArrayOffset);
-    LmSAnimFrameChunkInfo frameChunkInfo<bgcolor=0xff0000>;
-}
-
-FSeek(anim.seedFrameOffset);
-LmSSingleAnimFrame seedFrame<bgcolor=0xff0000>;
-
-FSeek(anim.customUserDataIndexOffset);
-LmSCustomUserDataIndexNode customUserDataIndexNodes[anim.customUserDataCount]<bgcolor=0xff00aa>;

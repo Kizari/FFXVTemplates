@@ -9,8 +9,9 @@
 // File Mask: *.amdl
 //------------------------------------------------
 
-#include "../utils/math.bt";
-#include "../utils/common.bt";
+#include "../Utilities/math.bt";
+#include "../Utilities/common.bt";
+#include "../Utilities/utils.bt";
 
 enum<ushort> LmEAnimatedScaleState
 {
@@ -244,7 +245,7 @@ struct LmPoseData
     LmSRawDataInfo rawDataInfo[amdl.poseSpec.rawTypesCount]<bgcolor=0xff0000>;
     Align(16);
     uint64 offset<bgcolor=0xff00aa>;
-    Align(16);
+    Align2(16);
     
 
     local int i;
