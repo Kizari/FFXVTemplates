@@ -245,7 +245,7 @@ struct LmPoseData
     LmSRawDataInfo rawDataInfo[amdl.poseSpec.rawTypesCount]<bgcolor=0xff0000>;
     Align(16);
     uint64 offset<bgcolor=0xff00aa>;
-    Align2(16);
+    Align(16);
     
 
     local int i;

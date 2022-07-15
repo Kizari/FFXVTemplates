@@ -9,27 +9,24 @@
 // File Mask: *.*
 //------------------------------------------------
 
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
 void Align(int blockSize)
 {
-    local int offset = FTell();
-    local int size = blockSize + blockSize * (offset / blockSize) - offset;
-    if (size > 0 && size < blockSize)
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
     {
-        byte padding[size]<bgcolor=0x000000, hidden=true>;
+        Padding padding<bgcolor=0x000000, hidden=true>;
     }
 }
 
-void Align2(int blockSize)
-{
-    local int offset = FTell();
-    local int size = blockSize + blockSize * (offset / blockSize) - offset;
-    if (size > 0 && size < blockSize)
-    {
-        byte padding2[size]<bgcolor=0x000000, hidden=true>;
-    }
-}
-
-int GetBytesToAlignment(int blockSize)
+uint GetBytesToAlignment(uint blockSize)
 {
     local int offset = FTell();
     return blockSize + blockSize * (offset / blockSize) - offset;
