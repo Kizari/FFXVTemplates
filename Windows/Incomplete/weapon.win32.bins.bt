@@ -1,0 +1,294 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: weapon.win32.bins
+//   Authors: Light, Kizari
+//   Version: 0.8
+//   Purpose: Contains weapon data and attributes
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Point this to Utilities folder
+#include "C:\Users\....\utils.bt";
+
+
+
+
+local int preset = 1;
+//<bgcolor=0xff00aa>; purp
+//<bgcolor=0xff0000>; blue
+
+// Stores each struct's starting point for seeking entry data
+local int charStartingPoint;
+// Stores ending of each struct to align next one
+local int structEndPoint;
+
+struct ResourceId
+{
+    uint type;
+    uint primary;
+    uint secondary;
+    uint flags;
+};
+
+struct Bin
+{
+    char magic[12];
+    int size;
+    ResourceId resourceId;
+    int index;
+    ResourceId maybeAnotherResourceId<bgcolor=0x00ffff>;
+    uint count<bgcolor=0xff00aa>;
+    uint maybeChildSize<bgcolor=0xff00aa>;
+    //uint maybeParentSizeOffset<bgcolor=0xFFEEEE>;
+    
+};
+
+
+struct StringBinItem
+{
+    string normalisedName;
+    string name;
+    string location;
+};
+    
+
+struct ArrayBuildInfo
+{
+    int fixID<bgcolor=0xff00aa>;
+    int padding<bgcolor=0x0000ff>;
+    int TrueEntryCount;
+    int TrueEntrySize;
+    int padding<bgcolor=0x0000ff>;
+    int DistanceToEnd<bgcolor=0x0000ff>;
+    int DistanceToData;
+    int padding<bgcolor=0x0000ff>;
+    int guesswork_1;
+    int padding<bgcolor=0x0000ff>;
+    int padding<bgcolor=0x0000ff>;  
+    int EntryBufferBarrier<bgcolor=0x339999>;
+    charStartingPoint = FTell();
+    //unknownHeaderInfo HeaderInfo;
+
+    
+   
+};
+
+
+
+struct entryType1
+{
+    int fixid;
+    int value_1;
+    int sequentialID2;
+    int charOffset;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint + (entry1Data.DistanceToData) + charOffset - entry1Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+    
+    
+};
+
+struct entryType2
+{
+    
+    int fixid;
+    int charOffset;
+    int sequentialID;
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint + (entry2Data.DistanceToData) + charOffset - entry2Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+
+struct entryType3
+{
+    
+    int sequentialID;
+    int sequentialID_2;
+    int fixid;
+    int charOffset;
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint + (entry3Data.DistanceToData) + charOffset - entry3Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType4
+{
+    
+    int charOffset;
+    int sequentialID;
+    int sequentialID_2;
+    int charOffset2;
+    int fixid;
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint + (entry4Data.DistanceToData) + charOffset - entry4Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType5
+{
+
+// 65 is likely Broadsword  fixid 16837746
+
+// 66 is likely Flametongue > 28% fire, look for this
+
+// 67 is Airstep Sword   > Special 1 = 17001363 > MP Boost 7
+// 97 is Rapier Lance
+// 315 is Blazefire Saber
+    int pad;
+    int pad;
+    int Pad;
+    int Pad;
+    int Pad;
+    int Comrades_StatAttributes;
+    int Comrades_StatAmount;
+    int Comrades_PassiveID;
+    int pad;
+    int somethingbutidk;
+    int fixid;
+    int NextDataOffset;
+    int pad;
+    int WeaponType;
+    int WeaponName;
+    int pad;
+    int pad;
+    int attackValue;
+    int IDorPadding;
+    int MaybeInventory;
+    int pad;
+    int ShopCost;
+    int CritRate;
+    int indexOrPad;
+    int pad;
+    int pad;
+    int Something_Comrades;
+    int SpecialSlot_0or1;
+    int indexOrTrash;
+    int InventoryCountProbably;
+    int Something_Comrades;
+    int pad;
+
+
+    
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint + NextDataOffset + entry5Data.DistanceToData - entry5Data.TrueEntrySize ;
+    
+    FSeek(TypeOffset);    
+    string weaponLabels;
+    
+    TypeOffset = charStartingPoint+ entry5Data.DistanceToEnd - entry5Data.TrueEntrySize ;
+    FSeek(TypeOffset);
+    int checkint[32]; 
+
+    
+
+
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+};
+
+struct BytePadding {byte padding<bgcolor=0x0000ff>;};
+
+struct Entry5Padding {int padthis[32];};
+
+struct BottomCheck { int unknown[128];};
+
+void padNewChunk(int padding) 
+{
+    
+    FSeek(structEndPoint);
+    local int currentPos = FTell();
+    FSeek(currentPos + padding);
+
+
+}
+
+
+local int i; 
+
+Bin outerBin<bgcolor=0x00ff00>;
+    Align(256);
+Bin innerBin<bgcolor=0x00ff00>;
+
+// Entry 1 
+ArrayBuildInfo entry1Data<bgcolor=0xff0000>;
+entryType1 entries[1]<bgcolor=0x339999>;
+
+padNewChunk(3);
+
+// Entry 2
+ArrayBuildInfo entry2Data<bgcolor=0xff0000>;
+charStartingPoint += -4;
+
+for( i = 0 ; i < 33  ; i++) 
+{
+entryType2 entryType_2<bgcolor=0xa3e676>;
+}
+
+padNewChunk(1);
+
+// Entry 3
+ArrayBuildInfo entry3Data<bgcolor=0xff0000>;
+
+for( i = 0 ; i < 116  ; i++) 
+{
+entryType3 entryType_3<bgcolor=0xa3e676>;
+}
+padNewChunk(2);
+
+// Entry 4
+ArrayBuildInfo entry4Data<bgcolor=0xff0000>;
+charStartingPoint += 4;
+for( i = 0 ; i < 37  ; i++) 
+{
+entryType4 entryType_4<bgcolor=0xa3e676>;
+}
+padNewChunk(2);
+
+
+// Entry 5  >> 2782 entries
+ArrayBuildInfo entry5Data<bgcolor=0xff0000>;
+charStartingPoint += 112; //112 works
+//Entry5Padding uglypadding[3];
+
+for( i = 0 ; i < 2782 ; i++) 
+{
+entryType5 entryType_5<bgcolor=0xa3e676>;
+}
+//padNewChunk(6);
+
+
+
+//entryType5 final5<bgcolor=0xa3e676>;
+
+BottomCheck bottom[20];

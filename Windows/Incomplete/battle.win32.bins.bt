@@ -1,0 +1,552 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: weapon.win32.bins
+//   Authors: Light, Kizari
+//   Version: 0.8
+//   Purpose: Contains attributes and likely animation data for battle
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Point this to Utilities folder
+#include "C:\Users\....\utils.bt";
+
+
+
+local int preset = 1;
+//<bgcolor=0xff00aa>; purp
+//<bgcolor=0xff0000>; blue
+
+// Stores each struct's starting point for seeking entry data
+local int charStartingPoint;
+// Stores ending of each struct to align next one
+local int structEndPoint;
+
+struct ResourceId
+{
+    uint type;
+    uint primary;
+    uint secondary;
+    uint flags;
+};
+
+struct Bin
+{
+    char magic[12];
+    int size;
+    ResourceId resourceId;
+    int index;
+    ResourceId maybeAnotherResourceId<bgcolor=0x00ffff>;
+    uint count<bgcolor=0xff00aa>;
+    uint maybeChildSize<bgcolor=0xff00aa>;
+    //uint maybeParentSizeOffset<bgcolor=0xFFEEEE>;
+    
+};
+
+
+struct StringBinItem
+{
+    string normalisedName;
+    string name;
+    string location;
+};
+    
+
+struct ArrayBuildInfo
+{
+    int fixID<bgcolor=0xff00aa>;
+    int padding<bgcolor=0x0000ff>;
+    int TrueEntryCount;
+    int TrueEntrySize;
+    int padding<bgcolor=0x0000ff>;
+    int DistanceToEnd<bgcolor=0x0000ff>;
+    int DistanceToData;
+    int padding<bgcolor=0x0000ff>;
+    int guesswork_1;
+    int padding<bgcolor=0x0000ff>;
+    int padding<bgcolor=0x0000ff>;  
+    int EntryBufferBarrier<bgcolor=0x339999>;
+    charStartingPoint = FTell();
+    //unknownHeaderInfo HeaderInfo;
+
+    
+   
+};
+
+struct entryType1
+{
+// first is 4
+// second is 10
+// third is 10
+
+//6 > 11x12 > 9
+// 4 > 10x12 > 8
+
+//entry 14 should be 147
+
+    int fixid;
+    int unknown_2;
+    int unknown_3;
+    int unknown_4;
+    int unknown_5;
+    int charOffset;
+    int unknown_7;
+
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint   + (entry1Data.DistanceToData) + unknown_3 - entry1Data.TrueEntrySize;
+    //local uint TypeOffset = charStartingPoint + (entry1Data.DistanceToData) + charOffset - entry1Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+    
+    
+};
+
+/*
+struct entryType2
+{
+// first is 4
+// second is 10
+// third is 10
+
+//6 > 11x12 > 9
+// 4 > 10x12 > 8
+
+//entry 14 should be 147
+
+    int fixid;
+    int unknown_2;
+    int unknown_3;
+    int unknown_4;
+    int unknown_5;
+    int charOffset;
+    int unknown_7;
+    int unknown_8;
+    int unknown_9;
+    int unknown_10;
+    int unknown_11;
+    int unknown_12;
+    int unknown_13;
+    int unknown_14;
+    int unknown_15;
+    int unknown_16;
+    int unknown_17;
+    int unknown_18;
+    int unknown_19;
+
+
+    local uint returnAddress = FTell();
+    //local uint TypeOffset = charStartingPoint   + (entry1Data.DistanceToData) + (unknown_17 )  - entry1Data.TrueEntrySize;
+    //local uint TypeOffset = charStartingPoint + (entry1Data.DistanceToData) + charOffset - entry1Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+    
+    
+};
+*/
+
+struct entryType2
+{
+    
+    int fixid;
+    int unknown_2;
+    int unknown_3;
+    int unknown_4;
+    int unknown_5;
+    int charOffset;
+    int unknown_7;
+    int unknown_8;
+    int unknown_9;
+    int unknown_10;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry2Data.DistanceToData) + charOffset - entry2Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType3
+{
+    
+    int fixid;
+    int charOffset;
+    int unknown_3;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry3Data.DistanceToData) + charOffset - entry3Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType4
+{
+    
+    int index;
+    int sequentialnumber;
+    int fixid;
+    int charOffset;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry4Data.DistanceToData) + charOffset - entry4Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType5
+{
+    
+    int fixid;
+    int charOffset;
+    int index;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry5Data.DistanceToData) + charOffset - entry5Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType6
+{
+    
+    int charOffset;
+    int unknown_2;
+    int unknown_3;
+    int unknown_4;
+    int fixid;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry6Data.DistanceToData) + charOffset - entry6Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType7
+{
+    
+    int fixid;
+    int charOffset;
+    int index;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry7Data.DistanceToData) + charOffset - entry7Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType8
+{
+    //fixid  + charOffset
+    int fixid;
+    int charOffset;
+    int index;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry8Data.DistanceToData) + charOffset - entry8Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+
+};
+
+struct entryType9
+{
+    //fixid  + charOffset
+    int unknown_1;
+    int unknown_2;
+    int unknown_3;
+    int unknown_4;
+    int unknown_5;
+    int unknown_6;
+    int unknown_7;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry9Data.DistanceToData) - entry9Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType10
+{
+
+    
+    //fixid  + charOffset
+    int unknown_1;
+    int unknown_2;
+    int unknown_3;
+    int unknown_4;
+    int unknown_5;
+    int unknown_6;
+    int unknown_7;
+    int unknown_8;
+    int unknown_9;
+    int unknown_10;
+    int unknown_11;
+    int unknown_12;
+    int unknown_13;
+    int unknown_14;
+    int unknown_15;
+    int unknown_16;
+    int unknown_17;
+    int unknown_18;
+    int unknown_19;
+    int charOffset_attack;
+    
+        local uint returnAddress = FTell();
+        local uint TypeOffset = charStartingPoint  + (entry10Data.DistanceToData) + charOffset_attack - entry10Data.TrueEntrySize;
+    
+        FSeek(TypeOffset);    
+        string attackName;
+        FSeek(returnAddress);
+
+    int unknown_21;
+    int WeaponType;
+    int charOffset_attackJp;
+
+        returnAddress = FTell();
+        TypeOffset = charStartingPoint  + (entry10Data.DistanceToData) + charOffset_attackJp - entry10Data.TrueEntrySize;
+        FSeek(TypeOffset);    
+        string attackNameJp;
+        FSeek(returnAddress);
+
+    int unknown_24;
+    int unknown_25;
+    int unknown_26;
+    int unknown_27;
+    int unknown_28;
+    int unknown_29;
+    int unknown_30;
+    int unknown_31;
+    int unknown_32;
+    int unknown_33;
+    int unknown_34;
+    int unknown_35;
+    float unknown_36;
+    float unknown_37;
+    int unknown_38;
+    int unknown_39;
+    int unknown_40;
+    int unknown_41;
+    int unknown_42;
+    int unknown_43;
+    int AlwaysZero;
+    int Phantom_Something;
+    int AlwaysZero;
+    int unknown_47;
+    int unknown_48;
+    
+    returnAddress = FTell();
+    TypeOffset = charStartingPoint  + (entry10Data.DistanceToData) + charOffset_attack - entry10Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+/*
+struct entryType7
+{
+    //fixid  + charOffset
+    int unknown_1;
+    int unknown_2;
+    int unknown_3;
+    int unknown_4;
+    int unknown_5;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry6Data.DistanceToData) - entry6Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+*/
+
+struct BottomCheck { int unknown[120];};
+
+void padNewChunk(int padding) 
+{
+    
+    FSeek(structEndPoint);
+    local int currentPos = FTell();
+    FSeek(currentPos + padding);
+
+
+}
+
+
+local int i; 
+
+Bin outerBin<bgcolor=0x00ff00>;
+    Align(256);
+
+Bin innerBin<bgcolor=0x00ff00>;
+
+int whatshappening[10];
+
+// Entry 1 
+ArrayBuildInfo entry1Data<bgcolor=0xff0000>;
+charStartingPoint += 12;
+
+for( i = 0 ; i < 2  ; i++) 
+{
+entryType1 entryType_1<bgcolor=0xa3e676>;
+}
+
+padNewChunk(2);
+
+// Entry 2
+ArrayBuildInfo entry2Data<bgcolor=0xff0000>;
+charStartingPoint += 24;
+
+for( i = 0 ; i < 8  ; i++) 
+{
+entryType2 entryType_2<bgcolor=0xa3e676>;
+}
+
+padNewChunk(3);
+
+// Entry 3
+ArrayBuildInfo entry3Data<bgcolor=0xff0000>;
+charStartingPoint += -4;
+
+for( i = 0 ; i < 4  ; i++) 
+{
+entryType3 entryType_3<bgcolor=0xa3e676>;
+}
+padNewChunk(0);
+
+// Entry 4
+ArrayBuildInfo entry4Data<bgcolor=0xff0000>;
+charStartingPoint += 0;
+
+for( i = 0 ; i < 76  ; i++) 
+{
+entryType4 entryType_4<bgcolor=0xa3e676>;
+}
+padNewChunk(2);
+
+// Entry 5
+ArrayBuildInfo entry5Data<bgcolor=0xff0000>;
+charStartingPoint += -4;
+
+for( i = 0 ; i < 12  ; i++) 
+{
+entryType5 entryType_5<bgcolor=0xa3e676>;
+}
+
+padNewChunk(2);
+
+// Entry 6
+ArrayBuildInfo entry6Data<bgcolor=0xff0000>;
+charStartingPoint += 4;
+
+for( i = 0 ; i < 298  ; i++) 
+{
+entryType6 entryType_6<bgcolor=0xa3e676>;
+}
+
+padNewChunk(13);
+
+// Entry 7
+ArrayBuildInfo entry7Data<bgcolor=0xff0000>;
+charStartingPoint += -4;
+
+for( i = 0 ; i < 4  ; i++) 
+{
+entryType7 entryType_7<bgcolor=0xa3e676>;
+}
+padNewChunk(0);
+
+// Entry 8
+ArrayBuildInfo entry8Data<bgcolor=0xff0000>;
+charStartingPoint += -4;
+
+for( i = 0 ; i < 9  ; i++) 
+{
+entryType8 entryType_8<bgcolor=0xa3e676>;
+}
+
+padNewChunk(3);
+
+// Entry 9  No idea
+ArrayBuildInfo entry9Data<bgcolor=0xff0000>;
+charStartingPoint += 13;
+
+for( i = 0 ; i < 2  ; i++) 
+{
+entryType9 entryType_9<bgcolor=0xa3e676>;
+}
+
+padNewChunk(2);
+
+
+// Entry 10  
+ArrayBuildInfo entry10Data<bgcolor=0xff0000>;
+charStartingPoint += 176;
+
+//int paditout[48];
+
+for( i = 0 ; i < 3497  ; i++) 
+{
+entryType10 entryType_10<bgcolor=0xa3e676>;
+}
+
+padNewChunk(3);
+//BottomCheck bottom;

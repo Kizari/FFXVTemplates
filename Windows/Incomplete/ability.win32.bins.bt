@@ -1,0 +1,252 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: weapon.win32.bins
+//   Authors: Light, Kizari
+//   Version: 0.8
+//   Purpose: Contains ability data and attributes
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+
+// Point this to Utilities folder
+#include "C:\Users\....\utils.bt";
+
+
+
+
+local int preset = 1;
+//<bgcolor=0xff00aa>; purp
+//<bgcolor=0xff0000>; blue
+
+// Stores each struct's starting point for seeking entry data
+local int charStartingPoint;
+// Stores ending of each struct to align next one
+local int structEndPoint;
+
+struct ResourceId
+{
+    uint type;
+    uint primary;
+    uint secondary;
+    uint flags;
+};
+
+struct Bin
+{
+    char magic[12];
+    int size;
+    ResourceId resourceId;
+    int index;
+    ResourceId maybeAnotherResourceId<bgcolor=0x00ffff>;
+    uint count<bgcolor=0xff00aa>;
+    //uint maybeChildSize<bgcolor=0xff00aa>;
+    //uint maybeParentSizeOffset<bgcolor=0xFFEEEE>;
+    
+};
+
+
+struct StringBinItem
+{
+    string normalisedName;
+    string name;
+    string location;
+};
+    
+
+struct ArrayBuildInfo
+{
+    int fixID<bgcolor=0xff00aa>;
+    int padding<bgcolor=0x0000ff>;
+    int TrueEntryCount;
+    int TrueEntrySize;
+    int padding<bgcolor=0x0000ff>;
+    int DistanceToEnd<bgcolor=0x0000ff>;
+    int DistanceToData;
+    int padding<bgcolor=0x0000ff>;
+    int guesswork_1;
+    int padding<bgcolor=0x0000ff>;
+    int padding<bgcolor=0x0000ff>;  
+    int EntryBufferBarrier<bgcolor=0x339999>;
+    charStartingPoint = FTell();
+    //unknownHeaderInfo HeaderInfo;
+
+    
+   
+};
+
+struct entryType1
+{
+    int fixid;
+    int charOffset;
+    int index;
+
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint   + (entry1Data.DistanceToData) + charOffset - entry1Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+    
+    
+};
+
+
+struct entryType2
+{
+    int fixid;
+    int charOffset;
+    int index;
+
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint   + (entry2Data.DistanceToData) + charOffset - entry2Data.TrueEntrySize;
+    //local uint TypeOffset = charStartingPoint + (entry1Data.DistanceToData) + charOffset - entry1Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+    
+    
+};
+
+
+struct entryType3
+{
+    
+    int fixid;
+    int charOffset;
+    int unknown_3;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry3Data.DistanceToData) + charOffset - entry3Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+struct entryType4
+{
+    
+    int unknown_1;
+    int unknown_2;
+    int fixid;
+    int charOffset;
+    int unknown_5;
+    int unknown_uiabilityCategory;
+    int unknown_MPStatusEffects;
+    int unknown_8;
+    int unknown_abilityID;
+    int ability_attribute;
+    int alwayszero;
+    int equipmentid;
+    int unknown_13;
+    int ability_type;
+    int something_ENC;
+    int ability_hptrigger;
+    int ability_buff;
+    int unknown_18;
+    int unknown_19;
+
+    local uint returnAddress = FTell();
+    local uint TypeOffset = charStartingPoint  + (entry4Data.DistanceToData) + charOffset - entry4Data.TrueEntrySize;
+    
+    FSeek(TypeOffset);    
+    string attribute;
+    
+    structEndPoint = FTell();
+    FSeek(returnAddress);
+    
+};
+
+
+
+struct BottomCheck { int unknown[120];};
+
+void padNewChunk(int padding) 
+{
+    
+    FSeek(structEndPoint);
+    local int currentPos = FTell();
+    FSeek(currentPos + padding);
+
+
+}
+
+
+local int i; 
+
+Bin outerBin<bgcolor=0x00ff00>;
+    Align(256);
+
+Bin innerBin<bgcolor=0x00ff00>;
+
+// Entry 1 
+ArrayBuildInfo entry1Data<bgcolor=0xff0000>;
+charStartingPoint += -4;
+
+for( i = 0 ; i < 78  ; i++) 
+{
+entryType1 entryType_1<bgcolor=0xa3e676>;
+}
+
+padNewChunk(1);
+
+// Entry 2
+ArrayBuildInfo entry2Data<bgcolor=0xff0000>;
+
+charStartingPoint += -4;
+
+for( i = 0 ; i < 3 ; i++) 
+{
+entryType2 entryType_2<bgcolor=0xa3e676>;
+}
+
+padNewChunk(3);
+
+
+// Entry 3
+ArrayBuildInfo entry3Data<bgcolor=0xff0000>;
+charStartingPoint += -4;
+
+for( i = 0 ; i < 22  ; i++) 
+{
+entryType3 entryType_3<bgcolor=0xa3e676>;
+}
+padNewChunk(3);
+
+
+// Entry 4
+ArrayBuildInfo entry4Data<bgcolor=0xff0000>;
+charStartingPoint += 60;
+
+for( i = 0 ; i < 903 ; i++) 
+{
+entryType4 entryType_4<bgcolor=0xa3e676>;
+}
+
+
+//printStuff();
+
+// 836 > axe
+
+// 728 is where actions start
+
+//WE01_RUSH_STICK_L_000	69136634	310
+//WE01_RUSH_STICK_R_000	69136635	310
+//WE02_RUSH_STICK_F_000	69136637	201
+//WE02_RUSH_STICK_B_000	69136638	0
