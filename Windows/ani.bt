@@ -28,6 +28,7 @@ void Align(int blockSize)
     }
 }
 
+
 // ------------------------------------------------
 // Enumerations
 // ------------------------------------------------
@@ -127,14 +128,9 @@ enum LmEPackedKeyType
 // Structures
 // ------------------------------------------------
 
-struct PackedKey6
+struct PackedKey
 {
     byte data[6];
-};
-
-struct PackedKey16
-{
-    byte data[16];
 };
 
 struct LmSSingleAnimFrame
@@ -152,7 +148,7 @@ struct LmSSingleAnimFrame
         ubyte unknowns[((numKeys[1] << 8) + numKeys[2]) & 0xFFF]<bgcolor=0x0099ff>;
         ubyte currentKeyTimeBytes[(((numKeys[1] >> 4) + 16 * numKeys[0]) & 1) + (((numKeys[1] >> 4) + 16 * numKeys[0]) >> 1)]<bgcolor=0x00ffff>;
         Align(2);
-        PackedKey6 packedKeys[(numKeys[1] >> 4) + 16 * numKeys[0]];
+        PackedKey packedKeys[(numKeys[1] >> 4) + 16 * numKeys[0]];
     }
 };
 
@@ -174,11 +170,6 @@ struct LmSCustomUserDataIndexNode
     uint64 dataOffset; // This is the offset from the position before this value to where the data begins
     LmEAnimCustomDataType type;
     Align(8);
-};
-
-struct PartsSizeBlock
-{
-    uint64 unknown;
 };
 
 struct LmAnimation
@@ -206,9 +197,9 @@ struct LmAnimation
 
     LmSAnimTriggerData triggers[triggerCount]<bgcolor=0x00ffff>;
 
-    PartsSizeBlock partsSizeBlocks[partsSizeBlocksCount]<bgcolor=0xff00aa>;
-    PartsSizeBlock partsSizeBlocks2[partsSizeBlocksCount]<bgcolor=0x00ffff>;
-    PartsSizeBlock partsSizeBlocks3[partsSizeBlocksCount]<bgcolor=0xff00aa>;
+    uint64 partsSizeBlocks[partsSizeBlocksCount]<bgcolor=0xff00aa>;
+    uint64 partsSizeBlocks2[partsSizeBlocksCount]<bgcolor=0x00ffff>;
+    uint64 partsSizeBlocks3[partsSizeBlocksCount]<bgcolor=0xff00aa>;
 
     local float count = (durationSeconds * keyframeFPS) + 1;
     local int chunkCount = (count / 16) + 1;
@@ -247,3 +238,9 @@ LmSSingleAnimFrame frames[frameCount]<bgcolor=0xaaaaff, optimize=false>;
 
 FSeek(anim.seedFrameOffset);
 LmSSingleAnimFrame seedFrame<bgcolor=0xff0000>;
+
+if (FTell() < FileSize())
+{
+    // Accounts for leftover padding from PKA extraction
+    Align(16);
+}

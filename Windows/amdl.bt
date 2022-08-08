@@ -185,7 +185,7 @@ struct LmSkeletalAnimInfo
     short parentIndices[boneCountFullSkeleton]<bgcolor=0x5555ff>;
     short maybeParentIndexOffsets[boneCountFullSkeleton]<bgcolor=0xffff00>;
     ushort unknownIndices2[boneCountFullSkeleton]<bgcolor=0xff00aa>;
-    uint unknownIndices3[boneCountFullSkeleton]<bgcolor=0x5555ff>;
+    uint boneIds[boneCountFullSkeleton]<bgcolor=0x5555ff>;
     Align(16);
     
     Quaternion unknownRotations[boneCountFullSkeleton]<bgcolor=0xffff00>;

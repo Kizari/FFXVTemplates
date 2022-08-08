@@ -1,0 +1,123 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: clsn.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: Suspected that this is collision information relevant to physics simulations
+//  Category: Collision
+// File Mask: *.clsn
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+// ------------------------------------------------
+// Enumerations
+// ------------------------------------------------
+
+enum BlockType
+{
+    BLOCK_TYPE_NULL  = 0,
+    BLOCK_TYPE_STATIC_BODY  = 1,
+    BLOCK_TYPE_OVERLAP  = 2,
+    BLOCK_TYPE_RAGDOLL  = 3,
+    BLOCK_TYPE_CHAIN  = 4,
+    BLOCK_TYPE_CLOTH  = 5,
+    BLOCK_TYPE_CHARACTER_PROXY  = 6,
+    BLOCK_TYPE_IK    = 7,
+    BLOCK_TYPE_CLIPPING  = 8,
+    BLOCK_TYPE_WORLD_WIND  = 9,
+    BLOCK_TYPE_ANIMATED_SHAPE  = 10,
+    BLOCK_TYPE_DYNAMIC  = 11
+};
+
+// ------------------------------------------------
+// Block Types
+// ------------------------------------------------
+
+struct OverlapBlock
+{
+    int overlapBodiesOffset;
+    uint overlopBodiesCount;
+    int userVariablesOffset;
+    uint userVariablesCount;
+    uint partsId;
+    uint reactionId;
+    int overlapBodies2Offset;
+    uint overlapBodies2Count;
+    uint accId;
+    int pairsOffset;
+    uint pairsCount;
+    uint mirrorPairId;
+    int mirrorLR;
+};
+
+// ------------------------------------------------
+// Structures
+// ------------------------------------------------
+
+struct BinaryHeader
+{
+    char type[4];
+    char subType[4];
+    uint version;
+    char endianType;
+    char alignmentBits;
+    int16 offset;
+    uint64 size;
+    uint64 dateTime;
+    uint reserved[4];
+};
+
+struct Block
+{
+    BlockType type;
+    uint nameOffset;
+    uint userStringOffset;
+    char enabled;
+    char binaryVersion;
+    ushort reserved;
+    uint userId;
+    int reserved2;
+
+    switch (type)
+    {
+        case BLOCK_TYPE_OVERLAP:
+            OverlapBlock block;
+    }
+};
+
+struct PhbHeader
+{
+    BinaryHeader header<bgcolor=0xff0000>;
+    int reserved[3];
+    int blocksOffset;
+    uint blocksCount;
+    int padding;
+    Align(8);
+};
+
+// ------------------------------------------------
+// Main Template Logic
+// ------------------------------------------------
+
+PhbHeader header<bgcolor=0xffff00>;
+uint unknowns[header.blocksOffset]<bgcolor=0x0000ff>;
+Block block[header.blocksCount]<bgcolor=0x00ffff>;
