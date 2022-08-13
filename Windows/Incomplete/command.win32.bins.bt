@@ -1,7 +1,7 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
 //
-//      File: weapon.win32.bins
+//      File: command.win32.bins
 //   Authors: Light, Kizari
 //   Version: 0.8
 //   Purpose: Contains weapon data and attributes
@@ -11,9 +11,16 @@
 //   History: 
 //------------------------------------------------
 
-// Point this to Utilities folder
-#include "C:\Users\....\utils.bt";
 
+
+// This is very incomplete, and is likely missing lots of info and structure.
+// Nonetheless, rudimentary editing of hitboxes is possible.
+
+// To identify the correct HitboxIDs, you'll need to obtain the hitbox ID from the .ani file of 
+// the animation you want to change. 
+
+
+#include "C:\...\Utilities\utils.bt";
 
 
 
@@ -31,8 +38,8 @@ struct ResourceId
 {
     uint type;
     uint primary;
-    uint secondary;
-    uint flags;
+    //uint secondary;
+    //uint flags;
 };
 
 struct Bin
@@ -43,7 +50,7 @@ struct Bin
     int index;
     ResourceId maybeAnotherResourceId<bgcolor=0x00ffff>;
     uint count<bgcolor=0xff00aa>;
-    //uint maybeChildSize<bgcolor=0xff00aa>;
+    uint maybeChildSize<bgcolor=0xff00aa>;
     //uint maybeParentSizeOffset<bgcolor=0xFFEEEE>;
     
 };
@@ -80,39 +87,49 @@ struct ArrayBuildInfo
 
 struct entryType1
 {
-    int fixid;
-    int charOffset;
-    int index;
+    // 137 total
+    int unknown_1;
+    int unknown_2; 
+    int HitboxID; 
+    int AttackPower; 
+    int unknown[41];
+    int Hitstop;
+    int unknown_3[25];
+    int Stagger; 
+    int unknown_4[42];
+    float JobChangeGauge;
+    int padmaybe[3];
+    int HPOnHit;
+    int unknown_5[18];
 
-
-    local uint returnAddress = FTell();
-    local uint TypeOffset = charStartingPoint   + (entry1Data.DistanceToData) + charOffset - entry1Data.TrueEntrySize;
+local uint returnAddress = FTell();
+if(Hitstop < 10000) {       
+    local uint TypeOffset = charStartingPoint   + (entry1Data.DistanceToData) + (Hitstop) - entry1Data.TrueEntrySize;
     
-    FSeek(TypeOffset);    
-    string attribute;
-
+    FSeek(TypeOffset);
+ 
+    int PossiblyData;
+}
     structEndPoint = FTell();
     FSeek(returnAddress);
-    
-    
+
     
 };
 
 
 struct entryType2
 {
-    int fixid;
-    int charOffset;
-    int index;
+    int unknown[13];
 
 
     local uint returnAddress = FTell();
+/*
     local uint TypeOffset = charStartingPoint   + (entry2Data.DistanceToData) + charOffset - entry2Data.TrueEntrySize;
     //local uint TypeOffset = charStartingPoint + (entry1Data.DistanceToData) + charOffset - entry1Data.TrueEntrySize;
     
     FSeek(TypeOffset);    
     string attribute;
-
+*/
     structEndPoint = FTell();
     FSeek(returnAddress);
     
@@ -120,58 +137,6 @@ struct entryType2
     
 };
 
-
-struct entryType3
-{
-    
-    int fixid;
-    int charOffset;
-    int unknown_3;
-
-    local uint returnAddress = FTell();
-    local uint TypeOffset = charStartingPoint  + (entry3Data.DistanceToData) + charOffset - entry3Data.TrueEntrySize;
-    
-    FSeek(TypeOffset);    
-    string attribute;
-    
-    structEndPoint = FTell();
-    FSeek(returnAddress);
-    
-};
-
-struct entryType4
-{
-    
-    int unknown_1;
-    int unknown_2;
-    int fixid;
-    int charOffset;
-    int unknown_5;
-    int unknown_uiabilityCategory;
-    int unknown_MPStatusEffects;
-    int unknown_8;
-    int unknown_abilityID;
-    int ability_attribute;
-    int alwayszero;
-    int equipmentid;
-    int unknown_13;
-    int ability_type;
-    int something_ENC;
-    int ability_hptrigger;
-    int ability_buff;
-    int unknown_18;
-    int unknown_19;
-
-    local uint returnAddress = FTell();
-    local uint TypeOffset = charStartingPoint  + (entry4Data.DistanceToData) + charOffset - entry4Data.TrueEntrySize;
-    
-    FSeek(TypeOffset);    
-    string attribute;
-    
-    structEndPoint = FTell();
-    FSeek(returnAddress);
-    
-};
 
 
 
@@ -197,44 +162,26 @@ Bin innerBin<bgcolor=0x00ff00>;
 
 // Entry 1 
 ArrayBuildInfo entry1Data<bgcolor=0xff0000>;
-charStartingPoint += -4;
+//int paddinsg[548];
+charStartingPoint += 0;
+//charStartingPoint += 3;
 
-for( i = 0 ; i < 78  ; i++) 
+for( i = 0 ; i < 5512 ; i++) 
 {
 entryType1 entryType_1<bgcolor=0xa3e676>;
 }
 
-padNewChunk(1);
+padNewChunk(1033);
 
 // Entry 2
+Bin Bin3<bgcolor=0x00ff00>;
 ArrayBuildInfo entry2Data<bgcolor=0xff0000>;
 
-charStartingPoint += -4;
+//charStartingPoint += -4;
 
-for( i = 0 ; i < 3 ; i++) 
+for( i = 0 ; i < 22 ; i++) 
 {
 entryType2 entryType_2<bgcolor=0xa3e676>;
 }
 
-padNewChunk(3);
-
-
-// Entry 3
-ArrayBuildInfo entry3Data<bgcolor=0xff0000>;
-charStartingPoint += -4;
-
-for( i = 0 ; i < 22  ; i++) 
-{
-entryType3 entryType_3<bgcolor=0xa3e676>;
-}
-padNewChunk(3);
-
-
-// Entry 4
-ArrayBuildInfo entry4Data<bgcolor=0xff0000>;
-charStartingPoint += 60;
-
-for( i = 0 ; i < 903 ; i++) 
-{
-entryType4 entryType_4<bgcolor=0xa3e676>;
-}
+//padNewChunk(3);
