@@ -11,9 +11,7 @@
 //   History: 
 //------------------------------------------------
 
-// Point this to Utilities folder
-#include "C:\Users\....\utils.bt";
-
+#include "C:\Users\Light\Desktop\Reverse Engineering XV\FFXVTemplates-main\Utilities\utils.bt";
 
 
 
@@ -154,7 +152,7 @@ struct entryType4
     
 };
 
-struct entryType5
+struct WeaponData
 {
 
 // 65 is likely Broadsword  fixid 16837746
@@ -175,7 +173,7 @@ struct entryType5
     int pad;
     int somethingbutidk;
     int fixid;
-    int NextDataOffset;
+    int stringOffset;
     int pad;
     int WeaponType;
     int WeaponName;
@@ -197,18 +195,57 @@ struct entryType5
     int Something_Comrades;
     int pad;
 
-
-    
-
     local uint returnAddress = FTell();
-    local uint TypeOffset = charStartingPoint + NextDataOffset + entry5Data.DistanceToData - entry5Data.TrueEntrySize ;
+    local uint TypeOffset = charStartingPoint + stringOffset + entry5Data.DistanceToData - entry5Data.TrueEntrySize ;
     
     FSeek(TypeOffset);    
     string weaponLabels;
     
-    TypeOffset = charStartingPoint+ entry5Data.DistanceToEnd - entry5Data.TrueEntrySize ;
-    FSeek(TypeOffset);
-    int checkint[32]; 
+    if(pad[0] < 120000){ 
+            TypeOffset = (charStartingPoint) + entry5Data.DistanceToEnd + (pad[0]*4) - entry5Data.TrueEntrySize ;
+            FSeek(TypeOffset);
+            int padSize<bgcolor=0x0000ff>;
+            int padAddlData[padSize]; 
+
+            int unknownSize_1<bgcolor=0x0000ff>; 
+            int unknownData_1[unknownSize_1]; 
+
+            int unknownSize_2<bgcolor=0x0000ff>; 
+            int unknownData_2[unknownSize_2]<bgcolor=0x0000ff>; 
+
+            int unknownIDSize<bgcolor=0x0000ff>; 
+
+            int unknownIDs[unknownIDSize]<bgcolor=0x0000ff>; // used Weapon Model ID is one of these 
+ 
+            int unknownSize_3<bgcolor=0x0000ff>; 
+            int unknownData_3[unknownSize_3]<bgcolor=0x0000ff>; 
+
+            int statDataSize<bgcolor=0x0000ff>; 
+
+            int AddStat_STR<bgcolor=0xff00aa>;
+            int AddStat_VIT<bgcolor=0xff00aa>;
+            int AddStat_MAG<bgcolor=0xff00aa>;
+            int AddStat_SPR<bgcolor=0xff00aa>;
+            int AddStat_HP<bgcolor=0xff00aa>;
+            int AddStat_HPRecoveryRate<bgcolor=0xff00aa>; 
+            int AddStat_MP<bgcolor=0xff00aa>;
+            int AddStat_MPRecoveryRate<bgcolor=0xff00aa>;
+     
+                // These three aren't used (in main game) as far as I know, possibly old values
+            int Resistance_Sword; 
+            int Resistance_Greatsword; 
+            int Resistance_Polearm;
+
+            int Resistance_Ballistic<bgcolor=0x0000ff>; 
+            int Resistance_Fire<bgcolor=0x0000ff>; 
+            int Resistance_Ice<bgcolor=0x0000ff>; 
+            int Resistance_Lightning<bgcolor=0x0000ff>; 
+            int Resistance_Dark<bgcolor=0x0000ff>; 
+
+            int ComboCritRate<bgcolor=0x0000ff>; 
+            int SaveData<bgcolor=0x0000ff>; //???? Not sure what this does actually
+        }
+   
 
     
 
@@ -279,16 +316,10 @@ padNewChunk(2);
 // Entry 5  >> 2782 entries
 ArrayBuildInfo entry5Data<bgcolor=0xff0000>;
 charStartingPoint += 112; //112 works
-//Entry5Padding uglypadding[3];
 
 for( i = 0 ; i < 2782 ; i++) 
 {
-entryType5 entryType_5<bgcolor=0xa3e676>;
+WeaponData WeaponDataEntry<bgcolor=0xa3e676>;
 }
-//padNewChunk(6);
 
 
-
-//entryType5 final5<bgcolor=0xa3e676>;
-
-BottomCheck bottom[20];
