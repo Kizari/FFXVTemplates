@@ -191,9 +191,7 @@ struct LmSkeletalAnimInfo
     Quaternion unknownRotations[boneCountFullSkeleton]<bgcolor=0xffff00>;
     Quaternion unknownRotations2[boneCountFullSkeleton]<bgcolor=0xff00aa>;
 
-    Matrix transformations[boneCountFullSkeleton]<bgcolor=0x0099ff>;
-    local int finalMatricesCount = boneCountBindOnly - boneCountFullSkeleton;
-    Matrix unknownTransformations[finalMatricesCount]<bgcolor=0x00ffff>;
+    Matrix bindPoseTransformations[boneCountBindOnly]<bgcolor=0x0099ff>;
 };
 
 struct CustomUserData

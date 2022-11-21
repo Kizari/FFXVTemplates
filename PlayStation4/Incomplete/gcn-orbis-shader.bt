@@ -1,0 +1,140 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//unk = unknown, meaningful
+//cbz = unknown, can be zero
+
+//typedef uint32 rel_ptr_t; //ptr = rel_ptr + (char*)&rel_ptr
+
+struct shdr
+{
+    uint64 cbz00;
+    uint64 cbz08;
+    uint64 footer_offset_10;
+    uint64 zero18;
+    uint32 zero20;
+    char magic24[4]; // "Shdr"
+    uint64 cbz28;
+    uint32 zero30;
+    uint16 size34; //=footer_offset_10-entry3c-0x10
+    ubyte cbz36;
+    ubyte unk37; //used by vertex shader
+    uint32 zero38;
+    uint32 entry3c; //gpu code starts at entry3c+0x34
+    uint32 cbz40;
+    uint16 nreg44; //nvec = (nreg44%64+1)*4, nscal = (nreg44/64+1)*8
+    uint16 cbz46;
+    uint64 m0_init_reg_48; //must be %2==0, the register for initializing M0 is s[m0_init_reg_48/2]. cannot be >=32
+    uint32 always4_50; //4, setting to 0 disables shader, setting to nonzero causes visual artifacts (black output), setting to 12 causes crash
+    uint32 shader_type_54; //0 for vertex, 2 for fragment
+    ubyte unk58; //1 for vertex, 2->0 for fragment. often 2 for vertex too
+    ubyte cbz59;
+    uint16 cbz5a;
+    uint32 has_coords_5c; //if true, coords for interpolation are in v[0:1]
+    uint32 shader_type_60; //0x20017 for vertex, 0 for fragment
+    uint32 cbz64;
+    uint16 channel_mask_68; //R=1, G=2, B=4, A=8, 0x400 for vertex shader
+    uint16 nattrs6a; //number of attribute dwords to be loaded from memory into v[4:3+nattrs6a]
+    uint32 cbz6c;
+    uint32 gcn_bytecode[1]; //at entry3c+0x34
+};
+
+//footer_offset_10=0xac, struct offset 0x9c
+struct orb_shdr
+{
+    uint16 unk_f0; //used for abi fetcher
+    uint16 cbz_f2;
+    uint16 unk_f4; //used for vertex shader output
+    uint16 sampler_ptr_reg_f6; //s[sampler_ptr_reg_f6:sampler_ptr_reg_f6+3]
+    uint16 unk_f8; //set to 2, otherwise uniform_ptr_reg_f6 does not apply
+    uint16 uniform_ptr_reg_fa; //s[uniform_ptr_reg_fa:uniform_ptr_reg_fa+3]
+    uint32 buffer_source_fc; //if not 2, reads clear color instead of uniforms. maybe the same as unk_f8?
+    uint32 cbz00;
+    uint32 cbz04;
+    char magic08[8]; // "OrbShdr"
+    uint32 cbz10;
+    ubyte unk14[2]; //2 1, changing causes artifacts
+    uint16 cbz16;
+    uint64 cbz18;
+    uint32 cbz20;
+    uint32 number_of_sampler_uniforms_24;
+    uint32 cnt28; //+32 to program size
+    uint32 number_of_uniforms_2c;
+    uint32 number_of_samplers_30;
+    ubyte number_of_inputs_34;
+    ubyte number_of_outputs_35;
+    ubyte cnt36; //+16 to program size
+    ubyte cbz37;
+    uint32 cnt38; //+1 to program size
+    uint32 strings_size_3c; //+1 to program size
+    struct orb_shdr_sampler_uniform
+    {
+        uint32 index00;
+        uint32 zero04;
+        ubyte unk08; //always 2
+        ubyte cbz09;
+        ubyte cbz0a;
+        ubyte zero0b;
+        uint32 zero0c;
+        uint32 zero10;
+        //rel_ptr_t name14;
+        uint64 p_name14;
+    } sampler_uniforms[number_of_sampler_uniforms_24-1];
+    uint32 cbz40; //assumes number_of_sampler_uniforms_24=1
+    uint32 size_of_uniform_space_44;
+    uint16 unk48; //changing causes uniform not found
+    uint16 cbz4a;
+    uint32 number_of_uniforms_4c; //is it?
+    uint32 zero50;
+    //rel_ptr_t global_cb_s_54; // "__GLOBAL_CB__"
+    uint64 p_global_cb_s_54;
+    struct orb_shdr_uniform
+    {
+        ubyte type00; //TODO: enum table
+        ubyte is_enabled_01;
+        ubyte zero02;
+        ubyte cbz03;
+        uint32 offset04; //some offset or size
+        uint32 size08; //xxx: error message says its offset
+        uint32 cbz0c;
+        uint64 cbz10;
+        uint32 cbz18;
+        //rel_ptr_t name_offset_1c;
+        //rel_ptr_t no_name_s_20; // "(no_name)"
+        uint64 test;
+        uint64 test2;
+    } uniforms[number_of_uniforms_2c];
+    struct orb_shdr_sampler
+    {
+        uint64 zero00;
+        uint32 index08;
+        //rel_ptr_t name0c;
+        uint64 test;
+    } samplers[number_of_samplers_30];
+    struct orb_shdr_attrib
+    {
+        ubyte type00; //TODO: enum table
+        ubyte marker01;
+        ubyte zero02;
+        ubyte index03;
+        uint32 zero04;
+        //rel_ptr_t name08;
+        //rel_ptr_t name_caps_0c;
+        uint64 test;
+        uint64 test2;
+    } attribs[number_of_inputs_34+number_of_outputs_35];
+    char strings[1];
+};
+
+FSeek(64);
+shdr shader;

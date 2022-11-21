@@ -1,0 +1,83 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: wth2.bt
+//   Authors: Kizari, Garythesnail
+//   Version: 1
+//   Purpose: Weather presets
+//  Category: Climate
+// File Mask: *.wth2
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+// ------------------------------------------------
+// Structures
+// ------------------------------------------------
+
+struct HashTerminatedString
+{
+    local int length = 0;
+    while (true)
+    {
+        char c<hidden=true>;
+
+        if (c == 0x23)
+        {
+            break;
+        }
+
+        length++;
+    }
+
+    FSeek(FTell() - length - 1);
+    char value[length];
+};
+
+struct Header
+{
+    string name;
+    Align(16);
+};
+
+struct Preset
+{
+    ushort unknown<bgcolor=0x0000ff>;
+    ushort incrementalIndex<bgcolor=0xff00aa>;
+    ushort climateId<bgcolor=0xff00aa>;
+    HashTerminatedString weatherKey<bgcolor=0x00ff00>;
+    ushort presetModifier<bgcolor=0xff00aa>;
+    uint unknowns[15]<bgcolor=0x0000ff>;    // Possibly some offsets in here?
+    float view[16];
+    float viewInv[16];
+    float viewPos[4];
+    //float values[369]<bgcolor=0x00ffff>;
+    //byte unknowns2[224]<bgcolor=0x0000ff>;
+};
+
+// ------------------------------------------------
+// Main Template Logic
+// ------------------------------------------------
+
+Header header<bgcolor=0xffff00>;
+Preset presets[1];
+//Preset preset3;
+//FSeek(1866220);
+//Preset preset2;

@@ -135,6 +135,9 @@ struct PackedKey
 
 struct LmSSingleAnimFrame
 {
+    // [0] - used to help calculate the number of keys in the frame
+    // [1] - used to help calculate the number of keys in the frame
+    // [2] - The number of timeKeyArrayStepModifiers
     ubyte numKeys[3]<bgcolor=0x00ff00>;
 
     if (numKeys[0] == 0 && numKeys[1] == 0)
@@ -145,8 +148,12 @@ struct LmSSingleAnimFrame
     }
     else
     {
-        ubyte unknowns[((numKeys[1] << 8) + numKeys[2]) & 0xFFF]<bgcolor=0x0099ff>;
+        // These seem to affect how the animation steps through the currentKeyTimeBytes array
+        ubyte timeKeyArrayStepModifiers[numKeys[2]]<bgcolor=0x0099ff>;
+
+        // It looks like these have to do with the timing of each key?
         ubyte currentKeyTimeBytes[(((numKeys[1] >> 4) + 16 * numKeys[0]) & 1) + (((numKeys[1] >> 4) + 16 * numKeys[0]) >> 1)]<bgcolor=0x00ffff>;
+        
         Align(2);
         PackedKey packedKeys[(numKeys[1] >> 4) + 16 * numKeys[0]];
     }
