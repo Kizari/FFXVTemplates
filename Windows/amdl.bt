@@ -99,6 +99,12 @@ struct LmPoseSpec
     
     Align(120);
 
+    // Channel [1] appears to possibly be the root rotation for the armature
+    // See SQEX::Luminous::Animation::LmAnimPlaybackLeafNode::DoRootProcessing
+    // Channel [2] appears to be used to create a bone ID map in relation to GMDL
+    // This appears to point to child info offsets in SkeletalAnimInfo
+    // Channel [5] appears to possibly be the root translation for the armature
+    // See SQEX::Luminous::Animation::LmAnimPlaybackLeafNode::DoRootProcessing
     LmSDataChannelInfo channels[9]<bgcolor=0x00ffff>;
     
     uint64 skeletalBoneNamesOffset;

@@ -46,13 +46,14 @@ struct highResData{
 
 struct mipArray{
     mip mipmaps [dds.mipcount];
-    string filename;
+    //string filename;
 };
 
 struct mipdata{
     int32 tileMode;
     int32 arrayCount;
     mipArray mips[arrayCount];
+    string filename;
 };
 
 struct imageData{

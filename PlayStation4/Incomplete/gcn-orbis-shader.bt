@@ -1,15 +1,37 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
 //
-//      File: 
-//   Authors: 
-//   Version: 
-//   Purpose: 
-//  Category: 
-// File Mask: 
+//      File: gcn-orbis-shader.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: PS4 Shaders
+//  Category: Materials
+// File Mask: *.sb
 //  ID Bytes: 
-//   History: 
+//   History: Template based on the information found here:
+//            https://github.com/sleirsgoevy/piglet-shaders/blob/master/orb-shdr.txt
 //------------------------------------------------
+
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+// ------------------------------------------------
+// Structures
+// ------------------------------------------------
 
 //unk = unknown, meaningful
 //cbz = unknown, can be zero
@@ -46,7 +68,7 @@ struct shdr
     uint16 channel_mask_68; //R=1, G=2, B=4, A=8, 0x400 for vertex shader
     uint16 nattrs6a; //number of attribute dwords to be loaded from memory into v[4:3+nattrs6a]
     uint32 cbz6c;
-    uint32 gcn_bytecode[1]; //at entry3c+0x34
+    //uint32 gcn_bytecode[287]; //at entry3c+0x34
 };
 
 //footer_offset_10=0xac, struct offset 0x9c
@@ -97,7 +119,7 @@ struct orb_shdr
     uint32 number_of_uniforms_4c; //is it?
     uint32 zero50;
     //rel_ptr_t global_cb_s_54; // "__GLOBAL_CB__"
-    uint64 p_global_cb_s_54;
+    //uint64 p_global_cb_s_54;
     struct orb_shdr_uniform
     {
         ubyte type00; //TODO: enum table
@@ -105,6 +127,7 @@ struct orb_shdr
         ubyte zero02;
         ubyte cbz03;
         uint32 offset04; //some offset or size
+        //int32 reserved<bgcolor=0x000000>;
         uint32 size08; //xxx: error message says its offset
         uint32 cbz0c;
         uint64 cbz10;
@@ -112,7 +135,7 @@ struct orb_shdr
         //rel_ptr_t name_offset_1c;
         //rel_ptr_t no_name_s_20; // "(no_name)"
         uint64 test;
-        uint64 test2;
+        //uint64 test2;
     } uniforms[number_of_uniforms_2c];
     struct orb_shdr_sampler
     {
@@ -131,10 +154,61 @@ struct orb_shdr
         //rel_ptr_t name08;
         //rel_ptr_t name_caps_0c;
         uint64 test;
-        uint64 test2;
+        //uint64 test2;
     } attribs[number_of_inputs_34+number_of_outputs_35];
-    char strings[1];
 };
 
-FSeek(64);
-shdr shader;
+struct CshdHeader
+{
+    char magic[4];
+    uint maybeVersion;
+    uint headerSize;
+    uint dataSize; // Excludes header and end padding
+    Align(headerSize);
+};
+
+struct ShaderChunk
+{
+    uint64 unknown;
+    uint64 unknown;
+    uint64 footerOffsetPlus16; // Doesn't seem to check out in some files
+    uint64 zero64;
+    uint32 zero;
+    char magic[4];
+    uint64 unknown;
+    uint32 zero;
+    uint16 byteCodeSize;
+    ubyte zero8;
+    ubyte unknown8;
+    uint32 zero;
+    uint32 entry3c; //gpu code starts at entry3c+0x34
+    uint32 unknown32;
+    uint16 nreg44; //nvec = (nreg44%64+1)*4, nscal = (nreg44/64+1)*8
+    uint16 unknown16;
+    uint64 m0_init_reg_48; //must be %2==0, the register for initializing M0 is s[m0_init_reg_48/2]. cannot be >=32
+    uint32 always4_50; //4, setting to 0 disables shader, setting to nonzero causes visual artifacts (black output), setting to 12 causes crash
+    uint32 shader_type_54; //0 for vertex, 2 for fragment
+    ubyte unknown8; //1 for vertex, 2->0 for fragment. often 2 for vertex too
+    ubyte unknown8;
+    uint16 zero16;
+    uint32 has_coords_5c; //if true, coords for interpolation are in v[0:1]
+    uint32 shader_type_60; //0x20017 for vertex, 0 for fragment
+    uint32 unknown32;
+    uint16 channel_mask_68; //R=1, G=2, B=4, A=8, 0x400 for vertex shader
+    uint16 nattrs6a; //number of attribute dwords to be loaded from memory into v[4:3+nattrs6a]
+    uint32 unknown32;
+    byte gcnByteCode[byteCodeSize - 44]<bgcolor=0x0000ff>; // The amount to subtract varies between files
+};
+
+// ------------------------------------------------
+// Main Template Logic
+// ------------------------------------------------
+
+CshdHeader header<bgcolor=0x00ff00>;
+
+ShaderChunk shaderChunk<bgcolor=0xffff00>;
+
+//FSeek(64 + shaderChunk.footerOffsetPlus16 - 16);
+orb_shdr orbShader<bgcolor=0x00ffff>;
+
+Align(64);

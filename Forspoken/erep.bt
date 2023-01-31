@@ -1,0 +1,13 @@
+// Based on Yretenai's work on Forspoken research
+// https://github.com/yretenai/Witch/blob/develop/Scarlet.Structures/Archive/EbonyReplacement.cs
+
+struct EbonyReplacement
+{
+    uint64 destinationHash;
+    uint64 sourceHash;
+};
+
+while (FTell() < FileSize())
+{
+    EbonyReplacement replacement;
+}

@@ -1,0 +1,150 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Template based on information found here:
+// https://github.com/Inori/GPCS4/blob/master/Misc/PsslBcTest.cpp
+
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+// ------------------------------------------------
+// Structures
+// ------------------------------------------------
+
+struct CshdHeader
+{
+    char magic[4];
+    uint maybeVersion;
+    uint headerSize;
+    uint fileSizeLess80;
+    Align(headerSize);
+};
+
+struct Header
+{
+    ubyte versionMajor;
+    ubyte versionMinor;
+    ushort compilerRevision;
+    uint64 associationHash;
+    ubyte shaderType;
+    ubyte codeType;
+    ubyte usesShaderResourceTable;
+    ubyte compilerType : 4;
+    ubyte reserved : 4;
+    uint codeSize;
+    ubyte vertexShaderVariant;
+    ubyte padding[3]<bgcolor=0x000000>;
+    uint systemAttributes[3];
+};
+
+struct InputUsageSlot
+{
+    ubyte usageType;
+    ubyte apiSlot;
+    ubyte startRegister;
+    ubyte registerCount : 1;
+    ubyte resourceType : 1;
+    ubyte reserved : 2;
+    ubyte chunkMask : 4;
+};
+
+struct ShaderFileHeader
+{
+    char magic[4];
+    ushort versionMajor;
+    ushort versionMinor;
+    ubyte type;
+    ubyte shaderHeaderSizeInDW;
+    ubyte shaderAuxData;
+    ubyte targetGpuModes;
+    uint reserved<bgcolor=0x000000>;
+
+    uint shaderSize : 23;
+    uint shaderIsUsingSrt : 1;
+    uint inputUsageSlotCount : 8;
+    ushort embeddedConstantBufferSizeInDQW;
+    ushort scratchSizeInDWPerThread;
+};
+
+struct VsShader
+{
+    // This is only used if vertex shader < domain shader
+    /*uint spiShaderPgmLoVs;
+    uint spiShaderPgmHiVs;
+    uint spiShaderPgmRsrc1Vs;
+    uint spiShaderPgmRsrc2Vs;
+    uint spiVsOutConfig;
+    uint spiShaderPosFormat;
+    uint paC1VsOutCntl;*/
+    ubyte inputSemanticsCount;
+    ubyte exportSemanticsCount;
+    ubyte gsModeOrInputSemanticsCsCount;
+    ubyte fetchControl;
+};
+
+struct PsShader
+{
+    ubyte inputSemanticsCount;
+    ubyte reserved[3]<bgcolor=0x000000>;
+};
+
+struct Footer
+{
+    char signature[7];
+    ubyte version;
+    uint psslOrCg : 1;      // 0 = IL/shtb, 1 = PSSL/Cg
+    uint cached : 1;
+    uint type : 4;          // See enum ShaderBinaryType
+    uint sourceType : 2;
+    uint length : 24;       // Bytecode length
+    ubyte chunkUsageBaseOffsetInDW;
+    ubyte inputUsageSlotCount;
+    ubyte isSrt : 1;
+    ubyte isSrtUsedInfoValid : 1;
+    ubyte isExtendedUsageInfo : 1;
+    ubyte reserved : 5;
+    ubyte reserved;
+    uint64 shaderHash;
+    uint crc32;             // crc32 of shader + this struct before this field
+};
+
+// ------------------------------------------------
+// Main Template Logic
+// ------------------------------------------------
+
+CshdHeader cshdHeader<bgcolor=0xff00aa>;
+Header header<bgcolor=0xffff00>;
+ShaderFileHeader shaderFileHeader<bgcolor=0x0099ff>;
+//VsShader vsShader<bgcolor=0x00ff00>;
+uint shaderBinaryOffset<bgcolor=0x0000ff>;
+FSeek(64 + shaderBinaryOffset);
+
+byte shaderData[shaderFileHeader.shaderSize]<bgcolor=0x00ffff>;
+byte unknown[24]<bgcolor=0x0000ff>;
+
+Footer footer<bgcolor=0xffff00>;
+//InputUsageSlot inputUsageSlots[footer.inputUsageSlotCount]<bgcolor=0xffff00>;

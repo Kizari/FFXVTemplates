@@ -221,6 +221,12 @@ struct LmAnimation
     byte customData[customDataSize]<bgcolor=0x0000ff>;
 };
 
+struct AnimationKeyframes
+{
+    local uint frameCount = Ceil(anim.durationSeconds * anim.keyframeFPS) + 1;
+    LmSSingleAnimFrame frames[frameCount]<bgcolor=0xaaaaff, optimize=false>;
+};
+
 
 // ------------------------------------------------
 // Main Template Logic
@@ -239,9 +245,7 @@ if (anim.animationFrameChunkInformationPointerArrayOffset > 0)
     LmSAnimFrameChunkInfo frameChunkInfo<bgcolor=0xff0000>;
 }
 
-local uint frameCount = Ceil(anim.durationSeconds * anim.keyframeFPS) + 1;
-Printf("Frame Count: %d\n", frameCount);
-LmSSingleAnimFrame frames[frameCount]<bgcolor=0xaaaaff, optimize=false>;
+AnimationKeyframes keyframes;
 
 FSeek(anim.seedFrameOffset);
 LmSSingleAnimFrame seedFrame<bgcolor=0xff0000>;
