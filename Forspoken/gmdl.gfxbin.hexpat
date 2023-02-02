@@ -1,12 +1,14 @@
 // ---------------------------
-// Thanks to Sai for reversing the gmdl.gfxbin and gpubin format
-// ---------------------------
-// Also see https://github.com/Kizari/Flagrum/blob/main/Flagrum.Core/Gfxbin/Gmdl/ModelReader.cs
+// NOTES:
+// * The format used here is called msgpack     https://github.com/msgpack/msgpack/blob/master/spec.md
+// * C# implementation of gmdl.gfxbin           https://github.com/Kizari/Flagrum/blob/main/Flagrum.Core/Gfxbin/Gmdl/ModelReader.cs
+// * msgpack hexpat exists as well              https://github.com/WerWolv/ImHex-Patterns/blob/master/patterns/msgpack.hexpat
 // ---------------------------
 
 #pragma pattern_limit 1310720;
 
 #include <std/io.pat>
+#include <std/math.pat>
 
 enum TypeFormat : u8
 {
@@ -62,6 +64,7 @@ struct Value
 {
     u8 type;
     
+    // NOTE: Not all types are implemented yet
     if (type == TypeFormat::Uint64)
     {
         u64 value;
@@ -90,12 +93,13 @@ struct Value
     {
         u8 value @ $ - 1[[transform("default_int")]];
     }
-}[[format("format_value")]];
+} [[format("format_value"), sealed]];
 
 struct String
 {
     u8 type;
     
+    // There's probably a way to combine this with Value
     if (type < 0xA0 || type > 0xBF)
     {
         u8 length;
@@ -106,7 +110,7 @@ struct String
     }
     
     char value[length];
-}[[format("format_string")]];
+} [[format("format_string"), sealed]];
 
 // ---------------------------
 // Functions
@@ -152,20 +156,16 @@ struct Bone
 {
     String name;
     Value lodIndex;
-    Value index; // Added with Forspoken
-};
-
-struct FirstNode
-{
-    Value matrix[12];
-    String name;
-    u8 unknown;
-    u16 unknown2;
+    Value uniqueIndex;
 };
 
 struct Node
 {
-    Value matrix[13];
+    Value matrix[12];
+    
+    // This doesn't seem to be in every gfxbin, not sure what the condition is
+    Value unknownFloat;
+    
     String name;
     Value unknown;
     Value unknown2;
@@ -224,26 +224,29 @@ struct Mesh
     Value orientedBB[12];
     
     Value primitiveType;
-    Value vertexCount;
-    Value vertexBufferOffset;
+    Value faceIndicesCount;
+    Value faceIndicesOffset;
     Value unknown5;
     Value unknown6;
    
-    Value faceIndicesCount;
-    Value faceIndexBufferOffset;
+    Value vertexCount;
+    Value someSize;
     
     Value vertexStreamCount;
     VertexStream vertexStreams[vertexStreamCount.value];
     
-    Value someCount;
-    Value someCount2;
+    Value vertexBufferOffset;
+    Value vertexBufferSize;
     
     Value subgeometriesCount;
     SubGeometry subgeometries[subgeometriesCount.value];
     
     Value unknown7;
-    Value someCount3;
-    Value unknown8;
+    
+    // Not sure what this is—looks like an AABB on the test cube
+    // Frey doesn't have one though, just an offset with 0 size
+    Value aabbOffset;
+    Value aabbSize;
     
     Value materialHash;
     
@@ -284,6 +287,21 @@ struct MeshObject
     Mesh meshes[meshCount.value];
 };
 
+struct AssetHashArray
+{
+    u8 type [[hidden]];
+        
+    if (type == TypeFormat::Uint64)
+    {
+        u64 assetHash;
+    }
+    else
+    {
+        $ -= 1;
+        break;
+    }
+} [[inline]];
+
 struct GfxbinHeader
 {
     Value version;
@@ -301,11 +319,15 @@ struct Gfxbin
     Bone bones[boneCount.value];
     
     Value nodeCount;
-    Node nodes[nodeCount.value - 10]; // Not sure why this needs to be 10 less, but it does
+    
+    // Not sure why this needs to be 10 less, but it does
+    // Also not sure how this will behave with lower node counts
+    Node nodes[std::math::max(1, nodeCount.value - 10)];
     
     Value unknownFloat;
     Value unknown;
-    Value assetHash[g_gpubinCount];
+    
+    AssetHashArray assetHashes[9999]; // Will break when all hashes are read
     
     Value meshObjectCount;
     MeshObject meshObjects[meshObjectCount.value];
@@ -330,23 +352,6 @@ struct Gfxbin
 // Main Template Logic
 // ---------------------------
 
-// Get the gpubin count from the end of the file
 bool isFirstMeshObject = true;
-u32 counter = 1;
-u32 g_gpubinCount;
-
-while (true)
-{
-    u8 test @ sizeof($) - (counter * 5) - 1;
-    if (test == counter)
-    {
-        g_gpubinCount = test;
-        break;
-    }
-    
-    counter += 1;
-}
-
-// Read the file
 GfxbinHeader header @ 0x00;
 Gfxbin gfxbin @ $;
