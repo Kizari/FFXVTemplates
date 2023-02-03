@@ -8,7 +8,6 @@
 #pragma pattern_limit 1310720;
 
 #include <std/io.pat>
-#include <std/math.pat>
 
 enum TypeFormat : u8
 {
@@ -93,7 +92,7 @@ struct Value
     {
         u8 value @ $ - 1[[transform("default_int")]];
     }
-} [[format("format_value"), sealed]];
+} [[format("format_value")]];
 
 struct String
 {
@@ -159,6 +158,16 @@ struct Bone
     Value uniqueIndex;
 };
 
+struct FirstNode
+{
+    Value matrix[12];
+    
+    String name;
+    Value unknown;
+    Value unknown2;
+    Value unknown3;
+};
+
 struct Node
 {
     Value matrix[12];
@@ -217,20 +226,19 @@ struct Mesh
 {
     String name;
     Value unknown;
-    Value unknown2;
+    TypeFormat unknownBool;
     
     AABB aabb;
-    Value unknown3;
+    TypeFormat unknownBool2;
     Value orientedBB[12];
     
     Value primitiveType;
-    Value faceIndicesCount;
-    Value faceIndicesOffset;
-    Value unknown5;
-    Value unknown6;
-   
+    Value faceIndexCount;
+    Value faceIndexType;
+    Value unknown4;
+    Value faceIndexOffset;
+    Value faceIndicesSize;
     Value vertexCount;
-    Value someSize;
     
     Value vertexStreamCount;
     VertexStream vertexStreams[vertexStreamCount.value];
@@ -251,8 +259,8 @@ struct Mesh
     Value materialHash;
     
     Value drawPriorityOffset;
-    TypeFormat unknownBool2;
     TypeFormat unknownBool3;
+    TypeFormat unknownBool4;
     
     Value lodNear;
     Value lodFar;
@@ -262,9 +270,9 @@ struct Mesh
     Value partsCount;
     MeshPart parts[partsCount.value];
     
-    TypeFormat unknownBool6;
+    TypeFormat unknownBool5;
     Value flags;
-    TypeFormat unknownBool7;
+    TypeFormat unknownBool6;
     Value breakableBoneIndex;
     Value lowLodShadowCascadeNo;
 };
@@ -322,12 +330,13 @@ struct Gfxbin
     
     // Not sure why this needs to be 10 less, but it does
     // Also not sure how this will behave with lower node counts
-    Node nodes[std::math::max(1, nodeCount.value - 10)];
+    FirstNode node;
+    Node nodes[nodeCount.value - 1];
     
     Value unknownFloat;
-    Value unknown;
     
-    AssetHashArray assetHashes[9999]; // Will break when all hashes are read
+    Value gpubinCount;
+    Value assetHashes[gpubinCount.value];
     
     Value meshObjectCount;
     MeshObject meshObjects[meshObjectCount.value];
@@ -344,8 +353,8 @@ struct Gfxbin
     Value someFloat4;
     Value someFloat5;
     
-    Value gpubinCount;
-    Value gpubinSize[gpubinCount.value];
+    Value gpubinSizeCount;
+    Value gpubinSize[gpubinSizeCount.value];
 };
 
 // ---------------------------
@@ -355,3 +364,4 @@ struct Gfxbin
 bool isFirstMeshObject = true;
 GfxbinHeader header @ 0x00;
 Gfxbin gfxbin @ $;
+
