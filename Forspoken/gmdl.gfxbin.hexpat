@@ -158,22 +158,18 @@ struct Bone
     Value uniqueIndex;
 };
 
-struct FirstNode
-{
-    Value matrix[12];
-    
-    String name;
-    Value unknown;
-    Value unknown2;
-    Value unknown3;
-};
-
 struct Node
 {
     Value matrix[12];
     
-    // This doesn't seem to be in every gfxbin, not sure what the condition is
-    Value unknownFloat;
+    if (isFirstNode)
+    {
+        isFirstNode = false;
+    }
+    else
+    {
+        Value unknownFloat;
+    }
     
     String name;
     Value unknown;
@@ -225,17 +221,17 @@ struct ModelPart
 struct Mesh
 {
     String name;
-    Value unknown;
+    Value vertexLayoutType;
     TypeFormat unknownBool;
     
     AABB aabb;
-    TypeFormat unknownBool2;
+    TypeFormat isOrientedBB;
     Value orientedBB[12];
     
     Value primitiveType;
     Value faceIndexCount;
     Value faceIndexType;
-    Value unknown4;
+    Value gpubinIndex;
     Value faceIndexOffset;
     Value faceIndicesSize;
     Value vertexCount;
@@ -249,12 +245,11 @@ struct Mesh
     Value subgeometriesCount;
     SubGeometry subgeometries[subgeometriesCount.value];
     
-    Value unknown7;
-    
     // Not sure what this is—looks like an AABB on the test cube
     // Frey doesn't have one though, just an offset with 0 size
-    Value aabbOffset;
-    Value aabbSize;
+    Value unknownCount;
+    Value unknownOffset;
+    Value unknownSize;
     
     Value materialHash;
     
@@ -327,11 +322,7 @@ struct Gfxbin
     Bone bones[boneCount.value];
     
     Value nodeCount;
-    
-    // Not sure why this needs to be 10 less, but it does
-    // Also not sure how this will behave with lower node counts
-    FirstNode node;
-    Node nodes[nodeCount.value - 1];
+    Node nodes[nodeCount.value];
     
     Value unknownFloat;
     
@@ -361,7 +352,9 @@ struct Gfxbin
 // Main Template Logic
 // ---------------------------
 
+bool isFirstNode = true;
 bool isFirstMeshObject = true;
 GfxbinHeader header @ 0x00;
 Gfxbin gfxbin @ $;
+
 
