@@ -1,0 +1,183 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: btex.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: Forspoken Textures
+//  Category: Graphics
+// File Mask: *.btex
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+local ubyte isSize8Mip = 0;
+local ubyte isLastImage = 0;
+local ubyte isLastMip = 0;
+local uint currentBlockCount;
+local uint currentBlockSize;
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+void Pad(int blockSize)
+{
+    alignmentPaddingSize = blockSize - currentBlockSize;
+    if (alignmentPaddingSize > 0)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+} 
+
+// ------------------------------------------------
+// Structures
+// ------------------------------------------------
+
+struct Btex
+{
+    char magic[4];
+    uint32 headerSize;
+    uint32 imageDataSize;
+    uint16 version;
+    ubyte platform;
+    ubyte flags;
+    uint16 imageCount;
+    uint16 imageHeaderStride;
+    uint32 imageHeaderOffset;
+    uint64 padding<bgcolor=0x000000, hidden=true>;
+};
+
+struct HighResData
+{
+    uint32 highResMipCount;
+    uint32 highResBtexSize;
+    uint64 padding<bgcolor=0x000000, hidden=true>;
+};
+
+struct ImageMetadata
+{
+    uint16 height;
+    uint16 width;
+    uint16 pitch;
+    uint16 format;
+    ubyte mipCount;
+    ubyte depth;
+    ubyte dimensionCount;
+    ubyte imageFlags;
+    uint16 surfaceCount;
+    uint16 surfaceHeaderStride;
+    int32 platformDataOffset;
+    int32 surfaceHeaderOffset;
+    int32 nameOffset;
+    int32 platformDataSize;
+    HighResData highResData;
+    int32 tileMode;
+    int32 arrayCount;
+    Align(128);
+};
+
+struct DataBlock
+{
+    byte pixelData[currentBlockSize]<bgcolor=0x00ffff>;
+};
+
+struct MipData
+{
+    local int i;
+
+    for (i = 0; i < currentBlockCount; i++)
+    {
+        DataBlock block;
+
+        if (isLastImage == 1 && isLastMip == 1)
+        {
+            Align(256);
+        }
+        else if (isSize8Mip == 1 && i > currentBlockCount - 4)
+        {
+            Pad(512);
+        }
+        else
+        {
+            Pad(256);
+        }
+    }
+};
+
+struct ImageData
+{
+    local int i;
+    local int width = metadata.width;
+    local int height = metadata.height;
+    local int pitch;
+    local int size;
+    local int currentBlockCount;
+
+    for (i = 0; i < metadata.mipCount; i++)
+    {
+        if (i == metadata.mipCount - 1)
+        {
+            isLastMip = 1;
+        }
+        else
+        {
+            isLastMip = 0;
+        }
+
+        pitch = ((width + 3) / 4) * ((height + 3) / 4) * 8;
+        size = Max(8, pitch);
+        
+        if (size == 8)
+        {
+            isSize8Mip = 1;
+            currentBlockCount = 1;
+            currentBlockSize = 8;
+        }
+        else
+        {
+            isSize8Mip = 0;
+            currentBlockSize = Min(256, Max(8, size / (width / 4)));
+            currentBlockCount = size / currentBlockSize;
+        }
+
+        MipData mip;
+
+        width /= 2;
+        height /= 2;
+    }
+};
+
+struct ImageArray
+{
+    local int i;
+    for (i = 0; i < metadata.arrayCount; i++)
+    {
+        if (i == metadata.arrayCount - 1)
+        {
+            isLastImage = 1;
+        }
+
+        ImageData image;
+    }
+};
+
+// ------------------------------------------------
+// Main Template Logic
+// ------------------------------------------------
+
+Btex btex<bgcolor=0xffff00>;
+ImageMetadata metadata<bgcolor=0xff00aa>;
+ImageArray images;

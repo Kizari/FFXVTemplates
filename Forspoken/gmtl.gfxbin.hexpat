@@ -220,7 +220,7 @@ struct Texture
     Entry unknown2;
     Entry uriHash;
     Entry flags;
-    Entry newUnknown;
+    Entry highTextureStreamingLevels;
 };
 
 struct Colour
@@ -312,3 +312,4 @@ struct Gmtl
 
 Gfxbin gfxbin @ 0x00;
 Gmtl gmtl @ $;
+
