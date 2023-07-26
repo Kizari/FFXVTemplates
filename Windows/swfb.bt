@@ -1,0 +1,298 @@
+//------------------------------------------------
+//--- 010 Editor v13.0.1 Binary Template
+//
+//      File: swfb
+//   Authors: Uhhhh
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+struct Rectangle
+{
+    float left;
+    float top;
+    float right;
+    float bottom;
+};
+
+//////////////////////////////////////////////
+
+struct Color
+{
+    uchar r<bgcolor=cRed>;
+    uchar g<bgcolor=cGreen>;
+    uchar b<bgcolor=cBlue>;
+    uchar a<bgcolor=cWhite>;
+};
+
+struct ColorTransform
+{
+    float mult[4];
+    short add[4];
+};
+
+struct VertexColor
+{
+    Color colors[4];
+};
+
+struct Matrix
+{
+    float scale[2]<bgcolor=0xFFD770>;
+    float skew[2]<bgcolor=0xCCAB59>;
+    float translate[2]<bgcolor=0x998042>;
+};
+
+//////////////////////////////////////////////
+
+struct Filter
+{
+    char type;
+    char padding[3]<hidden=true, bgcolor=cNone>;
+    Color color;
+    float horizontal;
+    float vertical;
+    float radian_angle;
+    float distance;
+    float strength;
+};
+
+struct Tag_PlaceObject
+{
+    local int i<hidden=true>;
+    ushort shapeId<bgcolor=0x02CCFF>;
+    ushort depth<bgcolor=cGreen>;
+    char blendMode<bgcolor=0x8264FF>;
+    char filterNum<bgcolor=0x8264FF>;
+    ushort clipDepth<bgcolor=0x8264FF>;
+    uint flags<bgcolor=0x0095FF>;
+    
+    
+
+
+
+    switch(flags)
+    {
+        case 1 : Matrix matrix; break;
+        case 2 : ColorTransform colorTrans; break;
+        case 3 : Matrix matrix; ColorTransform colorTrans; break;
+        case 4 : VertexColor vertexColor; break;
+        case 5 : Matrix matrix; VertexColor vertexColor; break;
+        case 6 : ColorTransform colorTrans; VertexColor vertexColor; break;
+        case 7 : Matrix matrix; ColorTransform colorTrans; VertexColor vertexColor; break;
+        default : break;
+    }
+
+    Filter filters[filterNum];
+    
+};
+
+struct Tag_RemoveObject
+{
+    ushort depth<bgcolor=cGreen>;
+    char padding[2]<bgcolor=cNone>;
+};
+
+struct Action
+{
+    char actionId<bgcolor=0x02CCFF>;
+    char padding[1]<bgcolor=cNone>;
+    ushort actionSize<bgcolor=0x5E84A2>;
+    if(actionId == -116)
+    {
+        uint fixid<bgcolor=0x02CCFF>;
+    }
+};
+
+struct Tag_DoAction
+{
+    local int i<hidden=true>;
+    uint actionNum<bgcolor=0x8264FF>;
+    for(i = 0 ; i < actionNum ; i++ )
+    {
+        Action action;
+    }
+};
+
+struct Tag_FrameLabel
+{
+    uint fixId<bgcolor=0x02CCFF>;
+};
+
+struct Tag_9Grid
+{
+    ushort shapeId<bgcolor=0x02CCFF>;
+    char padding[2]<bgcolor=cNone>;
+    Rectangle rectangle<bgcolor=0xFF8FDA>;
+};
+
+struct Tag
+{
+    ushort tagId<bgcolor=0x02CCFF>;
+    ushort tagSize<bgcolor=0x5E84A2>;
+    
+    switch(tagId)
+    { 
+        case 4 : Tag_PlaceObject placeObject; break;
+        case 5 : Tag_RemoveObject removeObject; break;
+        case 12 : Tag_DoAction doAction; break;
+        case 43 : Tag_FrameLabel frameLabel; break;
+        case 78 : Tag_9Grid nineGrid; break;
+        default : break;
+    }
+};
+
+
+
+
+
+//////////////////////////////////////////////
+
+
+
+
+
+
+
+
+struct Image
+{
+    ushort imageId<bgcolor=0x02CCFF>;
+    char padding[2]<bgcolor=cNone>;
+};
+
+struct Vertex
+{
+    float x;
+    float y;
+};
+
+struct Plane_Solid
+{
+    Color color;
+};
+
+struct Plane_Image
+{
+    ushort imageId<bgcolor=0x02CCFF>;
+    char padding[2]<bgcolor=cNone>;
+};
+
+struct Plane
+{
+    uint type;
+    Vertex vertex[4]<bgcolor=0x1500D7>;
+    switch(type)
+    {
+        case 0 : Plane_Solid solid; break;
+        case 64 : Plane_Image image; break;
+        default : break;
+    }
+    
+};
+
+struct Shape
+{
+    ushort shapeId<bgcolor=0x02CCFF>;
+    ushort planeNum<bgcolor=0x4BDE32>;
+    Rectangle bounds<bgcolor=0xFF8FDA>;
+    local int i<hidden=true>;
+    for(i = 0 ; i < planeNum ; i++)
+    {
+        Plane plane;
+    }
+};
+
+struct EditShape
+{
+    ushort shapeId<bgcolor=0x02CCFF>;
+    char align<bgcolor=0x8264FF>;
+    char padding<bgcolor=cNone>;
+    Rectangle bounds<bgcolor=0xFF8FDA>;
+    uint fixId<bgcolor=0x26D4FF>;
+};
+
+struct Label
+{
+    uint fixId<bgcolor=0x26D4FF>;
+    uint tagIndex<bgcolor=0x4BDE32>;
+};
+
+struct MovieClip
+{
+    ushort shapeId<bgcolor=0x26D4FF>;
+    ushort labelNum<bgcolor=0x4BDE32>;
+    ushort tagNum<bgcolor=0x4BDE32>;
+    ushort maxDepth<bgcolor=0xFF840B>;
+    local int i;
+
+    for(i = 0 ; i < labelNum ; i++)
+    {
+        Label label;
+    }    
+
+    for(i = 0 ; i < tagNum ; i++)
+    {
+        Tag tag<name = (this.tagId == 0 ? "TAG_END" : this.tagId == 1 ? "TAG_SHOWFRAME" : this.tagId == 4 ? "TAG_PLACEOBJECT" : this.tagId == 5 ? "TAG_REMOVEOBJECT" : this.tagId == 12 ? "TAG_DOACTION" : this.tagId == 43 ? "TAG_FRAMELABEL" : this.tagId == 78 ? "TAG_9GRID" : "Error" )>;
+    }
+    
+};
+
+struct Header
+{
+    char magic[4]<bgcolor=0x1500D7>;
+    char version<bgcolor=0x0159A1>;
+    char endian<bgcolor=0x02CCFF>;
+
+    short x<bgcolor=0xCFD467>;
+    short y<bgcolor=0xCFD467>;
+
+    ushort width<bgcolor=0x4BDE32>;
+    ushort height<bgcolor=0x4BDE32>;
+    ushort frameNum<bgcolor=0x6168FF>;
+    
+    float frameRate<bgcolor=0x8264FF>;
+
+    ushort imageNum;
+    ushort shapeNum;
+    ushort editShapeNum;
+    ushort movieClipNum;
+    ushort labelNum;
+    ushort tagNum;
+    ushort maxDepth;
+    ushort scalingGridNum;
+    Color background;
+};
+
+local int i<hidden=true>;
+
+struct Swf
+{
+    Header header_;
+    Image images[header_.imageNum];
+
+    for(i = 0 ; i < header_.shapeNum ; i++)
+    {
+        Shape shape<name="Shape">;
+    }
+
+    EditShape editShapes[header_.editShapeNum];
+
+    for(i = 0; i < header_.movieClipNum; i++)
+    {
+        MovieClip movieClip<name="Movie Clip">;
+    }
+
+    Label labels[header_.labelNum];
+    
+    for ( i = 0 ; i < header_.tagNum ; i++ )
+    {
+        Tag tag<name = (this.tagId == 0 ? "TAG_END" : this.tagId == 1 ? "TAG_SHOWFRAME" : this.tagId == 4 ? "TAG_PLACEOBJECT" : this.tagId == 5 ? "TAG_REMOVEOBJECT" : this.tagId == 12 ? "TAG_DOACTION" : this.tagId == 43 ? "TAG_FRAMELABEL" : this.tagId == 78 ? "TAG_9GRID" : "Error" )>;
+    }
+    
+};
+
+Swf swf<bgcolor=0x4BDE32>;
