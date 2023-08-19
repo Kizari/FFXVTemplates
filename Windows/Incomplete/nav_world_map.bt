@@ -1,0 +1,624 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: .nav_world_map
+//   Authors: Esteban Julio Ricardo Montoya de la Rosa Ramírez
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//This is a whole lot of flatbuffers
+
+struct NavCell2DData
+{
+    int x_;
+    int z_;
+};
+
+struct LmVector3_Float
+{
+    int x;
+    int y;
+    int z;
+};
+
+struct LmVector3i
+{
+    int x;
+    int y;
+    int z;
+};
+
+//======================= NavWorldTreeDescriptorData Table =======================
+struct NWTDDvTable(int tableOffset, long currentPos)
+{
+    FSeek(currentPos - tableOffset);
+    
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0<bgcolor=0x7DAC1F>;
+    short fieldId_1<bgcolor=0x7DAC1F>;
+    short fieldId_2<bgcolor=0x7DAC1F>;
+
+    
+    FSeek(currentPos+4);
+};
+
+struct NavWorldTreeDescriptorNodeData;
+
+struct NavWorldTreeDescriptorNodeData
+{
+    int vTableOffset<bgcolor=0x1F7DAC>;
+    NWTDDvTable vTable(vTableOffset, startof(vTableOffset));
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        ubyte field_0<bgcolor=0x36AC1F>; 
+    }
+    
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        int field_1<bgcolor=0x36AC1F>; 
+    }
+    
+    if(vTable.fieldId_2){
+        FSeek(startof(vTableOffset) + vTable.fieldId_2);
+        int field_2<bgcolor=0x36AC1F>; 
+        FSeek(startof(field_2) + field_2);
+        uint length_<bgcolor=0x009991>;
+        
+        local int i<hidden=true>;
+        local long ret<hidden=true>;
+    
+        for( i = 0 ; i < length_ ; i++ )
+        {
+            uint Offset<bgcolor=0xCC000E>;
+            ret = FTell();
+            FSkip(Offset-4);
+            
+            NavWorldTreeDescriptorNodeData child;
+            
+            FSeek(ret);
+        }
+    }
+};
+
+struct NavWorldTreeDescriptorData
+{
+    NavWorldTreeDescriptorNodeData navWorldTreeDescriptorNodeData;
+};
+
+//======================= NavWorldMapCellCondition Table =======================
+
+struct EbexString
+{
+    int Length<bgcolor=0x1F4EAC>;
+    char uri[Length]<bgcolor=0xAC7D1F>;
+};
+
+struct NavWorldMapCellCondition
+{
+    NavCell2DData navCell2DData<bgcolor=0xACA71F>;
+    uint condition_<bgcolor=0x6E1FAC>;
+    int padding<bgcolor=cNone>;
+};
+
+struct NavWorldMapCellConditionStruct
+{
+    uint length_<bgcolor=0x919900>;
+    NavWorldMapCellCondition navWorldMapCellCondition[length_];
+};
+
+struct NWMCellCondvTable(int tableOffset, long currentPos)
+{
+    FSeek(currentPos - tableOffset);
+    
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0<bgcolor=0x7DAC1F>;
+    short fieldId_1<bgcolor=0x7DAC1F>;
+    
+    FSeek(currentPos+4);
+};
+
+struct NavWorldMapCellCondition_Table
+{
+    int vTableOffset<bgcolor=0x1F7DAC>;
+    NWMCellCondvTable vTable(vTableOffset, startof(vTableOffset));
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        uint field_0<bgcolor=0x36AC1F>; 
+        FSeek(startof(field_0) + field_0);
+        EbexString ebexString;
+    } 
+    
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        ubyte field_1<bgcolor=0x36AC1F>; 
+    } 
+};
+
+struct NWMCvTable(int tableOffset, long currentPos)
+{
+    FSeek(currentPos - tableOffset);
+    
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0<bgcolor=0x7DAC1F>;
+    short fieldId_1<bgcolor=0x7DAC1F>;
+    short fieldId_2<bgcolor=0x7DAC1F>;
+    
+    FSeek(currentPos+4);
+};
+
+struct NavWorldMapCondition_Table
+{
+    int vTableOffset<bgcolor=0x1F7DAC>;
+    NWMCvTable vTable(vTableOffset, startof(vTableOffset));
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        uint field_0<bgcolor=0x36AC1F>; 
+        
+    } 
+    
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        uint field_1<bgcolor=0x36AC1F>; 
+        FSeek(startof(field_1) + field_1);
+        NavWorldMapCellConditionStruct navWorldMapCellConditionStruct;
+    } 
+    
+    if(vTable.fieldId_2){
+        FSeek(startof(vTableOffset) + vTable.fieldId_2);
+        uint field_2<bgcolor=0x36AC1F>; 
+        FSeek(startof(field_2) + field_2);
+        NavWorldMapCellCondition_Table navWorldMapCellCondition_Table;
+    } 
+    
+    
+};
+
+struct NavWorldMapCondition_Vector
+{
+    uint length_<bgcolor=0x009991>;
+    
+    local int i<hidden=true>;
+    local long ret<hidden=true>;
+    
+    for( i = 0 ; i < length_ ; i++ )
+    {
+        uint Offset<bgcolor=0xCC000E>;
+        ret = FTell();
+        FSkip(Offset-4);
+        
+        NavWorldMapCondition_Table navWorldMapCondition_Table;
+        
+        FSeek(ret);
+    }
+};
+
+//======================= Nav World Splitter Table =======================
+
+struct NavWorldSplitterString
+{
+    int Length<bgcolor=0x1F4EAC>;
+    char uri[Length]<bgcolor=0xAC7D1F>;
+};
+
+struct NavWorldSplitter_Vector
+{
+    uint length_<bgcolor=0x009991>;
+    
+    local int i<hidden=true>;
+    local long ret<hidden=true>;
+    
+        for( i = 0 ; i < length_ ; i++ )
+    {
+        uint Offset<bgcolor=0xCC000E>;
+        ret = FTell();
+        FSkip(Offset-4);
+        
+        NavWorldSplitterString navWorldSplitterString;
+        
+        FSeek(ret);
+    }
+};
+
+//======================= NavWorldMapEnvironment Table =======================
+
+struct CeilingHeightsStruct
+{
+    uint length_<bgcolor=0x919900>;
+    float heights[length_]<bgcolor=0x990017>;
+};
+
+struct NAEPvTable(int tableOffset, long currentPos)
+{
+    FSeek(currentPos - tableOffset);
+    
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short environmentFactoryType_Offset;
+    short cellSize_Offset;
+    short chunkCellSize_Offset;
+    short agentRadius_Offset;
+    short agentHeight_Offset;
+    short walkableSlopeAngle_Offset;
+    short agentMaxClimb_Offset;
+    short origin_Offset;
+    short edgeMaxLen_Offset;
+    short edgeMaxError_Offset;
+    short detailSampleDist_Offset;
+    short detailSampleMaxError_Offset;
+    short regionMinSize_Offset;
+    short regionMergeSize_Offset;
+    short vertsPerPoly_Offset;
+    short wallFacingAngleThreshold_Offset;
+    short minCoverHeight_Offset;
+    short coverDownExtensionDist_Offset;
+    short erodeAlgorithm_Offset;
+    short narrowPassageSize_Offset;
+    short largePassageMargin_Offset;
+    short narrowPassageMargin_Offset;   
+    short narrowPassageMaterialId_Offset;  
+    short ceilingHeightMask_Offset;
+    short ceilingHeightMaterialId_Offset;
+    short ceilingHeightsSizeOffset_Offset;
+       
+    FSeek(currentPos+4);
+};
+
+struct NavAutogenerationEnvironmentParameter_Table
+{
+    int vTableOffset<bgcolor=0x1F7DAC>;
+    NAEPvTable vTable(vTableOffset, startof(vTableOffset))<bgcolor=0x7DAC1F>;
+    
+    if(vTable.environmentFactoryType_Offset){
+        FSeek(startof(vTableOffset) + vTable.environmentFactoryType_Offset);
+        int environmentFactoryType<bgcolor=0xBF15B2>;
+    }   
+    if(vTable.cellSize_Offset){
+        FSeek(startof(vTableOffset) + vTable.cellSize_Offset);
+        LmVector3_Float cellSize<bgcolor=0x6EBF15>;
+    }
+    if(vTable.chunkCellSize_Offset){
+        FSeek(startof(vTableOffset) + vTable.chunkCellSize_Offset);
+        LmVector3i chunkCellSize<bgcolor=0xBF15B2>;
+    }   
+    if(vTable.agentRadius_Offset){
+        FSeek(startof(vTableOffset) + vTable.agentRadius_Offset);
+        float agentRadius<bgcolor=0x6EBF15>;
+    }
+    if(vTable.agentHeight_Offset){
+        FSeek(startof(vTableOffset) + vTable.agentHeight_Offset);
+        float agentHeight<bgcolor=0x6EBF15>;
+    }
+    if(vTable.walkableSlopeAngle_Offset){
+        FSeek(startof(vTableOffset) + vTable.walkableSlopeAngle_Offset);
+        float walkableSlopeAngle<bgcolor=0x6EBF15>;
+    }    
+    if(vTable.agentMaxClimb_Offset){
+        FSeek(startof(vTableOffset) + vTable.agentMaxClimb_Offset);
+        float agentMaxClimb<bgcolor=0x6EBF15>;
+    }
+    if(vTable.origin_Offset){
+        FSeek(startof(vTableOffset) + vTable.origin_Offset);
+        LmVector3_Float origin<bgcolor=0x6EBF15>;
+    } 
+    if(vTable.edgeMaxLen_Offset){
+        FSeek(startof(vTableOffset) + vTable.edgeMaxLen_Offset);
+        float edgeMaxLen<bgcolor=0x6EBF15>;
+    }
+    if(vTable.edgeMaxError_Offset){
+        FSeek(startof(vTableOffset) + vTable.edgeMaxError_Offset);
+        float edgeMaxError<bgcolor=0x6EBF15>;
+    }
+    if(vTable.detailSampleDist_Offset){
+        FSeek(startof(vTableOffset) + vTable.detailSampleDist_Offset);
+        float detailSampleDist<bgcolor=0x6EBF15>;
+    }
+    if(vTable.detailSampleMaxError_Offset){
+        FSeek(startof(vTableOffset) + vTable.detailSampleMaxError_Offset);
+        float detailSampleMaxError<bgcolor=0x6EBF15>;
+    }
+    if(vTable.regionMinSize_Offset){
+        FSeek(startof(vTableOffset) + vTable.regionMinSize_Offset);
+        int regionMinSize<bgcolor=0xBF15B2>;
+    }
+    if(vTable.regionMergeSize_Offset){
+        FSeek(startof(vTableOffset) + vTable.regionMergeSize_Offset);
+        int regionMergeSize<bgcolor=0xBF15B2>;
+    }
+    if(vTable.vertsPerPoly_Offset){
+        FSeek(startof(vTableOffset) + vTable.vertsPerPoly_Offset);
+        int vertsPerPoly<bgcolor=0xBF15B2>;
+    }
+    if(vTable.vertsPerPoly_Offset){
+        FSeek(startof(vTableOffset) + vTable.vertsPerPoly_Offset);
+        int vertsPerPoly<bgcolor=0xBF15B2>;
+    }
+    if(vTable.wallFacingAngleThreshold_Offset){
+        FSeek(startof(vTableOffset) + vTable.wallFacingAngleThreshold_Offset);
+        float wallFacingAngleThreshold<bgcolor=0x6EBF15>;
+    }
+    if(vTable.minCoverHeight_Offset){
+        FSeek(startof(vTableOffset) + vTable.minCoverHeight_Offset);
+        float minCoverHeight<bgcolor=0x6EBF15>;
+    }
+    if(vTable.coverDownExtensionDist_Offset){
+        FSeek(startof(vTableOffset) + vTable.coverDownExtensionDist_Offset);
+        float coverDownExtensionDist<bgcolor=0x6EBF15>;
+    }
+    if(vTable.erodeAlgorithm_Offset){
+        FSeek(startof(vTableOffset) + vTable.erodeAlgorithm_Offset);
+        ubyte erodeAlgorithm<bgcolor=0x152ABF>;
+    }
+    if(vTable.narrowPassageSize_Offset){
+        FSeek(startof(vTableOffset) + vTable.narrowPassageSize_Offset);
+        float narrowPassageSize<bgcolor=0x6EBF15>;
+    }
+    if(vTable.largePassageMargin_Offset){
+        FSeek(startof(vTableOffset) + vTable.largePassageMargin_Offset);
+        float largePassageMargin<bgcolor=0x6EBF15>;
+    }
+    if(vTable.narrowPassageMargin_Offset){
+        FSeek(startof(vTableOffset) + vTable.narrowPassageMargin_Offset);
+        float narrowPassageMargin<bgcolor=0x6EBF15>;
+    }
+    if(vTable.narrowPassageMaterialId_Offset){
+        FSeek(startof(vTableOffset) + vTable.narrowPassageMaterialId_Offset);
+        uint narrowPassageMaterialId<bgcolor=0x15B2BF>;
+    }
+    if(vTable.ceilingHeightMask_Offset){
+        FSeek(startof(vTableOffset) + vTable.ceilingHeightMask_Offset);
+        short ceilingHeightMask<bgcolor=0xB2BF15>;
+    }
+    if(vTable.ceilingHeightMaterialId_Offset){
+        FSeek(startof(vTableOffset) + vTable.ceilingHeightMaterialId_Offset);
+        uint ceilingHeightMaterialId<bgcolor=0x15B2BF>;
+    }
+    if(vTable.ceilingHeightsSizeOffset_Offset){
+        FSeek(startof(vTableOffset) + vTable.ceilingHeightsSizeOffset_Offset);
+        int ceilingHeightsSizeOffset<bgcolor=0xBF15B2>;
+        FSeek( startof(ceilingHeightsSizeOffset) + ceilingHeightsSizeOffset );
+        CeilingHeightsStruct ceilingHeightsStruct;
+    }
+    
+};
+
+
+
+struct NWMELabel
+{
+    int labelLength<bgcolor=0x1F4EAC>;
+    char label[labelLength]<bgcolor=0xAC7D1F>;
+};
+
+struct NWMEvTable(int tableOffset, long currentPos)
+{
+    FSeek(currentPos - tableOffset);
+    
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short FixId_Offset<bgcolor=0x7DAC1F>;
+    short NavAutogenEnvParamTable_Offset<bgcolor=0x7DAC1F>;
+    short fieldId_2<bgcolor=0x7DAC1F>;
+    short fieldId_3<bgcolor=0x7DAC1F>;
+    
+    FSeek(currentPos+4);
+};
+
+struct NavWorldMapEnvironment_Table
+{
+    int vTableOffset<bgcolor=0x1F7DAC>;
+    NWMEvTable vTable(vTableOffset, startof(vTableOffset));
+    
+    if(vTable.FixId_Offset){
+        FSeek(startof(vTableOffset) + vTable.FixId_Offset);
+        uint FixId<bgcolor=0x36AC1F>; 
+    }  
+    if(vTable.NavAutogenEnvParamTable_Offset){
+        FSeek(startof(vTableOffset) + vTable.NavAutogenEnvParamTable_Offset);
+        int NavAutogenEnvParamTable_Offset<bgcolor=0x36AC1F>; 
+        FSeek(startof(NavAutogenEnvParamTable_Offset) + NavAutogenEnvParamTable_Offset);
+        NavAutogenerationEnvironmentParameter_Table paramTable;
+    }  
+    if(vTable.fieldId_2){
+        FSeek(startof(vTableOffset) + vTable.fieldId_2);
+        int field_2<bgcolor=0x36AC1F>; 
+        FSeek(startof(field_2) + field_2);
+        NWMELabel label;
+        
+    }
+    if(vTable.fieldId_3){
+        FSeek(startof(vTableOffset) + vTable.fieldId_3);
+        ubyte field_3<bgcolor=0x36AC1F>; 
+
+    }
+};
+
+struct NavWorldMapEnvironment_Vector
+{
+
+    uint length_<bgcolor=0x009991>;
+    
+    
+    local int i<hidden=true>;
+    local long ret<hidden=true>;
+    
+        for( i = 0 ; i < length_ ; i++ )
+    {
+        uint Offset<bgcolor=0xCC000E>;
+        ret = FTell();
+        FSkip(Offset-4);
+        
+        NavWorldMapEnvironment_Table navWorldMapEnvironment_Table;
+        
+        FSeek(ret);
+    }
+    
+
+    
+
+};
+
+//======================= NavWorldMapCellData Table =======================
+
+struct Cell_Uri
+{
+    int uriLength<bgcolor=0x1F4EAC>;
+    char uri[uriLength]<bgcolor=0xAC7D1F>;
+};
+
+struct NWMCDvTable(int tableOffset, long currentPos)
+{
+    FSeek(currentPos - tableOffset);
+    
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short CellUri_Offset<bgcolor=0x7DAC1F>;
+    short fieldId_1<bgcolor=0x7DAC1F>;
+    short fieldId_2<bgcolor=0x7DAC1F>;
+    
+    FSeek(currentPos+4);
+};
+
+struct NavWorldMapCellData_Table
+{
+    
+    int vTableOffset<bgcolor=0x1F7DAC>;
+    NWMCDvTable vTable(vTableOffset, startof(vTableOffset));
+    
+    local int ret<hidden=true>;
+    
+    if(vTable.CellUri_Offset){
+        FSeek(startof(vTableOffset) + vTable.CellUri_Offset);
+        int CellUri_Offset<bgcolor=0x36AC1F>;  
+        FSeek(startof(CellUri_Offset) + CellUri_Offset);
+        Cell_Uri cell_Uri;     
+    }
+        
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        NavCell2DData navCell2DData<bgcolor=0x36AC1F>; 
+    }  
+    if(vTable.fieldId_2){
+        FSeek(startof(vTableOffset) + vTable.fieldId_2);
+        ubyte fieldId_2<bgcolor=0x36AC1F>; 
+    }
+};
+
+struct NavWorldMapCellData_Vector
+{
+
+    uint length_<bgcolor=0x009991>;
+    
+    
+    local int i<hidden=true>;
+    local long ret<hidden=true>;
+    
+    for( i = 0 ; i < length_ ; i++ )
+    {
+        uint Offset<bgcolor=0xCC000E>;
+        ret = FTell();
+        FSkip(Offset-4);
+        
+        NavWorldMapCellData_Table navWorldMapCellData_Table;
+        
+        FSeek(ret);
+    }
+    
+
+};
+
+//======================= Root Table =======================
+
+
+
+struct vTable(int tableOffset, long currentPos) //
+{
+    FSeek(currentPos - tableOffset);
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0<bgcolor=0x7DAC1F>;
+    short NavWorldMapCellData_VectorOffset<bgcolor=0x7DAC1F>;
+    short NavWorldMapEnvironment_VectorOffset<bgcolor=0x7DAC1F>;
+    short NavWorldMapSplitter_VectorOffset<bgcolor=0x7DAC1F>;
+    short NavWorldMapCondition_VectorOffset<bgcolor=0x7DAC1F>;
+    short NavWorldTreeDescriptorData_VectorOffset<bgcolor=0x7DAC1F>;
+    
+    FSeek(currentPos+4);
+};
+
+struct RootTable
+{
+    int vtableOffset<bgcolor=0x1F7DAC>;
+    vTable vtable(vtableOffset, startof(vtableOffset))<bgcolor=0x7DAC1F>;;
+    
+    if(vtable.NavWorldMapCellData_VectorOffset)
+        int NavWorldMapCellData_VectorOffset<bgcolor=0x36AC1F>;
+        
+    if(vtable.NavWorldMapEnvironment_VectorOffset)
+        int NavWorldMapEnvironment_VectorOffset<bgcolor=0x36AC1F>;
+        
+    if(vtable.NavWorldMapSplitter_VectorOffset)
+        int NavWorldMapSplitter_VectorOffset<bgcolor=0x36AC1F>;
+        
+    if(vtable.NavWorldMapCondition_VectorOffset)
+        int NavWorldMapCondition_VectorOffset<bgcolor=0x36AC1F>;
+        
+    if(vtable.NavWorldTreeDescriptorData_VectorOffset)
+        int NavWorldTreeDescriptorData_VectorOffset<bgcolor=0x36AC1F>;
+};
+
+struct Header
+{
+    int rootTableOffset<bgcolor=0xACA31F>;
+    char file_identifier[4]<bgcolor=0x1F28AC>;
+};
+
+Header header;
+
+FSeek(header.rootTableOffset);
+RootTable rootTable;
+if(exists(rootTable.NavWorldMapCellData_VectorOffset)){
+    FSeek(startof(rootTable.NavWorldMapCellData_VectorOffset) + rootTable.NavWorldMapCellData_VectorOffset);
+    NavWorldMapCellData_Vector navWorldMapCellData_Vector;
+}
+
+if(exists(rootTable.NavWorldMapEnvironment_VectorOffset)){
+    FSeek(startof(rootTable.NavWorldMapEnvironment_VectorOffset) + rootTable.NavWorldMapEnvironment_VectorOffset);
+    NavWorldMapEnvironment_Vector navWorldMapEnvironment_Vector;
+
+}   
+
+if(exists(rootTable.NavWorldMapSplitter_VectorOffset)){
+    FSeek(startof(rootTable.NavWorldMapSplitter_VectorOffset) + rootTable.NavWorldMapSplitter_VectorOffset);
+    NavWorldSplitter_Vector navWorldSplitter_Vector;
+
+}  
+
+if(exists(rootTable.NavWorldMapCondition_VectorOffset)){
+    FSeek(startof(rootTable.NavWorldMapCondition_VectorOffset) + rootTable.NavWorldMapCondition_VectorOffset);
+    NavWorldMapCondition_Vector navWorldMapCondition_Vector;
+
+}  
+
+if(exists(rootTable.NavWorldTreeDescriptorData_VectorOffset)){
+    FSeek(startof(rootTable.NavWorldTreeDescriptorData_VectorOffset) + rootTable.NavWorldTreeDescriptorData_VectorOffset);
+    NavWorldTreeDescriptorData navWorldTreeDescriptorData;
+
+}
