@@ -192,7 +192,12 @@ struct Indices
     uint partsIds[amdl.poseSpec.partsLayersCount]<bgcolor=0x0000ff>;
     Align(8);
 
-    PartsData partsData[amdl.poseSpec.partsLayersCount]<bgcolor=0x00ffff>;
+    PartsData bind_layer<bgcolor=0x00ffff>;
+    PartsData complete_playback<bgcolor=0x00ffff>;
+    PartsData root_rotation_parts<bgcolor=0x00ffff>;
+    PartsData root_translation_parts<bgcolor=0x00ffff>;
+    PartsData all_animated_scale_parts<bgcolor=0x00ffff>;
+    PartsData partsData[amdl.poseSpec.partsLayersCount-5]<bgcolor=0x00ffff>;
 };
 
 struct LmSkeletalAnimInfo
