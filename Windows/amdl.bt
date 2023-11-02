@@ -208,11 +208,15 @@ struct LmSkeletalAnimInfo
     ushort afterBonamikStartIndex;
     ushort kdBonesStartIndex;
     ushort dummy;
-    short childInfoOffset[boneCount]<bgcolor=0xffff00>;
-    ushort unknownIndices[boneCount]<bgcolor=0xff00aa>;
+    
+    short childIndexOffsets[boneCount]<bgcolor=0xffff00>;
+    short childIndices[boneCount]<bgcolor=0xff00aa>;
+    
     short parentIndices[boneCountFullSkeleton]<bgcolor=0x5555ff>;
-    short maybeParentIndexOffsets[boneCountFullSkeleton]<bgcolor=0xffff00>;
-    ushort unknownIndices2[boneCountFullSkeleton]<bgcolor=0xff00aa>;
+    
+    short childInfoOffsetFullSkeleton[boneCountFullSkeleton]<bgcolor=0xffff00>;
+    short childIndicesFullSkeleton[boneCountFullSkeleton]<bgcolor=0xff00aa>;
+    
     uint boneIds[boneCountFullSkeleton]<bgcolor=0x5555ff>;
     Align(16);
     
