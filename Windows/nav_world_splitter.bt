@@ -1,0 +1,64 @@
+//------------------------------------------------
+//--- 010 Editor v13.0.1 Binary Template
+//
+//      File: .nav_world_splitter
+//   Authors: Cornelius the Flatbuffer Hater
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+
+struct Header //Contains an Offset to the Root Table and a File Identifier String
+{
+    int rootTableOffset<bgcolor=0xD81B13, name="Find Root Table at Offset:">;
+    char file_Identifier[4]<bgcolor=0x13D0D8>;
+};
+
+struct root_String
+{
+    int Length<bgcolor=0x1F4EAC>;
+    char uri[Length]<bgcolor=0xAC7D1F>;
+};
+
+struct root_vTable //The vTable decides which fields are actually present in the Table
+{
+    short vtableLength<bgcolor=0xAC1F7D, name="Virtual Table Length">;
+    short tableLength<bgcolor=0xAC1F7D, name="Table Length">;
+    
+    /*
+        If the field's offset is 0, the field is not present in the Table.
+        data_0.nav_world_splitter is a prime example.
+    */
+    short fieldId_0<name="World URI String Offset Field">;
+    short fieldId_1<name="Splitter Index Field">;
+
+};
+
+struct Root_Table //Flatbuffer Data Table
+{
+    int vTableOffset<bgcolor=0x6DD813>; //A Table's offset to its vTable is signed and subtracted
+    
+    FSeek(startof(vTableOffset) - vTableOffset);
+    root_vTable vTable<bgcolor=0xD81B13>;
+    FSeek(startof(vTableOffset) + 4);
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        int field_0<bgcolor=0xD81B13, name="World URI String Offset">;
+        FSeek(startof(field_0) + field_0);
+        root_String fbString<name="World URI String">;
+    }
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        int field_1<bgcolor=0xD81B13, name="Splitter Index">;
+    }
+};
+
+Header header;
+FSeek(header.rootTableOffset);
+Root_Table root;
+
