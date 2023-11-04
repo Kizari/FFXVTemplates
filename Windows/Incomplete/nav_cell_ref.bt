@@ -1,0 +1,421 @@
+//------------------------------------------------
+//--- 010 Editor v13.0.1 Binary Template
+//
+//      File: .nav_cell_ref
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct Header
+{
+    int rootTableOffset<bgcolor=0xD81B13>;
+    char file_Identifier[4]<bgcolor=0x13D0D8>;
+};
+//================================ Field_6 Table ================================
+
+//================================ Field_5 Table ================================
+
+//================================ Field_4 Table ================================
+
+struct Field_4_String
+{
+    int Length<bgcolor=0x1F4EAC>;
+    char uri[Length]<bgcolor=0xAC7D1F>;
+};
+
+//================================ Field_3 Table ================================
+struct Field_3_Vector
+{
+    int length_<bgcolor=0x009991>;
+    int values[length_]<bgcolor=0x549900>;
+};
+
+//================================ Field_2 Table ================================
+
+struct F2NV1_String
+{
+    int Length<bgcolor=0x1F4EAC>;
+    char uri[Length]<bgcolor=0xAC7D1F>;
+};
+
+struct F2NV1_vTable
+{
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0;
+    short fieldId_1;
+    short fieldId_2;
+    short fieldId_3;
+};
+
+struct F2NV1Table
+{
+    int vTableOffset<bgcolor=0x6DD813>;
+    FSeek(startof(vTableOffset) - vTableOffset);
+    F2NV1_vTable vTable<bgcolor=0xD81B13>;
+    FSeek(startof(vTableOffset) + 4);
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        int field_0<bgcolor=0xD81B13>;
+        FSeek(startof(field_0) + field_0);
+        F2NV1_String navString;
+    }
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        int field_1<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_2){
+        FSeek(startof(vTableOffset) + vTable.fieldId_2);
+        int field_2<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_3){
+        FSeek(startof(vTableOffset) + vTable.fieldId_3);
+        uint field_3<bgcolor=0x440099>;
+    }
+};
+
+struct Field_2_nestedVector_1
+{
+    int length_<bgcolor=0x009991>;
+    local int i<hidden=true>;
+    local long ret<hidden=true>;
+    
+    for( i = 0 ; i < length_ ; i++ )
+    {
+        uint tableOffset<bgcolor=0x549900>;
+        ret = FTell();
+        FSkip(tableOffset-4);
+        
+        F2NV1Table Table;
+        
+        FSeek(ret);
+    }
+};
+
+struct F2NV2_String
+{
+    int Length<bgcolor=0x1F4EAC>;
+    char uri[Length]<bgcolor=0xAC7D1F>;
+};
+
+struct F2NV2_vTable
+{
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0;
+    short fieldId_1;
+    short fieldId_2;
+    short fieldId_3;
+};
+
+struct F2NV2Table
+{
+    int vTableOffset<bgcolor=0x6DD813>;
+    FSeek(startof(vTableOffset) - vTableOffset);
+    F2NV2_vTable vTable<bgcolor=0xD81B13>;
+    FSeek(startof(vTableOffset) + 4);
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        int field_0<bgcolor=0xD81B13>;
+        FSeek(startof(field_0) + field_0);
+        F2NV2_String navString;
+    }
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        int field_1<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_2){
+        FSeek(startof(vTableOffset) + vTable.fieldId_2);
+        int field_2<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_3){
+        FSeek(startof(vTableOffset) + vTable.fieldId_3);
+        uint field_3<bgcolor=0x440099>;
+    }
+};
+
+struct Field_2_nestedVector_2
+{
+    int length_<bgcolor=0x009991>;
+    local int i<hidden=true>;
+    local long ret<hidden=true>;
+    
+    for( i = 0 ; i < length_ ; i++ )
+    {
+        uint tableOffset<bgcolor=0x549900>;
+        ret = FTell();
+        FSkip(tableOffset-4);
+        
+        F2NV2Table Table;
+        
+        FSeek(ret);
+    }
+};
+
+struct F2NV3_Vector
+{
+    int length_<bgcolor=0x009991>;
+    short values[length_];
+};
+
+struct F2NV3_vTable
+{
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0;
+    
+    
+};
+
+struct F2NV3Table
+{
+    int vTableOffset<bgcolor=0x6DD813>;
+    FSeek(startof(vTableOffset) - vTableOffset);
+    F2NV3_vTable vTable<bgcolor=0xD81B13>;
+    FSeek(startof(vTableOffset) + 4);
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        int field_0<bgcolor=0xD81B13>;
+        FSeek(startof(field_0) + field_0);
+        F2NV3_Vector vector<bgcolor=0x089900>;
+    }
+};
+
+struct Field_2_nestedVector_3
+{
+    int length_<bgcolor=0x009991>;
+    local int i<hidden=true>;
+    local long ret<hidden=true>;
+    
+    for( i = 0 ; i < length_ ; i++ )
+    {
+        uint tableOffset<bgcolor=0x549900>;
+        ret = FTell();
+        FSkip(tableOffset-4);
+        
+        F2NV3Table Table;
+        
+        FSeek(ret);
+    }
+    
+};
+
+struct Field_2_vTable
+{
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0;
+    short fieldId_1;
+    short fieldId_2;
+    short fieldId_3;
+
+};
+
+struct Field_2_Table
+{
+    int vTableOffset<bgcolor=0x6DD813>;
+    
+    FSeek(startof(vTableOffset) - vTableOffset);
+    Field_2_vTable vTable<bgcolor=0xD81B13>;
+    FSeek(startof(vTableOffset) + 4);
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        uint field_0<bgcolor=0x440099>;
+    }
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        int field_1<bgcolor=0xD81B13>;
+        FSeek(startof(field_1) + field_1);
+        Field_2_nestedVector_1 nested_Vector_1;
+    }
+    if(vTable.fieldId_2){
+        FSeek(startof(vTableOffset) + vTable.fieldId_2);
+        int field_2<bgcolor=0xD81B13>;
+        FSeek(startof(field_2) + field_2);
+        Field_2_nestedVector_2 nested_Vector_2;
+        
+    }
+    if(vTable.fieldId_3){
+        FSeek(startof(vTableOffset) + vTable.fieldId_3);
+        int field_3<bgcolor=0xD81B13>;
+        FSeek(startof(field_3) + field_3);
+        Field_2_nestedVector_3 nested_Vector_3;
+    }
+    
+
+};
+
+struct Field_2_Vector
+{
+    int length_<bgcolor=0x009991>;
+    local int i<hidden=true>;
+    local long ret<hidden=true>;
+    
+    for( i = 0 ; i < length_ ; i++ )
+    {
+        uint tableOffset<bgcolor=0x549900>;
+        ret = FTell();
+        FSkip(tableOffset-4);
+        
+        Field_2_Table Table;
+        
+        FSeek(ret);
+    }
+};
+
+//================================ Field_1 Table ================================
+
+
+
+struct Field_1_Vector
+{
+    int length_<bgcolor=0x009991>;
+    int values[length_]<bgcolor=0x549900>;
+};
+
+//================================ Field_0 Table ================================
+
+struct Field_0_String
+{
+    int Length<bgcolor=0x1F4EAC>;
+    char uri[Length]<bgcolor=0xAC7D1F>;
+};
+
+struct Field_0_vTable
+{
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0;
+    short fieldId_1;
+};
+
+struct Field_0_Table
+{
+    int vTableOffset<bgcolor=0x6DD813>;
+    
+    FSeek(startof(vTableOffset) - vTableOffset);
+    Field_0_vTable vTable<bgcolor=0xD81B13>;
+    FSeek(startof(vTableOffset) + 4);
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        int field_0<bgcolor=0xD81B13>;
+        FSeek(startof(field_0) + field_0);
+        Field_0_String fieldString;
+    }
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        ubyte field_1<bgcolor=0x000899>;
+    }
+};
+
+struct Field_0_Vector
+{
+    int length_<bgcolor=0x009991>;
+    local int i<hidden=true>;
+    local long ret<hidden=true>;
+    
+    for( i = 0 ; i < length_ ; i++ )
+    {
+        uint tableOffset<bgcolor=0x549900>;
+        ret = FTell();
+        FSkip(tableOffset-4);
+        
+        Field_0_Table Table;
+        
+        FSeek(ret);
+    }
+};
+
+//================================ Root Table ================================
+
+struct root_vTable
+{
+    short vtableLength<bgcolor=0xAC1F7D>;
+    short tableLength<bgcolor=0xAC1F7D>;
+    
+    short fieldId_0;
+    short fieldId_1;
+    short fieldId_2;
+    short fieldId_3;
+    short fieldId_4;
+    short fieldId_5;
+    short fieldId_6;
+};
+
+struct Root_Table
+{
+    int vTableOffset<bgcolor=0x6DD813>;
+    
+    FSeek(startof(vTableOffset) - vTableOffset);
+    root_vTable vTable<bgcolor=0xD81B13>;
+    FSeek(startof(vTableOffset) + 4);
+    
+    if(vTable.fieldId_0){
+        FSeek(startof(vTableOffset) + vTable.fieldId_0);
+        int field_0<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_1){
+        FSeek(startof(vTableOffset) + vTable.fieldId_1);
+        int field_1<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_2){
+        FSeek(startof(vTableOffset) + vTable.fieldId_2);
+        int field_2<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_3){
+        FSeek(startof(vTableOffset) + vTable.fieldId_3);
+        int field_3<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_4){
+        FSeek(startof(vTableOffset) + vTable.fieldId_4);
+        int field_4<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_5){
+        FSeek(startof(vTableOffset) + vTable.fieldId_5);
+        int field_5<bgcolor=0xD81B13>;
+    }
+    if(vTable.fieldId_6){
+        FSeek(startof(vTableOffset) + vTable.fieldId_6);
+        int field_6<bgcolor=0xD81B13>;
+    }
+};
+
+Header header;
+FSeek(header.rootTableOffset);
+Root_Table root;
+
+if(exists(root.field_0)){
+    FSeek(startof(root.field_0) + root.field_0);
+    Field_0_Vector field_0_Vector;
+}
+if(exists(root.field_1)){
+    FSeek(startof(root.field_1) + root.field_1);
+    Field_1_Vector field_1_Vector;
+}
+if(exists(root.field_2)){
+    FSeek(startof(root.field_2) + root.field_2);
+    Field_2_Vector field_2_Vector;
+}
+if(exists(root.field_3)){
+    FSeek(startof(root.field_3) + root.field_3);
+    Field_3_Vector field_3_Vector;
+}
+if(exists(root.field_4)){
+    FSeek(startof(root.field_4) + root.field_4);
+    Field_4_String field_4_String;
+}

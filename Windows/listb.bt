@@ -1,0 +1,32 @@
+//------------------------------------------------
+//--- 010 Editor v13.0.2 Binary Template
+//
+//      File: listb.bt
+//   Authors: BrickleBork
+//   Version: 1
+//   Purpose: Image dictionary for SWFB
+//  Category: HUD
+// File Mask: *.listb
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct ImageData
+{
+    uint32 imageTypeAndId;
+    float x;
+    float y;
+    float width;
+    float height;
+};
+
+struct ImageDictionary
+{
+    // Change this to the imageNum in the swfb file that the listb file corresponds to
+    local uint imageCount = 20;
+
+    ImageData images[imageCount];
+};
+
+ImageDictionary imageDictionary;
+    
