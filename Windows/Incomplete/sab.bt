@@ -11,7 +11,22 @@
 //   History: 
 //------------------------------------------------
 
-#include "../utils/utils.bt";
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
 
 struct SabHeader
 {
@@ -138,6 +153,10 @@ struct At9ExtraData
     uint32 loopEnd;
     uint32 reserved2[2];
 };
+
+FSeek(152);
+float volume<bgcolor=0xff00aa>;
+FSeek(0);
 
 SabHeader header<bgcolor=0xffff00>;
 
