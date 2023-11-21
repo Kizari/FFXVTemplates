@@ -1,0 +1,97 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: FFXV Foliage Group Binaries
+//   Authors: That one guy
+//   Version: 1
+//   Purpose: Foliage Stuff
+//  Category: 
+// File Mask: .folgbin
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct FoliageDataNode
+{
+    ubyte split;
+};
+
+struct FoliageDataNodeArray ( uint size )
+{
+    FoliageDataNode nodes[ size ];
+};
+
+struct BoundingBox
+{
+    float vector_0[4]<bgcolor=cLtGreen>;
+    float vector_1[4]<bgcolor=cLtBlue>;
+};
+
+struct FoliageData
+{
+    float pos[3]<bgcolor=cBlue>;
+    float scale<bgcolor=cRed>;
+    float rot[3]<bgcolor=cPurple>;
+    uint color<bgcolor=cWhite>;
+};
+
+struct FoliageDataTree
+{
+    uint version;
+    uint treeStructSizeBytes;
+    uint nodeStructSizeBytes;
+    uint padding<bgcolor=cNone>;
+    BoundingBox totalBox;
+    BoundingBox instanceBox;
+};
+
+struct FoliageDataGroup
+{
+        uint hash;
+        uint count;
+        uint stride;
+        uint offset;
+        BoundingBox boundingBox;
+        float density;
+        uint treeOffsetBytes;
+        uint padding[2]<bgcolor=cNone>;
+};
+
+struct FoliageDataGroupHeader
+{
+    local int i<hidden=true>;
+    local int j<hidden=true>;
+    
+    local uint64 FoliageDataGroupStartPoint<hidden=true>;
+    
+    uint magic <bgcolor=cYellow>;
+    uint version <bgcolor=cGreen>;
+    uint count <bgcolor=cRed>;
+    uint stride <bgcolor=cRed>;
+    
+    FoliageDataGroupStartPoint = FTell();
+    FoliageDataGroup foliageDataGroups[count]<bgcolor=cDkGreen>;
+    
+    for ( i = 0 ; i < count ; i++ )
+    {
+        for ( j = 0 ; j < foliageDataGroups[i].count ; j++ )
+        {
+            FoliageData foliageData;
+        }
+    }
+    
+    for ( i = 0 ; i < count ; i++ )
+    {
+        FSeek( FoliageDataGroupStartPoint + foliageDataGroups[i].treeOffsetBytes );
+        FoliageDataTree foliageDataTree<bgcolor=cRed>;
+        if( foliageDataGroups[i].count > 1 )
+        {
+            FoliageDataNodeArray foliageDataNodes( foliageDataGroups[i].count + 1 ) <bgcolor=cDkPurple>;
+        }
+    }
+};
+
+FoliageDataGroupHeader header;
+local int i<hidden=true>;
+local int j<hidden=true>;
+
