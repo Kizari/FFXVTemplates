@@ -1,0 +1,300 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: ccb.bt
+//   Authors: Meeeeeee, Joschka
+//   Version: Idk how to version.0
+//   Purpose: Mapping out FFXV Camera Curve Binary Files
+//  Category: Animation
+// File Mask: *.ccb
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// ------------------------------------------------
+// Utilities
+// ------------------------------------------------
+
+local uint alignmentPaddingSize<hidden=true>;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+uint GetBytesToAlignment(uint blockSize)
+{
+    local int offset = FTell();
+    return blockSize + blockSize * (offset / blockSize) - offset;
+}
+
+// ------------------------------------------------
+// Enumerations
+// ------------------------------------------------
+
+enum <ubyte> EndianType
+{
+    Little = 0x0,
+    Big = 0x1
+};
+
+enum CurveId
+{
+    INDEX_POSITIONX = 0x0,
+    INDEX_POSITIONY = 0x1,
+    INDEX_POSITIONZ = 0x2,
+    INDEX_POSITIONXYZ = 0x3,
+    INDEX_SCALEX = 0x4,
+    INDEX_SCALEY = 0x5,
+    INDEX_SCALEZ = 0x6,
+    INDEX_SCALINGXYZ = 0x7,
+    INDEX_QUATROTATION = 0x8,
+    INDEX_QUATERNIONX = 0x9,
+    INDEX_QUATERNIONY = 0xA,
+    INDEX_QUATERNIONZ = 0xB,
+    INDEX_QUATERNIONW = 0xC,
+    INDEX_ROTATEX = 0xD,
+    INDEX_ROTATEY = 0xE,
+    INDEX_ROTATEZ = 0xF,
+    INDEX_VISIBILITY = 0x10,
+    INDEX_FIXGLOBAL = 0x11,
+    NUMBER_OF_INDEX = 0x12,
+};
+
+// ------------------------------------------------
+// Structures
+// ------------------------------------------------
+
+struct FrameBit // Meant to mimic the m128 used by the game
+{
+    uint64 part1;
+    uint64 part2;
+};
+
+struct MTBDataHeader
+{
+    float frameRate;
+    float totalFrames;
+    uint16 curveNodeCount;
+    uint16 physicsNodeCount;
+    uint status;
+    uint offset;
+};
+
+struct SecDataBinHeader
+{
+    char type[4]<bgcolor=0x31CB00, comment = "Section Data Binary">;
+    char subType[4]<bgcolor=0x3792F3>;
+    uint version<bgcolor=0xDC8330>;
+    EndianType endianType<bgcolor=0x3C14DC>;
+    char alignmentBits;
+    int16 offset<bgcolor=0x00F3FC>;
+    uint64 size<bgcolor=0xB39E2B>;
+    uint64 dateTime;
+    
+    // For some reason defined as char name[16], then read as a 32 bit offset to where the name is????
+    // So I just did this for sanity
+    uint nameOffset<bgcolor=cRed>;
+    char remainingName[12];
+    
+    
+
+    if( nameOffset )
+    {
+        local int returnPoint<hidden=true>;
+        returnPoint = FTell();
+        
+        // For some reason there's a 0xFF that's needs to be ANDed out to get the offset
+        FSeek( startof(nameOffset) + (nameOffset & 0x00FFFFFF) ); 
+        
+        // So far this string is always gibberish so it could be a bad guess or something evil (hash?)
+        string name<bgcolor=cGray>;
+        
+        FSeek( returnPoint );
+    }
+};
+
+struct MTBCurve
+{
+    CurveId curveId<bgcolor=cRed>;
+    uint16 unknown_0<bgcolor=cGray>;
+    uint16 numFrameBitsets<bgcolor=cGray>;
+    
+    if(!numFrameBitsets)
+    {
+        float unknown_2<bgcolor=cPurple>; // No idea what this is or why it's a thing only when there's no FrameBits
+    }
+    else
+    {
+        Align(16);
+    }
+    
+    // 128 bit fields where each bit represents a frame of the sequence
+    FrameBit frames[numFrameBitsets]<optimize = false, bgcolor=cLtBlue>; 
+    
+    local int activeFrames<hidden=true>;
+    local int i<hidden=true>;
+    local int j<hidden=true>;
+    
+    activeFrames = 0;
+    
+    // Checks each 128-bit FrameBit for active bits and adds up the # of transforms that need to be read
+    for( i = 0 ; i < numFrameBitsets ; i++ )
+    {
+        // 010 Doesn't have m128 so FrameBit is split into two 64-bit values
+        for ( j = 0 ; j < 64 ; j++ ) 
+        {
+            // Shifts the value to the right by j bits, then performs a bitwise AND with 0x0000000000000001
+            // If the value is 1, the frame is active; Increment activeFrames
+            if( frames[i].part1 >> j & 0x1 ) 
+            {
+                activeFrames += 1;
+            }
+            
+            if( frames[i].part2 >> j & 0x1 )
+            {
+                activeFrames += 1;
+            }
+        }
+    }
+    
+    float transforms[activeFrames]<optimize = false, bgcolor=0xB0AF28>;
+    
+    
+};
+
+struct MTBNodeHeader
+{
+    uint fullNameId;
+    uint nameId;
+    float jointLength<bgcolor=0xB0AF28>;
+    uint16 curveCount<bgcolor = 0xF6FD01>;
+    uint16 flags<bgcolor = cBlack>;
+    
+    local int i<hidden=true>;
+    
+    for ( i = 0 ; i < curveCount ; i++ )
+    {
+        MTBCurve curves;
+    }
+    
+    local int returnPoint<hidden=true>;
+    returnPoint = FTell();
+    
+    FSeek( startof(nameId) + (nameId & 0x00FFFFFF) );
+    
+    string name<bgcolor=cWhite>;
+    
+    FSeek( returnPoint );
+    
+};
+
+struct CameraMtbHeader
+{
+    char name[6]<bgcolor=0xFFE551>;
+    char padding[2];
+    int mtbSize<bgcolor=0x1DB072>;
+    int size<bgcolor=0x1DB072>;
+};
+
+struct MotionTrackBinary
+{
+    CameraMtbHeader cameraMtbHeader;
+    SecDataBinHeader file_header;
+    MTBDataHeader data_header<bgcolor=cBlue>;
+    
+    MTBNodeHeader curveNodes[data_header.curveNodeCount]<bgcolor = 0x43C6EE, optimize = false>;
+};
+
+struct CameraCommonHeader
+{
+    char name[6]<bgcolor=0xFFE551>;
+    int16 switcherIndex<bgcolor=0x28A3CB>;
+    int cameraLength<bgcolor=0x1DB072>;
+    float cameraStartFrame<bgcolor=0xB0AF28>;
+    int padding[4];
+};
+
+struct CameraPartHeader
+{
+    char name[6]<bgcolor=0xFFE551>;
+    char cameraNum<bgcolor=0x2CDEF3>;
+    char padding[9];
+};
+
+struct CameraPart
+{
+    char name[32]<bgcolor=0x8D36EC>;
+    float apertureV<bgcolor=0xB0AF28>;
+    float apertureH<bgcolor=0xB0AF28>;
+    float near_<bgcolor=0xB0AF28>;
+    float far_<bgcolor=0xB0AF28>;
+    char rootNum<bgcolor=0x2CDEF3>;
+    char moveNum<bgcolor=0x2CDEF3>;
+    char intNum<bgcolor=0x2CDEF3>;
+    char padding;
+    int rootAddress<bgcolor=0x1DB072>;
+    int moveAddress<bgcolor=0x1DB072>;
+    int intAddress<bgcolor=0x1DB072>;
+    int16 flenIndex<bgcolor=0x28A3CB>;
+    int16 rolIndex<bgcolor=0x28A3CB>;
+    int padding2[3];
+};
+
+struct CameraIndexListHeader(uint num)
+{
+    char name[6]<bgcolor=0xFFE551>;
+    char padding[10];
+    int16 index[num]<bgcolor=0x28A3CB>; // Skeptical about this but it adds up so far
+};
+
+struct CameraFileHeader
+{
+    char name[6]<bgcolor=0xFFE551>;
+    int16 version<bgcolor=0x28A3CB>;
+    int padding[2];
+    char user[16]<bgcolor=cYellow>;
+    char date[16]<bgcolor=cDkGreen>;
+};
+
+struct CameraCurveBinary
+{
+    SecDataBinHeader ccb_header<name = "Camera Curve Binary Header">;
+    
+    FSeek( startof( ccb_header ) + ccb_header.offset );
+
+    CameraFileHeader cameraFileHeader;
+    
+    CameraCommonHeader cameraCommonHeader;
+        
+    MotionTrackBinary motionTrackBin<name = "Motion Track Binary">;
+    
+    FSeek( startof(motionTrackBin) + (motionTrackBin.cameraMtbHeader.size) );
+    
+    CameraPartHeader cameraPartHeader;
+    CameraPart cameraPart;
+    
+    CameraIndexListHeader cameraIndexListHeader(cameraPart.rootNum + cameraPart.moveNum + cameraPart.intNum);
+    Align(16);
+};
+
+
+// ------------------------------------------------
+// Parsing
+// ------------------------------------------------
+
+CameraCurveBinary ccbFile<name = "Camera Curve Binary File", comment = "Referred to as .ccf in scripts and stuff">;
+
+
+
+
