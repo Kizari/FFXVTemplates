@@ -1,7 +1,18 @@
 //------------------------------------------------
+// NOTES:
+// A more complete template for .win.sab is now available in the "Windows" folder
+// This one has been left here due to having some data related to .win.mab, but 
+// it should be noted that this template is incomplete. If you wish to complete
+// this template for .win.mab, please reference the audio repositories linked on
+// the sidebar of the Flagrum wiki (Developer section, Useful GitHub Repositories page).
+// These repositories have code pertaining to .win.mab and .win.sab that would be
+// extremely helpful if a template is needed for any reason.
+//------------------------------------------------
+
+//------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
 //
-//      File: sab.bt
+//      File: mab.bt
 //   Authors: Kizari
 //   Version: 1
 //   Purpose: FFXV Audio Files
