@@ -1,298 +1,305 @@
 //------------------------------------------------
 //--- 010 Editor v13.0.1 Binary Template
 //
-//      File: swfb
+//      File: FFXV SWF Binary
 //   Authors: Uhhhh
 //   Version: 
 //   Purpose: 
 //  Category: 
-// File Mask: 
-//  ID Bytes: 
+// File Mask: *.swfb
+//  ID Bytes: 53 57 46 42 // SWFB
 //   History: 
 //------------------------------------------------
-struct Rectangle
+
+enum <char> BlendModeType
 {
-    float left;
-    float top;
-    float right;
-    float bottom;
+	BLEND_LINEAR = 0x0,
+	BLEND_CUBIC = 0x1,
+	BLEND_EASEIN = 0x2,
+	BLEND_EASEOUT = 0x3,
+	BLEND_EASEINOUT = 0x4,
+	BLEND_CUSTOM_CURVE = 0x5,
+	BLEND_FINTERP_TO = 0x6,
+	BLEND_NONE = 0x7,
+	BLEND_TIMELINE_CURVE = 0x8,
 };
 
-//////////////////////////////////////////////
-
-struct Color
+enum <unsigned int> PlaneType
 {
-    uchar r<bgcolor=cRed>;
-    uchar g<bgcolor=cGreen>;
-    uchar b<bgcolor=cBlue>;
-    uchar a<bgcolor=cWhite>;
+    PLANE_SOLID = 0x0,
+    PLANE_IMAGE = 0x40,
 };
 
-struct ColorTransform
-{
-    float mult[4];
-    short add[4];
+enum <char> ActionID {
+    ACTION_PLAY = 0x6,
+    ACTION_STOP = 0x7,
+    ACTION_GOTOLABEL = 0x8C,
 };
 
-struct VertexColor
+enum <unsigned short> TagID{
+    TAG_END = 0x0,
+    TAG_SHOWFRAME = 0x1,
+    TAG_PLACEOBJECT = 0x4,
+    TAG_REMOVEOBJECT = 0x5,
+    TAG_DOACTION = 0xC,
+    TAG_FRAMELABEL = 0x2B,
+    TAG_9GRID = 0x4E,
+};
+
+enum <char> EditShapeAlign
 {
+    EDITSHAPE_ALIGN_LEFT = 0x0,
+    EDITSHAPE_ALIGN_RIGHT = 0x1,
+    EDITSHAPE_ALIGN_CENTER = 0x2,
+    EDITSHAPE_ALIGN_TOP = 0x0,
+    EDITSHAPE_ALIGN_BOTTOM = 0x10,
+    EDITSHAPE_ALIGN_MIDDLE = 0x20,
+};
+
+enum <char> FilterType
+{
+    FILTER_DROP_SHADOW = 0x0,
+    FILTER_GLOW = 0x2,
+    FILTER_COLOR_MATRIX = 0x6,
+};
+
+struct Matrix{
+    float scale[2]<bgcolor = cDkGreen>;
+    float skew[2]<bgcolor = cDkGreen>;
+    float translate[2]<bgcolor = cDkGreen>;
+};
+
+struct ColorTransform{
+    float mult[4]<bgcolor = cLtGreen>;
+    short add[4]<bgcolor = cLtGreen>;
+};
+
+unsigned int AssignColor(unsigned int i_val, byte shift)
+{
+    local unsigned int val = 0x00000000;
+    val |= i_val;
+    val = val << shift;
+    
+    return val;
+}
+
+struct Color{
+    unsigned char r<bgcolor = (AssignColor(this, 0))>;
+    unsigned char g<bgcolor = (AssignColor(this, 8))>;
+    unsigned char b<bgcolor = (AssignColor(this, 16))>;
+    
+    char a<bgcolor=cGray>;
+};
+
+struct VertexColor{
     Color colors[4];
 };
 
-struct Matrix
-{
-    float scale[2]<bgcolor=0xFFD770>;
-    float skew[2]<bgcolor=0xCCAB59>;
-    float translate[2]<bgcolor=0x998042>;
+struct Vertex{
+    float x;
+    float y;
 };
 
-//////////////////////////////////////////////
+struct PlaneSolid{
+    Color color;
+};
 
-struct Filter
-{
-    char type;
+struct Rectangle{
+    float left<bgcolor=cLtBlue>;
+    float right<bgcolor=cLtBlue>;
+    float top<bgcolor=cLtBlue>;
+    float bottom<bgcolor=cLtBlue>;
+};
+
+struct PlaneImage{
+    unsigned short imageId;
+    char padding[2]<hidden=true, bgcolor=cNone>;
+};
+
+struct Plane{
+    PlaneType type;
+    Vertex vertex[4];
+    
+    switch(type){
+        case PLANE_SOLID: 
+            PlaneSolid solid;
+            break;
+        case PLANE_IMAGE: 
+            PlaneImage image;
+            break;
+    }
+};
+
+struct Filter{
+    FilterType type;
     char padding[3]<hidden=true, bgcolor=cNone>;
     Color color;
-    float horizontal;
-    float vertical;
+    float horizontal, vertical;
     float radian_angle;
     float distance;
     float strength;
 };
 
-struct Tag_PlaceObject
-{
-    local int i<hidden=true>;
-    ushort shapeId<bgcolor=0x02CCFF>;
-    ushort depth<bgcolor=cGreen>;
-    char blendMode<bgcolor=0x8264FF>;
-    char filterNum<bgcolor=0x8264FF>;
-    ushort clipDepth<bgcolor=0x8264FF>;
-    uint flags<bgcolor=0x0095FF>;
+enum <unsigned int> TagPlaceObjectFlags{
+    HAS_MATRIX = 0x1,
+    HAS_COLOR = 0x2,
+    HAS_VERTEX_COLOR = 0x4,
+};
+
+struct TagPlaceObject{
+    unsigned short shapeId<bgcolor = cYellow>;
+    unsigned short depth;
+    BlendModeType blendMode;
+    char filterNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    unsigned short clipDepth;
+    unsigned int flags<bgcolor=0x018FF1>;
     
-    
-
-
-
-    switch(flags)
+    if(flags & HAS_MATRIX)
     {
-        case 1 : Matrix matrix; break;
-        case 2 : ColorTransform colorTrans; break;
-        case 3 : Matrix matrix; ColorTransform colorTrans; break;
-        case 4 : VertexColor vertexColor; break;
-        case 5 : Matrix matrix; VertexColor vertexColor; break;
-        case 6 : ColorTransform colorTrans; VertexColor vertexColor; break;
-        case 7 : Matrix matrix; ColorTransform colorTrans; VertexColor vertexColor; break;
-        default : break;
+        Matrix matrix;
     }
-
-    Filter filters[filterNum];
+    
+    if(flags & HAS_COLOR)
+    {
+        ColorTransform colorTransform;
+    }
+    
+    if(flags & HAS_VERTEX_COLOR)
+    {
+        VertexColor vertexColors;
+    }
+    
+    Filter filters[filterNum]<optimize = false>;
     
 };
 
-struct Tag_RemoveObject
-{
-    ushort depth<bgcolor=cGreen>;
-    char padding[2]<bgcolor=cNone>;
+struct TagRemoveObject{
+    unsigned short depth;
+    char padding[2]<hidden=true, bgcolor=cNone>;
 };
 
-struct Action
-{
-    char actionId<bgcolor=0x02CCFF>;
-    char padding[1]<bgcolor=cNone>;
-    ushort actionSize<bgcolor=0x5E84A2>;
-    if(actionId == -116)
-    {
-        uint fixid<bgcolor=0x02CCFF>;
-    }
+struct ActionGotoLabel{
+    unsigned int fixId<bgcolor=cPurple>;
 };
 
-struct Tag_DoAction
-{
-    local int i<hidden=true>;
-    uint actionNum<bgcolor=0x8264FF>;
-    for(i = 0 ; i < actionNum ; i++ )
-    {
-        Action action;
-    }
+struct Action{
+    ActionID actionId;
+    char padding[1]<hidden=true, bgcolor=cNone>;
+    unsigned short actionSize;
+	
+	switch(actionId){
+		case ACTION_GOTOLABEL:
+			ActionGotoLabel gotoLabel;
+			break;
+	}
 };
 
-struct Tag_FrameLabel
-{
-    uint fixId<bgcolor=0x02CCFF>;
+struct TagDoAction{
+    unsigned int actionNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+	Action actions[actionNum]<optimize = false>;
 };
 
-struct Tag_9Grid
-{
-    ushort shapeId<bgcolor=0x02CCFF>;
-    char padding[2]<bgcolor=cNone>;
-    Rectangle rectangle<bgcolor=0xFF8FDA>;
+struct TagFrameLabel{
+    unsigned int fixId<bgcolor=cPurple>;
 };
 
-struct Tag
-{
-    ushort tagId<bgcolor=0x02CCFF>;
-    ushort tagSize<bgcolor=0x5E84A2>;
+struct Tag9Grid{
+    unsigned short shapeId;
+    char padding[2]<hidden=true, bgcolor=cNone>;
+    Rectangle rectangle;
+};
+
+struct Tag{
+    TagID tagId<bgcolor=0xE5DE52>;
+    unsigned short tagSize<bgcolor = cBlack>;
     
-    switch(tagId)
-    { 
-        case 4 : Tag_PlaceObject placeObject; break;
-        case 5 : Tag_RemoveObject removeObject; break;
-        case 12 : Tag_DoAction doAction; break;
-        case 43 : Tag_FrameLabel frameLabel; break;
-        case 78 : Tag_9Grid nineGrid; break;
-        default : break;
+    switch(tagId){
+        case TAG_FRAMELABEL: 
+            TagFrameLabel tag;
+            break;
+        case TAG_PLACEOBJECT: 
+            TagPlaceObject tag;
+            break;
+		case TAG_DOACTION:
+			TagDoAction tag;
+			break;
+        case TAG_9GRID:
+            Tag9Grid tag;
+            break;
+        default:
+            char tagData[tagSize-4]<optimize = false>;
     }
 };
 
 
 
-
-
-//////////////////////////////////////////////
-
-
-
-
-
-
-
-
-struct Image
-{
-    ushort imageId<bgcolor=0x02CCFF>;
-    char padding[2]<bgcolor=cNone>;
+struct Label{
+    unsigned int fixId<bgcolor=cPurple>;
+    unsigned int tagIndex;
 };
 
-struct Vertex
-{
-    float x;
-    float y;
+struct MovieClip{
+    unsigned short shapeId<bgcolor = cYellow>;
+    unsigned short labelNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    unsigned short tagNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    unsigned short maxDepth;
+    
+    Label labels[labelNum]<optimize = false>;
+    Tag tags[tagNum]<optimize = false>;
 };
 
-struct Plane_Solid
-{
+struct Header{
+    char magic[4]<bgcolor=cGray>;
+    char version;
+    char endian;
+    short x;
+    short y;
+    unsigned short width;
+    unsigned short height;
+    unsigned short frameNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    float frameRate;
+    unsigned short imageNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    unsigned short shapeNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    unsigned short editShapeNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    unsigned short movieClipNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    unsigned short labelNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    unsigned short tagNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    unsigned short maxDepth;
+    unsigned short scalingGridNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    
     Color color;
 };
 
-struct Plane_Image
-{
-    ushort imageId<bgcolor=0x02CCFF>;
-    char padding[2]<bgcolor=cNone>;
+struct Image{
+    unsigned short imageId;
+    char padding[2]<hidden=true, bgcolor=cNone>;
 };
 
-struct Plane
-{
-    uint type;
-    Vertex vertex[4]<bgcolor=0x1500D7>;
-    switch(type)
-    {
-        case 0 : Plane_Solid solid; break;
-        case 64 : Plane_Image image; break;
-        default : break;
-    }
+struct Shape{
+    unsigned short shapeId<bgcolor = cYellow>;
+    unsigned short planeNum<bgcolor = ( this != 0 ? cGreen : cRed )>;
+    Rectangle bounds;
     
+    Plane planes[planeNum]<optimize = false>;
 };
 
-struct Shape
-{
-    ushort shapeId<bgcolor=0x02CCFF>;
-    ushort planeNum<bgcolor=0x4BDE32>;
-    Rectangle bounds<bgcolor=0xFF8FDA>;
-    local int i<hidden=true>;
-    for(i = 0 ; i < planeNum ; i++)
-    {
-        Plane plane;
-    }
-};
-
-struct EditShape
-{
-    ushort shapeId<bgcolor=0x02CCFF>;
-    char align<bgcolor=0x8264FF>;
-    char padding<bgcolor=cNone>;
-    Rectangle bounds<bgcolor=0xFF8FDA>;
-    uint fixId<bgcolor=0x26D4FF>;
-};
-
-struct Label
-{
-    uint fixId<bgcolor=0x26D4FF>;
-    uint tagIndex<bgcolor=0x4BDE32>;
-};
-
-struct MovieClip
-{
-    ushort shapeId<bgcolor=0x26D4FF>;
-    ushort labelNum<bgcolor=0x4BDE32>;
-    ushort tagNum<bgcolor=0x4BDE32>;
-    ushort maxDepth<bgcolor=0xFF840B>;
-    local int i;
-
-    for(i = 0 ; i < labelNum ; i++)
-    {
-        Label label;
-    }    
-
-    for(i = 0 ; i < tagNum ; i++)
-    {
-        Tag tag<name = (this.tagId == 0 ? "TAG_END" : this.tagId == 1 ? "TAG_SHOWFRAME" : this.tagId == 4 ? "TAG_PLACEOBJECT" : this.tagId == 5 ? "TAG_REMOVEOBJECT" : this.tagId == 12 ? "TAG_DOACTION" : this.tagId == 43 ? "TAG_FRAMELABEL" : this.tagId == 78 ? "TAG_9GRID" : "Error" )>;
-    }
+struct EditShape{
+    unsigned short shapeId<bgcolor = cYellow>;
+    EditShapeAlign align;
+    char padding[1]<hidden=true, bgcolor=cNone>;
+    Rectangle bounds;
+    unsigned int fixId<bgcolor=cPurple>;
+};    
     
-};
-
-struct Header
-{
-    char magic[4]<bgcolor=0x1500D7>;
-    char version<bgcolor=0x0159A1>;
-    char endian<bgcolor=0x02CCFF>;
-
-    short x<bgcolor=0xCFD467>;
-    short y<bgcolor=0xCFD467>;
-
-    ushort width<bgcolor=0x4BDE32>;
-    ushort height<bgcolor=0x4BDE32>;
-    ushort frameNum<bgcolor=0x6168FF>;
-    
-    float frameRate<bgcolor=0x8264FF>;
-
-    ushort imageNum;
-    ushort shapeNum;
-    ushort editShapeNum;
-    ushort movieClipNum;
-    ushort labelNum;
-    ushort tagNum;
-    ushort maxDepth;
-    ushort scalingGridNum;
-    Color background;
-};
-
-local int i<hidden=true>;
-
-struct Swf
-{
+struct Binary{
     Header header_;
-    Image images[header_.imageNum];
-
-    for(i = 0 ; i < header_.shapeNum ; i++)
-    {
-        Shape shape<name="Shape">;
-    }
-
-    EditShape editShapes[header_.editShapeNum];
-
-    for(i = 0; i < header_.movieClipNum; i++)
-    {
-        MovieClip movieClip<name="Movie Clip">;
-    }
-
-    Label labels[header_.labelNum];
-    
-    for ( i = 0 ; i < header_.tagNum ; i++ )
-    {
-        Tag tag<name = (this.tagId == 0 ? "TAG_END" : this.tagId == 1 ? "TAG_SHOWFRAME" : this.tagId == 4 ? "TAG_PLACEOBJECT" : this.tagId == 5 ? "TAG_REMOVEOBJECT" : this.tagId == 12 ? "TAG_DOACTION" : this.tagId == 43 ? "TAG_FRAMELABEL" : this.tagId == 78 ? "TAG_9GRID" : "Error" )>;
-    }
+    Image images[header_.imageNum]<optimize = false, bgcolor = cRed>;
+    Shape shapes[header_.shapeNum]<optimize = false>;
+    EditShape editShapes[header_.editShapeNum]<optimize = false>;
+    MovieClip movieClips[header_.movieClipNum]<optimize = false, bgcolor = cBlue>;
+    Label labels[header_.labelNum]<optimize = false>;
+    Tag tags[header_.tagNum]<optimize = false>;
     
 };
 
-Swf swf<bgcolor=0x4BDE32>;
+Binary binary <name = "SWF Binary">;
