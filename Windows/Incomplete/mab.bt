@@ -1,7 +1,18 @@
 //------------------------------------------------
+// NOTES:
+// A more complete template for .win.sab is now available in the "Windows" folder
+// This one has been left here due to having some data related to .win.mab, but 
+// it should be noted that this template is incomplete. If you wish to complete
+// this template for .win.mab, please reference the audio repositories linked on
+// the sidebar of the Flagrum wiki (Developer section, Useful GitHub Repositories page).
+// These repositories have code pertaining to .win.mab and .win.sab that would be
+// extremely helpful if a template is needed for any reason.
+//------------------------------------------------
+
+//------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
 //
-//      File: sab.bt
+//      File: mab.bt
 //   Authors: Kizari
 //   Version: 1
 //   Purpose: FFXV Audio Files
@@ -11,7 +22,22 @@
 //   History: 
 //------------------------------------------------
 
-#include "../utils/utils.bt";
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
 
 struct SabHeader
 {
@@ -138,6 +164,10 @@ struct At9ExtraData
     uint32 loopEnd;
     uint32 reserved2[2];
 };
+
+FSeek(152);
+float volume<bgcolor=0xff00aa>;
+FSeek(0);
 
 SabHeader header<bgcolor=0xffff00>;
 

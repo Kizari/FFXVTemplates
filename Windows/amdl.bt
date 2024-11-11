@@ -13,6 +13,17 @@
 #include "../Utilities/common.bt";
 #include "../Utilities/utils.bt";
 
+enum LmEInstanceDataType
+{
+    eInstanceDataType_Computed_Pose = 0x0,
+    eInstanceDataType_Skeletal_Instance_Data = 0x1,
+    eInstanceDataType_BeginAssetBasedTypes = 0x2,
+    eInstanceDataType_Axial_Bone_Scaling_Info = 0x2,
+    eInstanceDataType_Radial_Bone_Scaling_Info = 0x3,
+    eInstanceDataType_LastNonUDSAssetType = 0x3,
+    eInstanceDataType_Num_Types = 0x4
+};
+
 enum<ushort> LmEAnimatedScaleState
 {
     eAnimatedScaleState_Inactive  = 0,
@@ -69,6 +80,38 @@ enum<ushort> LmEAnimProcessCutdownMode
     Menu=3,
     Swf=4,
     Actor=5
+};
+
+enum LmETransitionTypeBits
+{
+  eTransitionTypeBits_flags_none = 0x0,
+  eTransitionTypeBits_Freeze_source_anim = 0x8,
+  eTransitionTypeBits_Freeze_target_anim = 0x10,
+  eTransitionTypeBits_No_AnimFacing_Recompute = 0x20,
+  eTransitionTypeBits_No_AnimOrigin_Recompute = 0x40,
+  eTransitionTypeBits_Root_Rotation_Types_Start = 0x80,
+  eTransitionTypeBits_Root_No_Source_Rotation = 0x80,
+  eTransitionTypeBits_Root_Use_Target_Rotation = 0x100,
+  eTransitionTypeBits_Root_Lock_Anim_Facing = 0x200,
+  eTransitionTypeBits_Root_Translation_Types_Start = 0x400,
+  eTransitionTypeBits_Root_No_Source_Translation = 0x400,
+  eTransitionTypeBits_Root_Use_Target_Translation = 0x800,
+  eTransitionTypeBits_Root_MS_Source_Translation = 0x1000,
+  eTransitionTypeBits_Root_WS_Source_Translation = 0x2000,
+  eTransitionTypeBits_Root_Lock_Anim_Origin = 0x4000,
+  eTransitionTypeBits_CycleMatchBlend_Types_Start = 0x8000,
+  eTransitionTypeBits_MatchFeetCycleEvents = 0x8000,
+  eTransitionTypeBits_MatchFeetCycleEvents_DurationRatio = 0x10000,
+  eTransitionTypeBits_MatchFeetCycleEvents_PH1 = 0x20000,
+  eTransitionTypeBits_MatchFeetCycleEvents_PH2 = 0x40000,
+  eTransitionTypeBits_CycleMatchBlend_Types_End = 0x40000,
+  eTransitionTypeBits_CycleMatchBlend_Types_All_Bits_Set_Mask = 0x78000,
+  eTransitionTypeBits_SnapshotBlend = 0x80000,
+  eTransitionTypeBits_SnapshotBlendCaptureFromModelspacePose = 0x100000,
+  eTransitionTypeBits_OverrideTransitionDuration = 0x200000,
+  eTransitionTypeBits_ClearOverrideTransitionFlagsAfterUse = 0x400000,
+  eTransitionTypeBits_IgnoreAnimHookAndContinuePreviousSelection = 0x800000,
+  eTransitionTypeBits_Invalid = 0xFFFFFFFF,
 };
 
 struct LmSDataChannelInfo
@@ -132,7 +175,7 @@ struct LmSTransitionParams
     float blendTime;
     float playbackRate;
     float startTime;
-    uint flags;
+    LmETransitionTypeBits flags;
     uint useCount;
 };
 
@@ -220,8 +263,8 @@ struct LmSkeletalAnimInfo
     uint boneIds[boneCountFullSkeleton]<bgcolor=0x5555ff>;
     Align(16);
     
-    Quaternion unknownRotations[boneCountFullSkeleton]<bgcolor=0xffff00>;
-    Quaternion unknownRotations2[boneCountFullSkeleton]<bgcolor=0xff00aa>;
+    Quaternion modelSpaceBoneRotations[boneCountFullSkeleton]<bgcolor=0xffff00>;
+    Quaternion modelSpaceBoneTranslations[boneCountFullSkeleton]<bgcolor=0xff00aa>;
 
     Matrix bindPoseTransformations[boneCountBindOnly]<bgcolor=0x0099ff>;
 };
