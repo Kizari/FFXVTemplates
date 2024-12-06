@@ -1,0 +1,994 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: sab.bt
+//   Authors: Hellacopters
+//   Version: 2
+//   Purpose: Understanding .sab Packs
+//  Category: Audio
+// File Mask: *.sab
+//  ID Bytes: 73 61 62 66
+//   History: 1.0 - started file
+//   History: 2.0 - used FFXV file sturcts
+//------------------------------------------------
+
+//also known as .sbin files
+//Known to work with sead v22.7.20.10
+
+//basic align function
+void Align(int n) {
+    local int value = FTell() % n;
+
+    if (value) {
+        FSkip(n - value);
+    }
+};
+
+//for aligning with a fixed string to inculde 0 byte
+void AlignS(int n) {
+    local int value = FTell() % n;
+
+    if (value) {
+        FSkip(n - value);
+    } else {
+        FSkip(n);
+    }
+};
+
+//in SABSOUNDHEADER
+enum <ubyte> SAB_SOUND_TYPES
+{
+  SAB_SOUND_TYPE_EMPTY = 0x0,
+  SAB_SOUND_TYPE_NORMAL = 0x1,
+  SAB_SOUND_TYPE_RANDOM = 0x2,
+  SAB_SOUND_TYPE_ORDER = 0x3,
+  SAB_SOUND_TYPE_CYCLE = 0x4,
+  SAB_SOUND_TYPE_SWITCH = 0x5,
+};
+
+//in SABSOUNDHEADER
+enum <ubyte> SAB_SOUND_PORT_TYPES
+{
+  SAB_SOUND_PORT_MAIN = 0x0,
+  SAB_SOUND_PORT_RESTRICTED = 0x1,
+  SAB_SOUND_PORT_PAD = 0x2,
+};
+
+//in SABSOUNDHEADER
+enum <ubyte> SAB_SOUND_PANNING_TYPES
+{
+  SAB_SOUND_KEEP_CHANNELOFFSET_PANNING = 0x0,
+  SAB_SOUND_OBJECT_RADIUS_BASED_PANNING = 0x1,
+};
+
+//in SABMATERIALHEADER
+enum <ubyte> SAB_MATERIAL_FORMAT_TYPES
+{
+  SAB_MATERIAL_FORMAT_NONE = 0x0,
+  SAB_MATERIAL_FORMAT_PCM = 0x1,
+  SAB_MATERIAL_FORMAT_MSADPCM = 0x2,
+  SAB_MATERIAL_FORMAT_VORBIS = 0x3,
+  SAB_MATERIAL_FORMAT_ATRAC9 = 0x4,
+  SAB_MATERIAL_FORMAT_XMA2 = 0x5,
+  SAB_MATERIAL_FORMAT_MSMP3 = 0x6,
+  SAB_MATERIAL_FORMAT_HCA = 0x7,
+};
+
+//in SABTRACKHEADER
+enum <ubyte> SAB_TRACK_TYPES
+{
+  SAB_TRACK_NONE = 0x0,
+  SAB_TRACK_MATERIAL = 0x1,
+  SAB_TRACK_SOUND = 0x2,
+};
+
+//in SABTRACKCOMMANDHEADER
+enum <ubyte> TRACK_COMMAND_TYPES
+{
+  SAB_TRACK_COMMAND_NONE = 0x0,
+  SAB_TRACK_COMMAND_END = 0x1,
+  SAB_TRACK_COMMAND_INTERVAL = 0x2,
+  SAB_TRACK_COMMAND_VOLUME = 0x3,
+  SAB_TRACK_COMMAND_PITCH = 0x4,
+  SAB_TRACK_COMMAND_PANNING = 0x5,
+  SAB_TRACK_COMMAND_FRPANNING = 0x6,
+  SAB_TRACK_COMMAND_VOLUME_RANDOM = 0x7,
+  SAB_TRACK_COMMAND_PITCH_RANDOM = 0x8,
+  SAB_TRACK_COMMAND_PANNING_RANDOM = 0x9,
+  SAB_TRACK_COMMAND_FRPANNING_RANDOM = 0xA,
+  SAB_TRACK_COMMAND_VOLUME_OSCILLATOR = 0xB,
+  SAB_TRACK_COMMAND_PITCH_OSCILLATOR = 0xC,
+  SAB_TRACK_COMMAND_PANNING_OSCILLATOR = 0xD,
+  SAB_TRACK_COMMAND_FRPANNING_OSCILLATOR = 0xE,
+  SAB_TRACK_COMMAND_LFE = 0xF,
+  SAB_TRACK_COMMAND_CENTER = 0x10,
+  SAB_TRACK_COMMAND_SURROUNDPAN = 0x11,
+};
+
+//in SABTRACKCOMMANDHEADER
+enum <ubyte> TRACK_COMMAND_RANDOM_TYPES
+{
+  SAB_TRACK_COMMAND_RANDOM_TYPE_NONE = 0x0,
+  SAB_TRACK_COMMAND_RANDOM_TYPE_ADD = 0x1,
+  SAB_TRACK_COMMAND_RANDOM_TYPE_MULTIPLY = 0x2,
+};
+
+//in SABTRACKHEADER
+enum <ubyte> INTERPOLATION_TYPES
+{
+  SAB_INTERPOLATION_LINEAR = 0x0,
+  SAB_INTERPOLATION_BEZIER = 0x1,
+};
+
+//in SABTRACKOSCILLATORCOMMAND (yes they misspelled these)
+enum <ubyte> TRACK_COMMAND_OSCIILATOR_TYPES
+{
+  SAB_TRACK_COMMAND_OSCIILATOR_NONE = 0x0,
+  SAB_TRACK_COMMAND_OSCIILATOR_SINE = 0x1,
+  SAB_TRACK_COMMAND_OSCIILATOR_RECTANGLE = 0x2,
+  SAB_TRACK_COMMAND_OSCIILATOR_TRIANGLE = 0x3,
+  SAB_TRACK_COMMAND_OSCIILATOR_SAW = 0x4,
+  SAB_TRACK_COMMAND_OSCIILATOR_RANDOM = 0x5,
+  SAB_TRACK_COMMAND_OSCIILATOR_REVERSE_SINE = 0x6,
+  SAB_TRACK_COMMAND_OSCIILATOR_REVERSE_RECTANGLE = 0x7,
+  SAB_TRACK_COMMAND_OSCIILATOR_REVERSE_TRIANGLE = 0x8,
+  SAB_TRACK_COMMAND_OSCIILATOR_REVERSE_SAW = 0x9,
+};
+
+//in SABSEQUENCECOMMANDHEADER
+enum <ubyte> SAB_SEQUENCE_COMMAND_TYPES
+{
+  SAB_SEQUENCE_COMMAND_NONE = 0x0,
+  SAB_SEQUENCE_COMMAND_END = 0x1,
+  SAB_SEQUENCE_COMMAND_KEYON = 0x2,
+  SAB_SEQUENCE_COMMAND_INTERVAL = 0x3,
+  SAB_SEQUENCE_COMMAND_KEYOFF = 0x4,
+  SAB_SEQUENCE_COMMAND_WAIT = 0x5,
+  SAB_SEQUENCE_COMMAND_LOOPSTART = 0x6,
+  SAB_SEQUENCE_COMMAND_LOOPEND = 0x7,
+};
+
+//in SABZEROONEHEADER
+enum <ubyte> ZEROONE_SLOPE_TYPES
+{
+  SAB_ZEROONE_SLOPE_NONE = 0x0,
+  SAB_ZEROONE_SLOPE_STEPLIMIT = 0x1,
+};
+
+//in SABZEROONEHEADER
+enum <ubyte> ZEROONE_TARGET_TYPES
+{
+  SAB_ZEROONE_TARGET_NONE = 0x0,
+  SAB_ZEROONE_TARGET_VOLUME = 0x1,
+  SAB_ZEROONE_TARGET_PITCH = 0x2,
+  SAB_ZEROONE_TARGET_EFFECT = 0x3,
+  SAB_ZEROONE_TARGET_LAYER_VOLUME = 0x4,
+  SAB_ZEROONE_TARGET_LPF = 0x5,
+};
+
+//for coloring
+local int bcolors[10]<hidden=true> = {
+    0x00FFFF,
+    0x00FF00,
+    0xFF0000,
+    0xFF00FF,
+    0x0000FF,
+    0xFFFFFF,
+    0xFFFF00,
+    0x660066,
+    0xFF0066,
+    0x6600FF
+};
+
+//pulled from OO's config file
+typedef enum <ubyte> {
+    dummy0 = 0,
+    music = 1,
+    se = 2, //AV also SE files
+    voice = 3, 
+}OOCategory;
+
+typedef struct (int i) {
+    char name[4]<bgcolor=bcolors[i]>;
+    short reserved<hidden=true>;
+    ushort structSize;
+    uint Offset;
+    int reserved2;
+} SectionRead;
+
+//in SABSOUNDHEADER
+typedef struct 
+{
+  ubyte version;
+  ubyte reserved;
+  ushort structSize;
+  ushort sequenceIndex;
+  ushort sequenceID;
+  uint reserved3[2];
+} SABSOUNDSEQUENCEINFO <open=true>;
+
+//in SABTRACKSURROUNDPANCOMMAND
+typedef struct 
+{
+  float x;
+  float y;
+} SABTRACKSURROUNDPANCOMMAND_ControlPoints <open=true>;
+
+//in SABTRACKCOMMANDHEADER
+typedef struct 
+{
+  float rate;
+  float depth;
+  TRACK_COMMAND_OSCIILATOR_TYPES type;
+  ubyte reserved[3];
+} SABTRACKOSCILLATORCOMMAND <open=true>;
+
+//in SABSEQUENCEHEADER
+typedef struct 
+{
+  ubyte version;
+  ubyte structSize;
+  SAB_SEQUENCE_COMMAND_TYPES type;
+  ubyte commandSize;
+  local int clear = commandSize;
+  switch (type) {
+      case SAB_SEQUENCE_COMMAND_NONE:
+        Assert(commandSize == 0);
+        break;
+      case SAB_SEQUENCE_COMMAND_END:
+        Assert(commandSize == 0);
+        break;
+      case SAB_SEQUENCE_COMMAND_KEYON:
+        struct SABSEQUENCEKEYONCOMMAND
+        {
+          uint trackIndex;
+          ubyte isLoop;
+          ubyte reserved;
+          ushort trackID;
+          float playLength;
+        }KEYONCOMMAND<open=true>;
+        break;
+      case SAB_SEQUENCE_COMMAND_INTERVAL:
+        struct SABSEQUENCEINTERVALCOMMAND
+        {
+          unsigned int interval;
+        }INTERVALCOMMAND<open=true>;
+        break;
+      case SAB_SEQUENCE_COMMAND_KEYOFF:
+        Assert(commandSize == 0);
+        break;
+      case SAB_SEQUENCE_COMMAND_WAIT:
+        struct SABSEQUENCEWAITCOMMAND
+        {
+          unsigned int upper;
+          unsigned int lower;
+        }WAITCOMMAND<open=true>;
+        break;
+      case SAB_SEQUENCE_COMMAND_LOOPSTART:
+        struct SABSEQUENCELOOPSTARTCOMMAND
+        {
+          ushort upper;
+          ushort lower;
+        }LOOPSTARTCOMMAND<open=true>;
+        break;
+      case SAB_SEQUENCE_COMMAND_LOOPEND:
+        Assert(commandSize == 0);
+        break;
+      default:
+        break;
+  }
+}SABSEQUENCECOMMANDHEADER <open=true>;
+
+//in SABZEROONEHEADER
+typedef struct SABZEROONEPOINT
+{
+  float zeroone;
+  float value;
+  ubyte curve;
+  ubyte reserved1;
+  ushort reserved2;
+  uint reserved3;
+};
+
+//in SABZEROONEHEADER
+enum <ushort> EFFECT_PARAMETER_TYPES
+{
+  EFFECT_PARAM_NONE = 0xFFFFFFFF,
+  REVERB_PARAM_DEPTH = 0x0,
+  REVERB_PARAM_WET_VOLUME = 0x1,
+  REVERB_PARAM_DRY_VOLUME = 0x2,
+  REVERB_PARAM_REFLECTION_ROOM_TYPE = 0x3,
+  REVERB_PARAM_REFLECTION_VOLUME = 0x4,
+  REVERB_PARAM_REVERB_ROOM_SIZE = 0x5,
+  REVERB_PARAM_REVERB_PREDELAY = 0x6,
+  REVERB_PARAM_REVERB_VOLUME = 0x7,
+  REVERB_PARAM_REVERB_TIME = 0x8,
+  REVERB_PARAM_DAMPING = 0x9,
+  REVERB_PARAM_DIFFUSION = 0xA,
+  REVERB_PARAM_SCATTER_GAIN = 0xB,
+  REVERB_PARAM_REVERB_EQ_LOW_FILTER_TYPE = 0xC,
+  REVERB_PARAM_REVERB_EQ_LOW_FILTER_FREQ = 0xD,
+  REVERB_PARAM_REVERB_EQ_LOW_FILTER_INVQ = 0xE,
+  REVERB_PARAM_REVERB_EQ_LOW_FILTER_GAIN = 0xF,
+  REVERB_PARAM_REVERB_EQ_MIDLOW_FILTER_TYPE = 0x10,
+  REVERB_PARAM_REVERB_EQ_MIDLOW_FILTER_FREQ = 0x11,
+  REVERB_PARAM_REVERB_EQ_MIDLOW_FILTER_INVQ = 0x12,
+  REVERB_PARAM_REVERB_EQ_MIDLOW_FILTER_GAIN = 0x13,
+  REVERB_PARAM_REVERB_EQ_MIDDLE_FILTER_TYPE = 0x14,
+  REVERB_PARAM_REVERB_EQ_MIDDLE_FILTER_FREQ = 0x15,
+  REVERB_PARAM_REVERB_EQ_MIDDLE_FILTER_INVQ = 0x16,
+  REVERB_PARAM_REVERB_EQ_MIDDLE_FILTER_GAIN = 0x17,
+  REVERB_PARAM_REVERB_EQ_MIDHIGH_FILTER_TYPE = 0x18,
+  REVERB_PARAM_REVERB_EQ_MIDHIGH_FILTER_FREQ = 0x19,
+  REVERB_PARAM_REVERB_EQ_MIDHIGH_FILTER_INVQ = 0x1A,
+  REVERB_PARAM_REVERB_EQ_MIDHIGH_FILTER_GAIN = 0x1B,
+  REVERB_PARAM_REVERB_EQ_HIGH_FILTER_TYPE = 0x1C,
+  REVERB_PARAM_REVERB_EQ_HIGH_FILTER_FREQ = 0x1D,
+  REVERB_PARAM_REVERB_EQ_HIGH_FILTER_INVQ = 0x1E,
+  REVERB_PARAM_REVERB_EQ_HIGH_FILTER_GAIN = 0x1F,
+  REVERB_PARAM_MATERIAL_TYPE = 0x20,
+  REVERB_PARAM_MATERIAL_EQ_LOW_FILTER_TYPE = 0x21,
+  REVERB_PARAM_MATERIAL_EQ_LOW_FILTER_FREQ = 0x22,
+  REVERB_PARAM_MATERIAL_EQ_LOW_FILTER_INVQ = 0x23,
+  REVERB_PARAM_MATERIAL_EQ_LOW_FILTER_GAIN = 0x24,
+  REVERB_PARAM_MATERIAL_EQ_MIDLOW_FILTER_TYPE = 0x25,
+  REVERB_PARAM_MATERIAL_EQ_MIDLOW_FILTER_FREQ = 0x26,
+  REVERB_PARAM_MATERIAL_EQ_MIDLOW_FILTER_INVQ = 0x27,
+  REVERB_PARAM_MATERIAL_EQ_MIDLOW_FILTER_GAIN = 0x28,
+  REVERB_PARAM_MATERIAL_EQ_MIDDLE_FILTER_TYPE = 0x29,
+  REVERB_PARAM_MATERIAL_EQ_MIDDLE_FILTER_FREQ = 0x2A,
+  REVERB_PARAM_MATERIAL_EQ_MIDDLE_FILTER_INVQ = 0x2B,
+  REVERB_PARAM_MATERIAL_EQ_MIDDLE_FILTER_GAIN = 0x2C,
+  REVERB_PARAM_MATERIAL_EQ_MIDHIGH_FILTER_TYPE = 0x2D,
+  REVERB_PARAM_MATERIAL_EQ_MIDHIGH_FILTER_FREQ = 0x2E,
+  REVERB_PARAM_MATERIAL_EQ_MIDHIGH_FILTER_INVQ = 0x2F,
+  REVERB_PARAM_MATERIAL_EQ_MIDHIGH_FILTER_GAIN = 0x30,
+  REVERB_PARAM_MATERIAL_EQ_HIGH_FILTER_TYPE = 0x31,
+  REVERB_PARAM_MATERIAL_EQ_HIGH_FILTER_FREQ = 0x32,
+  REVERB_PARAM_MATERIAL_EQ_HIGH_FILTER_INVQ = 0x33,
+  REVERB_PARAM_MATERIAL_EQ_HIGH_FILTER_GAIN = 0x34,
+  COMPRESSOR_PARAM_THRESHOLD = 0x100,
+  COMPRESSOR_PARAM_RATIO = 0x101,
+  COMPRESSOR_PARAM_INPUTGAIN = 0x102,
+  COMPRESSOR_PARAM_POSTGAIN = 0x103,
+  COMPRESSOR_PARAM_ATTACK = 0x104,
+  COMPRESSOR_PARAM_RELEASE = 0x105,
+  COMPRESSOR_PARAM_SIDECHAIN_INPUT_BUS = 0x106,
+  COMPRESSOR_PARAM_SIDECHAIN_INPUT_SLOT = 0x107,
+  FILTER_PARAM_FREQUENCY = 0x200,
+  FILTER_PARAM_Q = 0x201,
+  FILTER_PARAM_GAIN = 0x202,
+  FILTER_PARAM_TYPE = 0x203,
+  SIDECHAIN_INPUT_PARAM_SEND_LEVEL = 0x300,
+  SIDECHAIN_INPUT_PARAM_TEST_TONE_LEVEL = 0x301,
+  SIMPLE_FILTER_PARAM_FREQUENCY = 0x400,
+  SIMPLE_FILTER_PARAM_TYPE = 0x401,
+  FLANGER_PARAM_DELAY = 0x500,
+  FLANGER_PARAM_LFO_DEPTH = 0x501,
+  FLANGER_PARAM_LFO_FREQUENCY = 0x502,
+  FLANGER_PARAM_DRY_VOLUME = 0x503,
+  FLANGER_PARAM_WET_VOLUME = 0x504,
+  GRANULAR_PITCHSHIFT_PARAM_PITCH = 0x600,
+  GRANULAR_PITCHSHIFT_PARAM_GRAIN_FREQUENCY = 0x601,
+  HILBERT_FILTER_PARAM_SHIFT = 0x700,
+  FOURIER_ANALYSIS_BLOCK_SIZE = 0x800,
+  FOURIER_ANALYSIS_UPDATE_RATE = 0x801,
+  BUILD_REVERB_DEPTH = 0x1000,
+  BUILD_REVERB_DRY = 0x1001,
+  BUILD_REVERB_WET = 0x1002,
+  BUILD_REVERB_EARLY = 0x1003,
+  BUILD_REVERB_REVERB = 0x1004,
+  BUILD_REVERB_REVERB_DELAY = 0x1005,
+  BUILD_REVERB_REVERB_TIME = 0x1006,
+  BUILD_REVERB_REVERB_LPF = 0x1007,
+};
+
+//in SABSEQUENCEHEADER
+typedef struct
+{
+    //guessing here with this as I couldn't find anything with Zero One
+    ubyte version;
+    ubyte useParamNamelen;
+    ushort structSize;
+    ushort numPoints;
+    ZEROONE_TARGET_TYPES target;
+    ubyte targetEffectSlot;
+    float minRange;
+    float maxRange;
+    EFFECT_PARAMETER_TYPES targetEffectParam;
+    ubyte targetLayerIndex;
+    ZEROONE_SLOPE_TYPES slopeType;
+    int reserved3[3];
+    if(useParamNamelen){
+      char name[useParamNamelen];
+    } else {
+     local string name = "0";
+    }
+    if(numPoints){
+        SABZEROONEPOINT ZEROONEPOINT[numPoints]<open=true>;
+    }
+}SABZEROONEHEADER<open=true>;
+
+//SABSOUNDHEADER
+typedef struct 
+{
+  ubyte version;
+  ZEROONE_SLOPE_TYPES slopeType;
+  ushort structSize;
+  int reserved2[3];
+  float up;
+  float down;
+}SABSOUNDZEROONEPARAM<open=true>;
+
+//in SABSOUNDEFFECTHEADER
+enum <ubyte> EFFECT_TYPES
+{
+  EFFECT_NONE = 0x0,
+  EFFECT_REVERB = 0x1,
+  EFFECT_COMPRESSOR = 0x2,
+  EFFECT_FILTER = 0x3,
+  EFFECT_SIDECHAIN_INPUT = 0x4,
+  EFFECT_SIMPLE_FILTER = 0x5,
+  EFFECT_FLANGER = 0x6,
+  EFFECT_GRANULAR_PITCHSHIFT = 0x7,
+  EFFECT_HILBERT_FILTER = 0x8,
+  EFFECT_FOURIER_ANALYSIS = 0x9,
+  EFFECT_BUILD_REVERB = 0xA,
+  NUM_EFFECTS = 0xB,
+};
+
+//in SABSOUNDHEADER
+typedef struct 
+{
+    //guessing here with this as I couldn't find anything with effects
+    ubyte version;
+    EFFECT_TYPES type;
+    ushort structSize;
+    uint reserved[3];
+    if(type == EFFECT_FLANGER){
+        struct SABSOUNDEFFECTFLANGERPARAM
+        {
+          ubyte version;
+          ubyte reserved;
+          ushort structSize;
+          float delay;
+          float LFODepth;
+          float LFOFrequency;
+          float dryVolume;
+          float wetVolume;
+          int reserved2[2];
+        }SOUNDEFFECTFLANGERPARAM<open=true>;
+    }
+}SABSOUNDEFFECTHEADER;
+
+typedef struct (SectionRead &s) {
+    FSeek(s.Offset);
+    local string name<hidden=true> = s.name;
+    ubyte version;
+    ubyte reserved;
+    ushort structSize;
+    ushort Count;
+    ushort reserved2;
+    uint reserved3[2];
+    local int z<hidden=true> = 0;
+    local int test<hidden=true> = 0;
+    if(Count){
+        int loc[Count];
+        for(z=0;z<Count;z++){
+            FSeek(loc[z] + s.Offset);
+            switch(s.name){
+                //for sbin (sabf)
+                case ("snd "): //Sound
+                    test = ReadByte();
+                    if(test <= 8){
+                        test = FTell();
+                        struct SABSOUNDHEADER_V8
+                        {
+                          ubyte version;
+                          ubyte work;
+                          ushort structSize;
+                          SAB_SOUND_TYPES type;
+                          ubyte numSequences;
+                          OOCategory category;
+                          ubyte priority;
+                          ushort number;
+                          ubyte startMacro;
+                          ubyte stopMacro;
+                          float volume;
+                          uint cycleIntervalLow;
+                          uint cycleIntervalHigh;
+                          ubyte cycleMaxPlayGroups;
+                          ubyte flgs;
+                          ushort sequenceOffset;
+                          float audibleRange;
+                          ubyte output;
+                          ubyte distanceAttenuationCurve;
+                          SAB_SOUND_PORT_TYPES port;
+                          ubyte reserved2;
+                          float playLength;
+                          float interiorFactor;
+                          float innerRange;
+                          char auxSendBusses[4];
+                          float auxSendVolumes[4];
+                          char numAuxSends;
+                          ubyte numEffects;
+                          Assert(numEffects == 0); //not found in any sample files
+                          char reserved4[2];
+                          float dopplerFactor;
+                          uint reserved5;
+                          char name[16];
+                          //guessing this is how it works based on data
+                          if(numEffects){
+                              int locs[numEffects]; 
+                              local int y<hidden=true> = 0;
+                              for(y=0;y<numEffects;y++){
+                                  FSeek(test+locs[y]);
+                                  SABSOUNDEFFECTHEADER SOUNDEFFECTHEADER<open=true>;
+                              }
+                          }
+                          if(numSequences){
+                            FSeek(test+sequenceOffset);
+                            SABSOUNDSEQUENCEINFO SEQUENCEINFO[numSequences]<open=true>;
+                          } 
+                        } SOUNDHEADER <open=true, read=sndName8>;
+                    } else {
+                        test = FTell();
+                        struct SABSOUNDHEADER
+                        {
+                          ubyte version;
+                          ubyte work;
+                          ushort structSize;
+                          SAB_SOUND_TYPES type;
+                          ubyte numSequences;
+                          OOCategory category;
+                          ubyte priority;
+                          ushort number;
+                          ubyte startMacro;
+                          ubyte stopMacro;
+                          float volume;
+                          uint cycleIntervalLow;
+                          uint cycleIntervalHigh;
+                          ubyte cycleMaxPlayGroups;
+                          ubyte flgs;
+                          ushort sequenceOffset;
+                          float audibleRange;
+                          ubyte output;
+                          ubyte distanceAttenuationCurve;
+                          SAB_SOUND_PORT_TYPES port;
+                          ubyte namelen;
+                          float playLength;
+                          float interiorFactor;
+                          float innerRange;
+                          char auxSendBusses[4];
+                          float auxSendVolumes[4];
+                          char numAuxSends;
+                          ubyte numEffects;
+                          ushort effectTableOffset;
+                          Assert(numEffects == 0); //not found in any sample files
+                          float dopplerFactor;
+                          ushort zerooneParamOffset;
+                          ubyte numZeroOneParam;
+                          Assert(numZeroOneParam == 0); //not found in any sample files
+                          ubyte finishMacro;
+                          SAB_SOUND_PANNING_TYPES panningType;
+                          ubyte reserved[3];
+                          float convergenceFactor;
+                          uint reserved2[2];
+                          if(namelen){
+                              char name[namelen];
+                          } else {
+                             local string name = "0";
+                          }
+                          AlignS(16);
+                          //guessing this is how it works based on data
+                          if(numEffects){
+                              FSeek(test+effectTableOffset);
+                              int locs[numEffects]; 
+                              local int y<hidden=true> = 0;
+                              for(y=0;y<numEffects;y++){
+                                  FSeek(test+locs[y]);
+                                  SABSOUNDEFFECTHEADER SOUNDEFFECTHEADER<open=true>;
+                              }
+                          }
+                          //guessing this is how it works based on data
+                          if(numZeroOneParam){
+                              FSeek(test+zerooneParamOffset);
+                              SABSOUNDZEROONEPARAM SOUNDZEROONEPARAM[numZeroOneParam]<open=true>;
+                          }
+                          if(numSequences){
+                            FSeek(test+sequenceOffset);
+                            SABSOUNDSEQUENCEINFO SEQUENCEINFO[numSequences]<open=true>;
+                          } 
+                        } SOUNDHEADER <open=true, read=sndName>;
+                    }
+                    break;
+                case ("seq "): //Sequence
+                    test = ReadByte();
+                    if(test == 1){
+                        test = FTell();
+                        struct SABSEQUENCEHEADER_V1
+                        {
+                          ubyte version;
+                          ubyte reserved;
+                          ushort structSize;
+                          ushort number;
+                          ushort volZerooneOffset;   //unsure what these would be pointing to. maybe too old to even had programming
+                          ushort pitchZerooneOffset; //unsure what these would be pointing to. maybe too old to even had programming
+                          ushort commandOffset;
+                          FSeek(test + commandOffset);
+                          local int ss<hidden=true> = 1;
+                          do {
+                              SABSEQUENCECOMMANDHEADER COMMANDHEADER<open=true>;
+                              ss = COMMANDHEADER.clear;
+                          } while (ss!=0);
+                        }SEQUENCEHEADER<open=true>;
+                    } else if(test == 2){
+                        test = FTell();
+                        struct SABSEQUENCEHEADER_V2
+                        {
+                          ubyte version;
+                          ubyte reserved;
+                          ushort structSize;
+                          ushort number;
+                          ushort volZerooneOffset;   //unsure what these would be pointing to. maybe too old to even had programming
+                          ushort pitchZerooneOffset; //unsure what these would be pointing to. maybe too old to even had programming
+                          ushort commandOffset;
+                          int reserved2[2];
+                          FSeek(test + commandOffset);
+                          local int ss<hidden=true> = 1;
+                          do {
+                              SABSEQUENCECOMMANDHEADER COMMANDHEADER<open=true>;
+                              ss = COMMANDHEADER.clear;
+                          } while (ss!=0);
+                        }SEQUENCEHEADER<open=true>;
+                    } else {
+                        test = FTell();
+                        struct SABSEQUENCEHEADER
+                        {
+                          ubyte version;
+                          ubyte reserved;
+                          ushort structSize;
+                          ushort id;
+                          ushort commandOffset;
+                          ubyte numZeroOnes;
+                          Assert(numZeroOnes == 0); //this was missing from all the files I checked
+                          ubyte reserved2[3];
+                          int reserved3;
+                          //guessing here based on data
+                          if(numZeroOnes){
+                              SABZEROONEHEADER ZEROONEHEADER[numZeroOnes]<open=true, read=SABZEROONEName>;
+                          }
+                          FSeek(test + commandOffset);
+                          local int ss<hidden=true> = 1;
+                          do {
+                              SABSEQUENCECOMMANDHEADER COMMANDHEADER<open=true>;
+                              ss = COMMANDHEADER.clear;
+                          } while (ss!=0);
+                        }SEQUENCEHEADER<open=true>;
+                    }
+                    //SEQ_READ SEQdata;
+                    break;
+                case ("trk "): //Track
+                    struct SABTRACKHEADER
+                    {
+                      ubyte version;
+                      SAB_TRACK_TYPES type;
+                      ushort structSize;
+                      short mtrl_index;
+                      short bank_id;
+                      short id;
+                      short childID;
+                      uint reserved;
+                      local int tt<hidden=true> = 1;
+                      do {
+                          struct SABTRACKCOMMANDHEADER
+                          {
+                            ubyte version;
+                            ubyte structSize;
+                            TRACK_COMMAND_TYPES type;
+                            ubyte commandSize;
+                            local int clear = commandSize;
+                            switch (type){
+                                case SAB_TRACK_COMMAND_NONE:
+                                    Assert(commandSize == 0);
+                                    break;
+                                case SAB_TRACK_COMMAND_END:
+                                    Assert(commandSize == 0);
+                                    break;
+                                case SAB_TRACK_COMMAND_INTERVAL:
+                                    struct SABTRACKINTERVALCOMMAND
+                                    {
+                                      uint interval;
+                                    }INTERVALCOMMAND<open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_VOLUME:
+                                    struct SABTRACKVOLUMECOMMAND
+                                    {
+                                      float vol;
+                                      uint shiftTime;
+                                      ubyte curve;
+                                      ubyte reserved[3];
+                                    }VOLUMECOMMAND<open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_PITCH:
+                                    struct SABTRACKPITCHCOMMAND
+                                    {
+                                      float pitch;
+                                      uint shiftTime;
+                                      ubyte curve;
+                                      ubyte reserved[3];
+                                    }PITCHCOMMAND<open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_PANNING:
+                                    struct SABTRACKPANNINGCOMMAND
+                                    {
+                                      float pan;
+                                      uint shiftTime;
+                                      ubyte curve;
+                                      ubyte reserved[3];
+                                    }PANNINGCOMMAND<open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_FRPANNING:
+                                    struct SABTRACKFRPANNINGCOMMAND
+                                    {
+                                      float frpan;
+                                      uint shiftTime;
+                                      ubyte curve;
+                                      ubyte reserved[3];
+                                    }FRPANNINGCOMMAND <open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_VOLUME_RANDOM:
+                                    struct SABTRACKVOLUMERANDOMCOMMAND
+                                    {
+                                      float upper;
+                                      float lower;
+                                      TRACK_COMMAND_RANDOM_TYPES type;
+                                      ubyte reserved[3];
+                                    }VOLUMERANDOMCOMMAND <open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_PITCH_RANDOM:
+                                    struct SABTRACKPITCHRANDOMCOMMAND
+                                    {
+                                      float upper;
+                                      float lower;
+                                      TRACK_COMMAND_RANDOM_TYPES type;
+                                      ubyte reserved[3];
+                                    }PITCHRANDOMCOMMAND <open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_PANNING_RANDOM:
+                                    struct SABTRACKPANNINGRANDOMCOMMAND
+                                    {
+                                      float upper;
+                                      float lower;
+                                      TRACK_COMMAND_RANDOM_TYPES type;
+                                      ubyte reserved[3];
+                                    }PANNINGRANDOMCOMMAND <open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_FRPANNING_RANDOM:
+                                    struct SABTRACKFRPANNINGRANDOMCOMMAND
+                                    {
+                                      float upper;
+                                      float lower;
+                                      TRACK_COMMAND_RANDOM_TYPES type;
+                                      ubyte reserved[3];
+                                    }FRPANNINGRANDOMCOMMAND <open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_VOLUME_OSCILLATOR:
+                                    SABTRACKOSCILLATORCOMMAND VOLUME_OSCILLATOR<open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_PITCH_OSCILLATOR:
+                                    SABTRACKOSCILLATORCOMMAND PITCH_OSCILLATOR<open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_PANNING_OSCILLATOR:
+                                    SABTRACKOSCILLATORCOMMAND PANNING_OSCILLATOR<open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_FRPANNING_OSCILLATOR:
+                                    SABTRACKOSCILLATORCOMMAND FRPANNING_OSCILLATOR<open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_LFE:
+                                    struct SABTRACKLFECOMMAND
+                                    {
+                                      float lfe;
+                                      uint shiftTime;
+                                      ubyte curve;
+                                      ubyte reserved[3];
+                                    }LFECOMMAND <open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_CENTER:
+                                    struct SABTRACKCENTERCOMMAND
+                                    {
+                                      float center;
+                                      uint shiftTime;
+                                      ubyte curve;
+                                      ubyte reserved[3];
+                                    }CENTERCOMMAND <open=true>;
+                                    break;
+                                case SAB_TRACK_COMMAND_SURROUNDPAN:
+                                    struct SABTRACKSURROUNDPANCOMMAND
+                                    {
+                                      SABTRACKSURROUNDPANCOMMAND_ControlPoints controlPoints[4];
+                                      uint distanceTime;
+                                      INTERPOLATION_TYPES interpolation;
+                                      ubyte reserved[3];
+                                    }SURROUNDPANCOMMAND <open=true>;
+                                    break;
+                                default:
+                                    break;
+                            }
+                          } TRACKCOMMAND<open=true>;
+                          tt = TRACKCOMMAND.clear;
+                      } while (tt!=0);
+                    }TRACKHEADER<open=true>;
+                    break; 
+                case ("mtrl"): //Material
+                    struct SABMATERIALHEADER
+                    {
+                      ubyte version;
+                      ubyte reserved;
+                      short structSize;
+                      ubyte channel;
+                      SAB_MATERIAL_FORMAT_TYPES format;
+                      short number;
+                      uint sampleRate;
+                      uint loopStart;
+                      uint loopEnd;
+                      uint extraBytes;
+                      uint dataSize;
+                      short id;
+                      short reserved3;
+                      switch (format){
+                          case SAB_MATERIAL_FORMAT_NONE:
+                            break;
+                          case SAB_MATERIAL_FORMAT_PCM:
+                            break;
+                          case SAB_MATERIAL_FORMAT_MSADPCM:
+                            break;
+                          case SAB_MATERIAL_FORMAT_VORBIS:
+                            struct SABMATERIALOGGVORBISEXTRADATA
+                            {
+                              ubyte version;
+                              ubyte reserved;
+                              ushort structSize;
+                              uint loopStartOffsetBytes;
+                              uint loopEndOffsetBytes;
+                              uint numSamples;
+                              uint headerSize;
+                              uint seekTableSize;
+                              uint reserved2[2];
+                            }OGGVORBISEXTRADATA<open=true>;
+                            break;
+                          case SAB_MATERIAL_FORMAT_ATRAC9:
+                            struct SABMATERIALATRAC9EXTRADATA
+                            {
+                              ubyte version;
+                              ubyte reserved;
+                              ushort structSize;
+                              ushort blockAlign;
+                              ushort samplesPerBlock;
+                              uint channelMask;
+                              ubyte config[4];
+                              uint totalSamples;
+                              uint overlapDelay;
+                              uint encoderDelay;
+                              uint sampleRate;
+                              uint loopStart;
+                              uint loopEnd;
+                              uint reserved2[2];
+                            }ATRAC9EXTRADATA<open=true>;
+                            break;
+                          case SAB_MATERIAL_FORMAT_XMA2:
+                            struct SABMATERIALXMA2EXTRADATA
+                            {
+                              ubyte version;
+                              ubyte reserved;
+                              ubyte LoopCount;
+                              ubyte EncoderVersion;
+                              ushort structSize;
+                              ushort BlockCount;
+                              uint nSamplesPerSec;
+                              uint nAvgBytesPerSec;
+                              ushort reserved2;
+                              ushort NumStreams;
+                              uint ChannelMask;
+                              uint SamplesEncoded;
+                              uint BytesPerBlock;
+                              uint PlayBegin;
+                              uint PlayLength;
+                              uint LoopBegin;
+                              uint LoopLength;
+                            }XMA2EXTRADATA<open=true>;
+                            break;
+                          case SAB_MATERIAL_FORMAT_MSMP3:
+                            struct SABMATERIALMSMP3EXTRADATA
+                            {
+                              char header[3];
+                              char version;
+                              int compressionType;
+                              int channels;
+                              int sampleSize;
+                              int sampleRate;
+                              int miscInfo;
+                              int LoopMarkers[10];
+                            }MSMP3EXTRADATA<open=true>;
+                            break;
+                          case SAB_MATERIAL_FORMAT_HCA:
+                            struct SABMATERIALHCAEXTRADATA
+                            {
+                              ubyte version;
+                              ubyte structSize;
+                              ushort header_size;
+                              ushort frame_size;
+                              ushort loop_start_frame;
+                              ushort loop_end_frame;
+                              ushort num_inserted;
+                              ubyte useMixer;
+                              ubyte reserved2[3];
+                            }HCAEXTRADATA<open=true>;
+                            break;
+                          default:
+                            break;
+                      }
+                      if(dataSize){
+                          byte data[(extraBytes-16)+dataSize];
+                      }
+                    }MATERIALHEADER<open=true>;
+                    break;
+                case ("inst"): //Instrument (not seen)
+                    break;    
+               
+                default:
+                    break;
+            }
+       }
+   }
+} SectionData <bgcolor=0x00FF00>;
+
+//header
+struct {
+    LittleEndian();
+    char id[4]<bgcolor=0x0000FF>;
+    Assert(id == "sabf");
+    ubyte version<comment="2">;
+    ubyte flgs;
+    ushort structSize<comment="4096 = big endian">;
+    if(structSize == 0x1000){
+        BigEndian();
+    }
+    ubyte numChunks;
+    ubyte namelen;
+    ushort number<comment="bank_id">;
+    int fileSize;
+    if(version == 2){
+        string filename<bgcolor=0x0000FF>;
+        Align(16);
+    }
+    local int HeaderSize = 16 + namelen + (16 - namelen % 16);
+    local int i<hidden=true> = 0;
+    for(i=0;i<numChunks;i++){
+        SectionRead Section(i)<read=secrName, bgcolor=bcolors[i]>;
+    }
+    for(i=0;i<numChunks;i++){
+        SectionData SecData(Section[i])<read=secName, bgcolor=bcolors[i]>;
+    }
+} SABFILEHEADER<open=true>;
+
+//entry reads
+string SABZEROONEName(SABZEROONEHEADER &t) {
+    return t.name;
+};
+
+string sndName8(SABSOUNDHEADER_V8 &t) {
+    return t.name;
+};
+
+string sndName(SABSOUNDHEADER &t) {
+    return t.name;
+};
+
+string secName(SectionData &t) {
+    return t.name;
+};
+
+string secrName(SectionRead &t) {
+    return t.name;
+};

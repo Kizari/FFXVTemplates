@@ -135,7 +135,7 @@ struct PackedKey
 
 struct LmSSingleAnimFrame
 {
-    // [0] - used to help calculate the number of keys in the frame
+    // [0] - The number of chunks in the frame (16 keys to a chunk)
     // [1] - used to help calculate the number of keys in the frame
     // [2] - The number of timeKeyArrayStepModifiers
     ubyte numKeys[3]<bgcolor=0x00ff00>;

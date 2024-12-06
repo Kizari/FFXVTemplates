@@ -1,0 +1,1097 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: sead.win.config.bt
+//   Authors: Hellacopters
+//   Version: 1
+//   Purpose: Audio Config
+//  Category: Audio
+// File Mask: sead.win.config
+//  ID Bytes: 73 63 6E 66
+//   History: 
+//   History: 1.0 - started file
+//-----------------------------------------------
+
+//Known to work with sead v22.7.20.10
+
+//basic align function
+void Align(int n) {
+    local int value = FTell() % n;
+
+    if (value) {
+        FSkip(n - value);
+    }
+};
+
+//for aligning with a fixed string to inculde 0 byte
+void AlignS(int n) {
+    local int value = FTell() % n;
+
+    if (value) {
+        FSkip(n - value);
+    } else {
+        FSkip(n);
+    }
+};
+
+//for file coloring
+local int bcolors[10]<hidden=true> = {
+    0x00FFFF,
+    0x00FF00,
+    0xFF0000,
+    0xFF00FF,
+    0x0000FF,
+    0xFFFFFF,
+    0xFFFF00,
+    0x660066,
+    0xFF0066,
+    0x6600FF
+};
+
+//basic entry read
+typedef struct (int i) {
+    char id[4]<bgcolor=bcolors[i]>;
+    ubyte version;
+    ubyte reserved;
+    ushort structSize;
+    uint Offset;
+    int reserved2;
+} CONFIGCHUNKTABLEELEMENT;
+
+//PARAMETER enum
+enum <ubyte> CONFIG_EXTERNALPARAMETER_SLOPE_TYPES
+{
+  CONFIG_EXTERNALPARAMETER_SLOPE_NONE = 0x0,
+  CONFIG_EXTERNALPARAMETER_SLOPE_STEPLIMIT = 0x1,
+};
+
+//COMMAND enum
+enum <ubyte> CONFIG_EVENT_COMMAND_TYPES
+{
+  CONFIG_EVENT_COMMAND_NONE = 0x0,
+  CONFIG_EVENT_COMMAND_END = 0x1,
+  CONFIG_EVENT_COMMAND_INTERVAL = 0x2,
+  CONFIG_EVENT_COMMAND_PLAY = 0x3,
+  CONFIG_EVENT_COMMAND_STOP = 0x4,
+  CONFIG_EVENT_COMMAND_MUSIC_SECTION = 0x5,
+  CONFIG_EVENT_COMMAND_MUSIC_MODE = 0x6,
+  CONFIG_EVENT_COMMAND_MUSIC_START = 0x7,
+  CONFIG_EVENT_COMMAND_MUSIC_END = 0x8,
+  CONFIG_EVENT_COMMAND_CATEGORY_VOLUME = 0x9,
+  CONFIG_EVENT_COMMAND_CATEGORY_PITCH = 0xA,
+  CONFIG_EVENT_COMMAND_EFFECT_PRESET = 0xB,
+  CONFIG_EVENT_COMMAND_EFFECT_PARAM = 0xC,
+  CONFIG_EVENT_COMMAND_EXT_PARAMETER = 0xD,
+  CONFIG_EVENT_COMMAND_SUSPEND = 0xE,
+  CONFIG_EVENT_COMMAND_RESUME = 0xF,
+  CONFIG_EVENT_COMMAND_CATEGORY_SUSPEND = 0x10,
+  CONFIG_EVENT_COMMAND_CATEGORY_RESUME = 0x11,
+};
+
+//CURVE enum
+enum <ubyte> CONFIG_CURVE_POINT_TYPES
+{
+  CONFIG_CURVE_POINT_LINEAR = 0x0,
+  CONFIG_CURVE_POINT_SMOOTH = 0x1,
+  CONFIG_CURVE_POINT_FAST = 0x2,
+  CONFIG_CURVE_POINT_SLOW = 0x3,
+};
+
+//CURVE enum
+enum <ubyte> CONFIG_CURVE_MODE_TYPES
+{
+  CONFIG_CURVE_MODE_RATIO = 0x0,
+  CONFIG_CURVE_MODE_DECIBEL96 = 0x1,
+};
+
+//MACRO enum
+enum <ubyte> CONFIG_MACRO_COMMAND_TYPES 
+{
+  CONFIG_MACRO_COMMAND_NONE = 0,                          //
+  CONFIG_MACRO_COMMAND_END = 1,                           //
+  CONFIG_MACRO_COMMAND_FILTERCLEAR = 16,                  //
+  CONFIG_MACRO_COMMAND_FILTERCATEGORY = 17,               //CONFIGMACRO FILTERCATEGORY COMMAND
+  CONFIG_MACRO_COMMAND_FILTERSOUNDID = 18,                //CONFIGMACRO FILTERSOUNDID COMMAND
+  CONFIG_MACRO_COMMAND_FILTERPRIORITY = 19,               //CONFIGMACRO FILTERPRIORITY COMMAND
+  CONFIG_MACRO_COMMAND_FILTERMACRONUMBER = 20,            //CONFIGMACRO FILTERMACRONUMBER COMMAND
+  CONFIG_MACRO_COMMAND_FILTERBANKNUMBER = 21,             //CONFIGMACRO FILTERBANKNUMBER COMMAND
+  CONFIG_MACRO_COMMAND_FILTERSOUNDELAPSEDTIME = 22,       //CONFIGMACRO FILTERSOUNDELAPSEDTIME COMMAND
+  CONFIG_MACRO_COMMAND_FILTERSOUNDVOLUME = 23,            //CONFIGMACRO FILTERSOUNDVOLUME COMMAND
+  CONFIG_MACRO_COMMAND_FILTERSOUNDPANNING = 24,           //CONFIGMACRO FILTERSOUNDPANNING COMMAND
+  CONFIG_MACRO_COMMAND_EXECUTESOUNDSTOP = 160,            //CONFIGMACRO EXECUTESOUNDSTOP COMMAND
+  CONFIG_MACRO_COMMAND_EXECUTESELFNOPLAY = 161,           //CONFIGMACROEXECUTECOMMAND
+  CONFIG_MACRO_COMMAND_EXECUTECATEGORYVOLUMECHANGE = 162, //CONFIGMACRO EXECUTECATEGORYVOLUMECHANGE COMMAND
+  CONFIG_MACRO_COMMAND_EXECUTESOUNDVOLUMECHANGE = 163,    //CONFIGMACRO EXECUTESOUNDVOLUMECHANGE COMMAND
+  CONFIG_MACRO_COMMAND_EXECUTESELFVOLUMECHANGE = 164,     //CONFIGMACROEXECUTESOUNDVOLUMECHANGECOMMAND
+  CONFIG_MACRO_COMMAND_EXECUTESELFDELAY = 165,            //CONFIGMACROEXECUTESOUNDDELAYCOMMAND
+  CONFIG_MACRO_COMMAND_EXECUTESELFSETSWITCHVALUE = 166,   //CONFIGMACRO EXECUTESOUNDSETSWITCHVALUE COMMAND
+  CONFIG_MACRO_COMMAND_EXECUTECATEGORYPITCHCHANGE = 167,  //CONFIGMACRO EXECUTECATEGORYPITCHCHANGE COMMAND
+  CONFIG_MACRO_COMMAND_EXECUTECATEGORYSUSPEND = 168,      //CONFIG_MACRO_COMMAND_EXECUTECATEGORYSUSPEND
+  CONFIG_MACRO_COMMAND_EXECUTECATEGORYRESUME = 169,       //CONFIG_MACRO_EXECUTE_CATEGORY_RESUME_COMMAND
+  CONFIG_MACRO_COMMAND_EXECUTESOUNDSUSPEND = 170,         //CONFIG_MACRO_EXECUTE_SOUND_SUSPEND_COMMAND
+  CONFIG_MACRO_COMMAND_EXECUTESOUNDRESUME = 171,          //CONFIG_MACRO_EXECUTE_SOUND_RESUME_COMMAND
+};
+
+//MACRO cond type enum
+enum <ubyte> CONFIG_MACRO_CONDITIONEXPRESSION_TYPES
+{
+  CONFIG_MACRO_CONDITIONEXPRESSION_EQUAL = 0x0,
+  CONFIG_MACRO_CONDITIONEXPRESSION_NOTEQUAL = 0x1,
+  CONFIG_MACRO_CONDITIONEXPRESSION_OVER = 0x2,
+  CONFIG_MACRO_CONDITIONEXPRESSION_ANDOVER = 0x3,
+  CONFIG_MACRO_CONDITIONEXPRESSION_UNDER = 0x4,
+  CONFIG_MACRO_CONDITIONEXPRESSION_ANDUNDER = 0x5,
+};
+
+//unsure what this is used for
+enum <ubyte>CONFIG_MACRO_CONDITIONRANGEEXPRESSION_TYPES
+{
+  CONFIG_MACRO_CONDITIONRANGEEXPRESSION_INSIDE = 0x0,
+  CONFIG_MACRO_CONDITIONRANGEEXPRESSION_OUTSIDE = 0x1,
+};
+
+//MACRO execute type enum
+enum <ubyte> CONFIG_MACRO_EXECUTE_TARGETS_TYPES
+{
+  CONFIG_MACRO_EXECUTE_TARGETS_ALL = 0x0,
+  CONFIG_MACRO_EXECUTE_TARGETS_OLDEST = 0x1,
+  CONFIG_MACRO_EXECUTE_TARGETS_MINIMUMVOLUME = 0x2,
+  CONFIG_MACRO_EXECUTE_TARGETS_FARTHEST = 0x3,
+};
+
+//MACRO parameter type enum
+enum <ubyte> CONFIG_MACRO_PARAMETER_TYPES
+{
+  CONFIG_MACRO_PARAMETER_TYPE_ABSOLUTE = 0x0,
+  CONFIG_MACRO_PARAMETER_TYPE_RELATIVE = 0x1,
+};
+
+//BUS effects
+enum <ubyte> EFFECT_TYPES
+{
+  EFFECT_NONE = 0x0,
+  EFFECT_REVERB = 0x1,
+  EFFECT_COMPRESSOR = 0x2,
+  EFFECT_FILTER = 0x3,
+  EFFECT_SIDECHAIN_INPUT = 0x4,
+  EFFECT_SIMPLE_FILTER = 0x5,
+  EFFECT_FLANGER = 0x6,
+  EFFECT_GRANULAR_PITCHSHIFT = 0x7,
+  EFFECT_HILBERT_FILTER = 0x8,
+  EFFECT_FOURIER_ANALYSIS = 0x9,
+  EFFECT_BUILD_REVERB = 0xA,
+  NUM_EFFECTS = 0xB,
+};
+
+//MARCO entry
+typedef struct{
+    ubyte version;
+    ubyte structSize;
+    CONFIG_MACRO_COMMAND_TYPES type;
+    ubyte commandSize;
+    local int clear<hidden=true> = commandSize;
+    switch (type) {
+        case CONFIG_MACRO_COMMAND_NONE: //0
+            Assert(commandSize == 0);
+            break;
+        case CONFIG_MACRO_COMMAND_END: //1
+            Assert(commandSize == 0);
+            break;
+        case CONFIG_MACRO_COMMAND_FILTERCLEAR: //16
+            clear = 1;
+            Assert(commandSize == 0);
+            break;
+        case CONFIG_MACRO_COMMAND_FILTERCATEGORY: //17
+            struct CONFIGMACROFILTERCATEGORYCOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                CONFIG_MACRO_PARAMETER_TYPES parameterType;
+                ubyte reserved[2];
+                int conditionNumber;
+            } FILTERCATEGORYCOMMAND<open=true>;;
+            break;
+        case CONFIG_MACRO_COMMAND_FILTERSOUNDID: //18
+            struct CONFIGMACROFILTERSOUNDIDCOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                CONFIG_MACRO_PARAMETER_TYPES parameterType;
+                ubyte reserved[2];
+                uint conditionID;
+            } FILTERSOUNDIDCOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_FILTERPRIORITY: //19
+            struct CONFIGMACROFILTERPRIORITYCOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                CONFIG_MACRO_PARAMETER_TYPES parameterType;
+                ubyte reserved[2];
+                int conditionPriority;
+            } FILTERPRIORITYCOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_FILTERMACRONUMBER: //20
+            struct CONFIGMACROFILTERMACRONUMBERCOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                CONFIG_MACRO_PARAMETER_TYPES parameterType;
+                ubyte reserved[2];
+                int conditionMacroNumber;
+            } FILTERMACRONUMBERCOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_FILTERBANKNUMBER: //21,
+            struct CONFIGMACROFILTERBANKNUMBERCOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                CONFIG_MACRO_PARAMETER_TYPES parameterType;
+                ubyte reserved[2];
+                int conditionNumber;
+            } FILTERBANKNUMBERCOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_FILTERSOUNDELAPSEDTIME: //22,
+            struct CONFIGMACROFILTERSOUNDELAPSEDTIMECOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                CONFIG_MACRO_PARAMETER_TYPES parameterType;
+                ubyte reserved[2];
+                float conditionElapsedTime;
+            } FILTERSOUNDELAPSEDTIMECOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_FILTERSOUNDVOLUME: //23,
+            struct CONFIGMACROFILTERSOUNDVOLUMECOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                CONFIG_MACRO_PARAMETER_TYPES parameterType;
+                ubyte reserved[2];
+                float conditionVolume;
+            } FILTERSOUNDVOLUMECOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_FILTERSOUNDPANNING: //24,
+            struct CONFIGMACROFILTERSOUNDPANNINGCOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                CONFIG_MACRO_PARAMETER_TYPES parameterType;
+                ubyte reserved[2];
+                float start;
+                float range;
+            } FILTERSOUNDPANNINGCOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTESOUNDSTOP: //160,
+            struct CONFIGMACROEXECUTESOUNDSTOPCOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte stopType;
+                ubyte reserved[1];
+                float fadeTime;
+            } EXECUTESOUNDSTOPCOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTESELFNOPLAY: //161,
+            Assert(commandSize == 4);
+            struct CONFIGMACROEXECUTECOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte reserved[2];
+            } EXECUTECOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTECATEGORYVOLUMECHANGE: //162,
+            struct CONFIGMACROEXECUTECATEGORYVOLUMECHANGECOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte categoryNumber;
+                ubyte reserved[1];
+                float volume;
+                float fadeTime;
+            } EXECUTECATEGORYVOLUMECHANGECOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTESOUNDVOLUMECHANGE: //163,
+            struct CONFIGMACROEXECUTESOUNDVOLUMECHANGECOMMAND163
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte reserved[2];
+                float volume;
+                float fadeTime;
+            } EXECUTESOUNDVOLUMECHANGECOMMAND163<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTESELFVOLUMECHANGE: //164,
+            struct CONFIGMACROEXECUTESOUNDVOLUMECHANGECOMMAND164
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte reserved[2];
+                float volume;
+                float fadeTime;
+            } EXECUTESOUNDVOLUMECHANGECOMMAND164<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTESELFDELAY: //165,
+            struct CONFIGMACROEXECUTESOUNDDELAYCOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte reserved[2];
+                float step;
+                float baseValue;
+            } EXECUTESOUNDDELAYCOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTESELFSETSWITCHVALUE: //166,
+            struct CONFIGMACROEXECUTESOUNDSETSWITCHVALUECOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte reserved[2];
+                float step;
+                float baseValue;
+            } EXECUTESOUNDSETSWITCHVALUECOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTECATEGORYPITCHCHANGE: //167,
+            struct CONFIGMACROEXECUTECATEGORYPITCHCHANGECOMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte categoryNumber;
+                ubyte reserved[1];
+                float pitch;
+                float fadeTime;
+            } EXECUTECATEGORYPITCHCHANGECOMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTECATEGORYSUSPEND: //168,
+            struct CONFIG_MACRO_EXECUTE_CATEGORY_SUSPEND_COMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte categoryNumber;
+                ubyte reserved[1];
+                float fadeTime;
+            } EXECUTE_CATEGORY_SUSPEND_COMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTECATEGORYRESUME: //169,
+            struct CONFIG_MACRO_EXECUTE_CATEGORY_RESUME_COMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                ubyte categoryNumber;
+                ubyte reserved[1];
+                float fadeTime;
+            } EXECUTE_CATEGORY_RESUME_COMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTESOUNDSUSPEND: //170,
+            struct CONFIG_MACRO_EXECUTE_SOUND_SUSPEND_COMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                CONFIG_MACRO_EXECUTE_TARGETS_TYPES targetsType;
+                ubyte reserved[1];
+                float fadeTime;
+            } EXECUTE_SOUND_SUSPEND_COMMAND<open=true>;
+            break;
+        case CONFIG_MACRO_COMMAND_EXECUTESOUNDRESUME: //171
+            struct CONFIG_MACRO_EXECUTE_SOUND_RESUME_COMMAND
+            {
+                CONFIG_MACRO_CONDITIONEXPRESSION_TYPES conditionExpression;
+                ubyte conditionSoundCount;
+                CONFIG_MACRO_EXECUTE_TARGETS_TYPES targetsType;
+                ubyte reserved[1];
+                float fadeTime;
+            } MACRO_EXECUTE_SOUND_RESUME_COMMAND<open=true>;
+            break;
+        default:
+            Assert(0);
+            break;
+    }
+} CONFIGMACROCOMMANDHEADER <open=true>;
+
+typedef struct 
+{
+  ubyte version;
+  ubyte structSize;
+  ubyte bus;
+  ubyte slot;
+  char preset;
+  ubyte reserved[3];
+  uint reserved2[2];
+} CONFIGEFFECTPRESETPACKELEMENT <open=true>;
+
+typedef struct 
+{
+  ubyte version;
+  ubyte structSize;
+  ubyte bus;
+  char send;
+  float volume;
+  uint reserved[2];
+}CONFIGEFFECTPRESETPACKBUSELEMENT <open=true>;
+
+typedef struct 
+{
+  ubyte version;
+  ubyte structSize;
+  CONFIG_EVENT_COMMAND_TYPES type;
+  ubyte commandSize;
+  local int clear<hidden=true> = commandSize;
+  switch (type) {
+      case CONFIG_EVENT_COMMAND_NONE:
+        Assert(commandSize == 0);
+        break;
+      case CONFIG_EVENT_COMMAND_END:
+        Assert(commandSize == 0);
+        break;
+      case CONFIG_EVENT_COMMAND_INTERVAL:
+        Assert(commandSize == 4);
+        struct CONFIG_EVENT_INTERVAL_COMMAND {
+            uint interval;
+        }INTERVAL_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_PLAY:
+        Assert(commandSize == 12);
+        struct CONFIG_EVENT_PLAY_COMMAND {
+            ushort sound;
+            ushort bank;
+            float fadeTime;
+            float seekTime;
+        } EVENT_PLAY_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_STOP:
+        Assert(commandSize == 8);
+        struct CONFIG_EVENT_STOP_COMMAND{
+            ushort sound;
+            ushort bank;
+            float fadeTime;
+        }STOP_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_MUSIC_SECTION:
+        Assert(commandSize == 8);
+        struct CONFIG_EVENT_MUSIC_SECTION_COMMAND{
+            ushort music;
+            ushort bank;
+            ushort sectionNumber;
+            ushort reserved;
+        }MUSIC_SECTION_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_MUSIC_MODE:
+        Assert(commandSize == 8);
+        struct CONFIG_EVENT_MUSIC_MODE_COMMAND{
+            ushort music;
+            ushort bank;
+            ushort modeNumber;
+            ushort reserved;
+        }MUSIC_MODE_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_MUSIC_START:
+        Assert(commandSize == 8);
+        struct CONFIG_EVENT_MUSIC_START_COMMAND{
+            ushort music;
+            ushort bank;
+            ushort startMethod;
+            ushort reserved;
+        } MUSIC_START_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_MUSIC_END:
+        Assert(commandSize == 8);
+        struct CONFIG_EVENT_MUSIC_END_COMMAND{
+            ushort music;
+            ushort bank;
+            ushort endMethod;
+            ushort reserved;
+        }MUSIC_END_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_CATEGORY_VOLUME:
+        Assert(commandSize == 12);
+        struct CONFIG_EVENT_CATEGORY_VOLUME_COMMAND{
+            float volume;
+            float fadeTime;
+            ubyte categoryNumber;
+            ubyte categoryLayer;
+            ubyte reserved[2];
+        }CATEGORY_VOLUME_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_CATEGORY_PITCH:
+        Assert(commandSize == 12);
+        struct CONFIG_EVENT_CATEGORY_PITCH_COMMAND {
+            float pitch;
+            float fadeTime;
+            ubyte categoryNumber;
+            ubyte reserved[3];
+        } CATEGORY_PITCH_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_EFFECT_PRESET:
+        Assert(commandSize == 8);
+        struct CONFIG_EVENT_EFFECT_PRESET_COMMAND {
+            short presetNumber;
+            short reserved;
+            float fadeTime;
+        } EFFECT_PRESET_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_EFFECT_PARAM:
+        Assert(commandSize == 12);
+        struct CONFIG_EVENT_EFFECT_PARAM_COMMAND{
+            ubyte busNumber;
+            ubyte slotNumber;
+            ushort paramType;
+            float param;
+            float fadeTime;
+        }EFFECT_PARAM_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_EXT_PARAMETER:
+        struct CONFIG_EVENT_EXT_PARAMETER_COMMAND {
+            float param;
+            ubyte namelen;
+            ubyte reserved[3];
+            char name[namelen];
+            AlignS(16);
+        } EXT_PARAMETER_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_SUSPEND:
+        Assert(commandSize == 8);
+        struct CONFIG_EVENT_SUSPEND_COMMAND {
+            ushort sound;
+            ushort bank;
+            float fadeTime;
+        }EVENT_SUSPEND_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_RESUME:
+        Assert(commandSize == 8);
+        struct CONFIG_EVENT_RESUME_COMMAND {
+            ushort sound;
+            ushort bank;
+            float fadeTime;
+        }RESUME_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_CATEGORY_SUSPEND:
+        Assert(commandSize == 12);
+       struct CONFIG_EVENT_CATEGORY_SUSPEND_COMMAND{
+            float fadeTime;
+            ubyte categoryNumber;
+            ubyte reserved[3];
+            uint reserved2;
+        }CATEGORY_SUSPEND_COMMAND<open=true>;
+        break;
+      case CONFIG_EVENT_COMMAND_CATEGORY_RESUME: 
+        Assert(commandSize == 12);
+        struct CONFIG_EVENT_CATEGORY_RESUME_COMMAND{
+            float fadeTime;
+            ubyte categoryNumber;
+            ubyte reserved[3];
+            uint reserved2;
+        }CATEGORY_RESUME_COMMAND<open=true>;
+        break;
+      default:
+        Assert(0);
+        break;
+  }
+}CONFIG_EVENT_COMMAND_HEADER <open=true>;
+
+//section reads
+typedef struct (CONFIGCHUNKTABLEELEMENT &s) {
+    FSeek(s.Offset);
+    local string name<hidden=true> = s.id;
+    local int Count<hidden=true> = 0;
+    switch(s.id){
+        case "ctgr":
+            struct CONFIGCATEGORYCHUNKHEADER {
+                ubyte version;
+                ubyte reserved;
+                ushort structSize;
+                ushort numCategories;
+                Count = numCategories;
+                ushort reserved2;
+                uint reserved3[2];
+            } HEADER <open=true>;
+            break;
+        case "bus ":
+            struct CONFIGBUSCHUNKHEADER{
+                ubyte version;
+                ubyte reserved;
+                ushort structSize;
+                ushort numBusses;
+                Count = numBusses;
+                ushort reserved2;
+                uint reserved3[2];
+            } HEADER <open=true>;
+            break;
+        case "mcr ":
+            struct CONFIGMACROCHUNKHEADER{
+                 ubyte version;
+                 ubyte reserved;
+                 ushort structSize;
+                 ushort numMacros;
+                 Count = numMacros;
+                 ushort reserved2;
+                 uint reserved3[2];
+            } HEADER <open=true>;
+            break;
+        case "epsp":
+            struct CONFIGEFFECTPRESETPACKCHUNKHEADER
+            {
+              ubyte version;
+              ubyte reserved;
+              ushort structSize;
+              ushort numPacks;
+              Count = numPacks;
+              ushort reserved2;
+              uint reserved3[2];
+            } HEADER <open=true>;
+            break;
+        case "eps ":
+            struct CONFIGEFFECTPRESETCHUNKHEADER{
+                ubyte version;
+                ubyte reserved;
+                ushort structSize;
+                ushort numEffects;
+                Count = numEffects;
+                ushort reserved2;
+                uint reserved3[2];
+            } HEADER <open=true>;
+            break;
+        case "cruv":
+            struct CONFIGCURVECHUNKHEADER {
+                ubyte version;
+                ubyte reserved;
+                ushort structSize;
+                ushort numCurves;
+                Count = numCurves;
+                ushort reserved2;
+                uint reserved3[2];
+            } HEADER <open=true>;
+            break;
+        case "expr":
+            struct CONFIGEXTERNALPARAMETERCHUNKHEADER{
+                ubyte version;
+                ubyte reserved;
+                ushort structSize;
+                ushort numExternalParams;
+                Count = numExternalParams;
+                ushort reserved2;
+                uint reserved3[2];
+            } HEADER <open=true>;
+            break;
+        case "hcam":
+            struct CONFIGHCAMXSETTINGS {
+                ubyte version;
+                ubyte maxInputs;
+                ushort structSize;
+                uint sampleRate;
+                ubyte enable;
+                ubyte reserved[3];
+                uint reserved2;
+            } HEADER <open=true>;
+            break;
+        case "evt ":
+            struct CONFIG_EVENT_CHUNK_HEADER
+            {
+              ubyte version;
+              ubyte reserved;
+              ushort structSize;
+              ushort numEvents;
+              Count = numEvents;
+              ushort reserved2;
+              uint reserved3[2];
+            } HEADER <open=true>;
+            break;
+        case "ctgl":  
+            struct CONFIGCATEGORYLAYERCHUNKHEADER
+            {
+              ubyte version;
+              ubyte reserved;
+              ushort structSize;
+              ushort numLayers;
+              Count = numLayers;
+              ushort reserved2;
+              unsigned int reserved3[2];
+            } HEADER <open=true>;
+            break;
+        default:
+            ubyte version;
+            ubyte reserved;
+            short structSize;
+            ushort count;
+            Count = count;
+            ushort reserved2;
+            unsigned int reserved3[2];
+            break;
+    }           
+    local int z<hidden=true> = 0;
+    local int test<hidden=true> = 0;
+    if(Count){
+        int loc[Count];
+        for(z=0;z<Count;z++){
+            FSeek(loc[z] + s.Offset);
+            switch(s.id){                
+                case ("ctgr"): //Category
+                    test = ReadByte();
+                    if(test == 1){
+                        struct CONFIGCATEGORY_V1 {
+                            ubyte version;
+                            ubyte number;
+                            ushort structSize;
+                            short maxSounds;
+                            ushort reserved2;
+                            uint reserved3[2];
+                            char name[16];
+                        }CATEGORY <read=CTGRName>;
+                    } else {
+                        struct CONFIGCATEGORY {
+                            ubyte version;
+                            ubyte number;
+                            ushort structSize;
+                            short maxSounds;
+                            ubyte strLen;
+                            ubyte reserved1;
+                            uint reserved2[2];
+                            char name[strLen];
+                            AlignS(16);
+                        } CATEGORY <read=CTGRName>;
+                    }
+                    break;
+                case ("bus "): //Bus
+                    struct BUS_Read {
+                        test = ReadByte();
+                        if(test == 1){
+                            struct CONFIGBUS_V1
+                            {
+                                ubyte version;
+                                ubyte number;
+                                ushort structSize;
+                                char output;
+                                ubyte numEffects;
+                                char sends[4];
+                                char numSends;
+                                ubyte reserved;
+                                float volume;
+                                float sendVolumes[4];
+                            } BUS<open=true>;
+                            char name[16];
+                        } else {
+                            struct CONFIGBUS {
+                                ubyte version;
+                                ubyte number;
+                                ushort structSize;
+                                ubyte output;
+                                ubyte numEffects;
+                                char sends[4];
+                                char numSends;
+                                ubyte namelen;
+                                float volume;
+                                float sendVolumes[4];
+                            }BUS<open=true>;
+                            char name[BUS.namelen];
+                            AlignS(16);
+                        }
+                        if(BUS.numEffects){
+                            uint busLoc[BUS.numEffects];
+                            Align(16);
+                            if(BUS.numEffects){
+                                struct CONFIGBUSEFFECTPRESETHEADER {
+                                    ubyte version;
+                                    EFFECT_TYPES type;
+                                    ushort structSize;
+                                    ubyte numPresets;
+                                    ubyte presetVersion;
+                                    ubyte reserved[10];
+                                } BUSEFFECTPRESET[BUS.numEffects]<open=true>;
+                            }
+                        }
+                    } BUSData <read=BUSName>;
+                    break;
+                case ("mcr "): //Macro
+                    struct CONFIGMACROHEADER {
+                        ubyte version;
+                        ubyte number;
+                        ushort structSize;
+                        uint reserved3[3];
+                        local int mm<hidden=true> = 1;
+                        do {
+                            CONFIGMACROCOMMANDHEADER MCDATA<open=true>;
+                            mm = MCDATA.clear;
+                        } while (mm!=0);
+                    } MACROHEADER <open=true>;
+                    break;
+                case ("epsp"): //EffectPresetPack
+                    test = ReadByte();
+                    if(test == 2){
+                        struct CONFIGEFFECTPRESETPACKHEADER_V2
+                        {
+                            ubyte version;
+                            ubyte reserved;
+                            ushort structSize;
+                            ushort numElements;
+                            ushort numBusElements;
+                            ushort busElementsOffset;
+                            ushort reserve;
+                            uint reserved2;
+                            char name[16];
+                            AlignS(16);
+                            if(numElements){
+                                CONFIGEFFECTPRESETPACKELEMENT PRESETPACKELEMENT[numElements] <open=true>;
+                            }
+                            if(numBusElements){
+                                CONFIGEFFECTPRESETPACKBUSELEMENT PRESETPACKBUSELEMENT[numBusElements] <open=true>;
+                            }
+                        } EFFECTPRESETPACK<open=true, read=PRESETPACKStr>;
+                    } else {
+                        struct CONFIGEFFECTPRESETPACKHEADER{
+                            ubyte version;
+                            ubyte namelen;
+                            ushort structSize;
+                            ushort numElements;
+                            ushort numBusElements;
+                            ushort busElementsOffset;
+                            ushort reserve;
+                            uint reserved2;
+                            char name[namelen];
+                            AlignS(16);
+                            if(numElements){
+                                CONFIGEFFECTPRESETPACKELEMENT PRESETPACKELEMENT[numElements] <open=true>;
+                            }
+                            if(numBusElements){
+                                CONFIGEFFECTPRESETPACKBUSELEMENT PRESETPACKBUSELEMENT[numBusElements] <open=true>;
+                            }
+                        } EFFECTPRESETPACK<open=true, read=PRESETPACKStr>;
+                    }
+                    break;
+                case ("eps "): //EffectPreset
+                    struct CONFIGBUSEFFECTHEADER
+                    {
+                      ubyte version;
+                      EFFECT_TYPES type;
+                      ushort structSize;
+                      ubyte numPresets;
+                      ubyte reserved[11];
+                      switch (type) {
+                          case EFFECT_NONE:
+                            Assert(numPresets == 0);
+                            break;
+                          case EFFECT_REVERB:
+                            struct CONFIGBUSEFFECTCOMMONREVERB
+                            {
+                              float depth;
+                              float reverbRoomsize;
+                              float wet;
+                              float dry;
+                              float reverbTime;
+                              float damping;
+                              float diffusion;
+                              float reflectionVolume;
+                              float reverbVolume;
+                              float reverbPredelay;
+                              int reverbEQLowFilterType;
+                              float reverbEQLowFilterFreq;
+                              float reverbEQLowFilterInvQ;
+                              float reverbEQLowFilterGain;
+                              int reverbEQMidLowFilterType;
+                              float reverbEQMidLowFilterFreq;
+                              float reverbEQMidLowFilterInvQ;
+                              float reverbEQMidLowFilterGain;
+                              int reverbEQMiddleFilterType;
+                              float reverbEQMiddleFilterFreq;
+                              float reverbEQMiddleFilterInvQ;
+                              float reverbEQMiddleFilterGain;
+                              int reverbEQMidHighFilterType;
+                              float reverbEQMidHighFilterFreq;
+                              float reverbEQMidHighFilterInvQ;
+                              float reverbEQMidHighFilterGain;
+                              int reverbEQHighFilterType;
+                              float reverbEQHighFilterFreq;
+                              float reverbEQHighFilterInvQ;
+                              float reverbEQHighFilterGain;
+                              int reflectionRoomType;
+                              float scatterGain;
+                            } COMMONREVERB[numPresets]<open=true>;
+                            break;
+                          case EFFECT_COMPRESSOR:
+                            struct CONFIGBUSEFFECTCOMPRESSOR
+                            {
+                              float threshold;
+                              float ratio;
+                              float inputGain;
+                              float postGain;
+                              float attackCoeff;
+                              float releaseCoeff;
+                              int sideChainInputBus;
+                              int sideChainInputSlot;
+                            }COMPRESSOR[numPresets]<open=true>;
+                            break;
+                          case EFFECT_FILTER:
+                            struct CONFIGBUSEFFECTFILTER
+                            {
+                              int filterType;
+                              float frequency;
+                              float q;
+                              float gain;
+                            }BUSEFFECTFILTER[numPresets]<open=true>;
+                            break;
+                          case EFFECT_SIDECHAIN_INPUT:
+                            struct CONFIGBUSEFFECTSIDECHAININPUT
+                            {
+                              float sendLevel;
+                              int reserved[3];
+                            }SIDECHAININPUT[numPresets]<open=true>;
+                            break;
+                          case EFFECT_SIMPLE_FILTER:
+                            struct CONFIGBUSEFFECTSIMPLEFILTER
+                            {
+                              int filterType;
+                              float frequency;
+                              int reserved[2];
+                            }SIMPLEFILTER[numPresets]<open=true>;
+                            break;
+                          case EFFECT_FLANGER:
+                            //doesn't apear to have any data
+                            break;
+                          case EFFECT_GRANULAR_PITCHSHIFT:
+                            //doesn't apear to have any data
+                            break;
+                          case EFFECT_HILBERT_FILTER:
+                            //doesn't apear to have any data
+                            break;
+                          case EFFECT_FOURIER_ANALYSIS:
+                            struct CONFIGBUSEFFECT_FOURIER_ANALYSIS {
+                                uint blockSize;
+                                uint updateRate;
+                                int reserved[2];
+                            } FOURIER_ANALYSIS[numPresets]<open=true>;
+                            break;
+                          case EFFECT_BUILD_REVERB:
+                            struct CONFIGBUSEFFECTBUILDREVERB
+                            {
+                              float depth;
+                              float dry;
+                              float wet;
+                              float early;
+                              float reverb;
+                              float reverbDelay;
+                              float reverbTime;
+                              float reverbLPF;
+                            }BUILDREVERB[numPresets]<open=true>;
+                            break;
+                          case NUM_EFFECTS:
+                            //doesn't apear to have any data
+                            break;
+                          default:
+                            break;
+                      }
+                    } EffectPreset <open=true>;
+                    break;
+                case ("curv"): //Curve
+                    struct CONFIGCURVEHEADER {
+                        ubyte version;
+                        ubyte reserved;
+                        ushort structSize;
+                        ushort numPoints;
+                        CONFIG_CURVE_MODE_TYPES mode;
+                        ubyte reserved2;
+                        uint reserved3[2];
+                        if(numPoints){
+                            struct CONFIGCURVEPOINT
+                            {
+                              ubyte version;
+                              ubyte structSize;
+                              CONFIG_CURVE_POINT_TYPES type;
+                              ubyte reserved;
+                              float x;
+                              float y;
+                              uint reserved2;
+                            } CURVEPOINT[numPoints] <open=true>;
+                        }
+                    } CURVECHUNK <open=true>;
+                    break;
+                case ("expr"): //ExternalParameter
+                    struct CONFIGEXTERNALPARAMETER
+                    {
+                      ubyte version;
+                      ubyte namelen;
+                      ushort structSize;
+                      CONFIG_EXTERNALPARAMETER_SLOPE_TYPES slopeType;
+                      ubyte reserved[3];
+                      int reserved2[2];
+                      float up;
+                      float down;
+                    }EXTERNALPARAMETER[numExternalParams] <open=true>;
+                    break;
+                case ("hcam"): //HCAMX
+                    //see above
+                    break;
+                case ("evt "): //Event
+                     struct CONFIG_EVENT_HEADER {
+                        ubyte version;
+                        ubyte number;
+                        ushort structSize;
+                        ubyte namelen;
+                        ubyte reserved[3];
+                        uint totalCommandSize;
+                        uint reserved2;
+                        char name[namelen];
+                        AlignS(16);
+                        local int ee<hidden=true> = 1;
+                        do {
+                            CONFIG_EVENT_COMMAND_HEADER EVTDATA<open=true>;
+                            ee = EVTDATA.clear;
+                        } while (ee!=0);
+                    } EVENT_HEADER <open=true, read=EVTName>;
+                    break;
+                case ("ctgl"): //CategoryLayer
+                    struct CONFIGCATEGORYLAYER {
+                        ubyte version;
+                        ubyte number;
+                        ushort structSize;
+                        ubyte namelen;
+                        ubyte reserved1[3];
+                        uint reserved2[2];
+                        char name[namelen];
+                    } CATEGORYLAYER <open=true, read=CTGLName>;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+} SectionData <bgcolor=0x00FF00>;
+
+//file headers
+struct CONFIGFILEHEADER{
+    char id[4]<name="scnf", bgcolor=0x0000FF>;
+    Assert(id =="scnf");
+    byte version;
+    byte reserved;
+    ushort structSize;
+    ubyte numChunks;
+    ubyte reserved2;
+    ushort reserved3;
+    int fileSize;
+    local int i<hidden=true> = 0;
+    for(i=0;i<numChunks;i++){
+        CONFIGCHUNKTABLEELEMENT Section(i)<read=secrName, bgcolor=bcolors[i]>;
+    }
+    for(i=0;i<numChunks;i++){
+        SectionData SecData(Section[i])<read=secName, bgcolor=bcolors[i]>;
+    }
+} CONFIGFILE<open=true>;
+
+//entry name display reads
+string secName(SectionData &t) {
+    return t.name;
+};
+
+string secrName(CONFIGCHUNKTABLEELEMENT &t) {
+    return t.id;
+};
+
+string PRESETPACKStr(CONFIGEFFECTPRESETPACKHEADER &t) {
+    return t.name;
+};
+
+string BUSName(BUS_Read &t) {
+    return t.name;
+};
+
+string CTGRName(CONFIGCATEGORY &t) {
+    return t.name;
+};
+
+string EVTName(CONFIG_EVENT_HEADER &t) {
+    return t.name;
+};
+
+string CTGLName(CONFIGCATEGORYLAYER &t) {
+    return t.name;
+};
