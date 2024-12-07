@@ -1,0 +1,232 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Final Fantasy XV AI Animation Constraint Data (Protocol Buffers Message) 
+//   Authors: Mongo
+//   Version: 1.0.0
+//   Purpose: Unknown
+//  Category: Animation
+// File Mask: *.acd
+//  ID Bytes: N/A 
+//   History: 
+//------------------------------------------------
+
+enum<byte> WireType{
+    VARINT = 0x0,
+    I64,
+    LEN,
+    SGROUP,
+    EGROUP,
+    I32
+};
+
+uint32 DecodeVarint(int64 pos) {
+    local int64 cur_pos = pos + 1;
+    local uint32 result = ReadByte(pos) & 0x7F;
+    local byte current = ReadByte(pos);
+    
+    if(current < 0x0) {
+        current = ReadByte(cur_pos);
+        result |= (current & 0x7F) << 7;
+        cur_pos += 1;
+        if(current < 0x0) {
+            current = ReadByte(cur_pos);
+            result |= (current & 0x7F) << 14;
+            cur_pos += 1;
+            if(current < 0x0) {
+                current = ReadByte(cur_pos);
+                result |= (current & 0x7F) << 21;
+                cur_pos += 1;
+                if(current < 0x0) {
+                    current = ReadByte(cur_pos);
+                    result |= (current & 0x7F) << 28;
+                    cur_pos += 1;
+                    if((current & 0x80) != 0) {
+                        local int64 i = 0;
+                        while(true) {
+                            if(++i >= 5)
+                                return 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+};
+
+typedef struct tagVarint {
+    local uint64 data_size = 1;
+    local int64 cur_pos = FTell();
+    local uint32 value = DecodeVarint(cur_pos);
+
+    while(ReadByte(cur_pos) & 0x80 && !FEof()) {
+        data_size++;
+        cur_pos++;
+    }
+
+    ubyte data[data_size];
+} Varint<read=this.value, fgcolor=0x00FF00>;
+
+typedef Varint ProtoTag<fgcolor=0xFF00FF>;
+
+typedef struct tagProtoI32Field {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == I32);
+
+    float data;
+} ProtoI32Field<read=this.data>;
+
+typedef struct tagVectorMessage {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == LEN);
+
+    Varint length;
+    local int64 end_point<hidden=true> = FTell() + length.value;
+
+   if(FTell() < end_point) {
+       ProtoI32Field x_; 
+   }
+   if(FTell() < end_point) {
+       ProtoI32Field y_; 
+   }
+   if(FTell() < end_point) {
+       ProtoI32Field z_; 
+   }
+   if(FTell() < end_point) {
+       ProtoI32Field w_; 
+   }
+} VectorMessage;
+
+typedef struct tagPieceWiseLinearFunctionMessage {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == LEN);
+
+    Varint length;
+    local int64 end_point<hidden=true> = FTell() + length.value;
+    while(!FEof() && FTell() < end_point) {
+        VectorMessage interpolationpoints_<bgcolor=0x000000>;
+    }
+} PieceWiseLinearFunctionMessage;
+
+typedef struct tagLinearFunctionMessage {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == LEN);
+
+    Varint length;
+    local int64 end_point<hidden=true> = FTell() + length.value;
+    ProtoI32Field slope_;
+    ProtoI32Field intersection_;
+} LinearFunctionMessage;
+
+typedef struct tagTurnRadiusBySpeedMessage {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == LEN);
+
+    Varint length;
+    local int64 end_point<hidden=true> = FTell() + length.value;
+
+    if(!FEof() && FTell() < end_point && (DecodeVarint(FTell()) >> 0x3 == 0x4))
+        PieceWiseLinearFunctionMessage mapping_; 
+
+    // Haven't found occurences of these yet, so they need to be verified
+    if(!FEof() && FTell() < end_point && (DecodeVarint(FTell()) >> 0x3 == 0x1))
+        LinearFunctionMessage upper_;
+    if(!FEof() && FTell() < end_point && (DecodeVarint(FTell()) >> 0x3 == 0x2))
+        LinearFunctionMessage lower_;
+    if(!FEof() && FTell() < end_point && (DecodeVarint(FTell()) >> 0x3 == 0x3))
+        ProtoI32Field boundary_;
+} TurnRadiusBySpeedMessage;
+
+typedef struct tagBoundedStoppingFunctionMessage {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == LEN);
+
+    Varint length;
+    local int64 end_point<hidden=true> = FTell() + length.value;
+    ProtoI32Field minspeed_;
+    ProtoI32Field maxspeed_;
+    PieceWiseLinearFunctionMessage mapping_<bgcolor=0x008000>;
+} BoundedStoppingFunctionMessage;
+
+typedef struct tagStoppingModelMessage {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == LEN);
+
+    Varint length;
+    local int64 end_point<hidden=true> = FTell() + length.value;
+    while(!FEof() && FTell() < end_point) {
+        BoundedStoppingFunctionMessage functions_<bgcolor=0x00C000>;
+    }
+} StoppingModelMessage;
+
+typedef struct tagSpeedByDesiredSpeedAtDistanceMessage {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == LEN);
+
+    Varint length;
+    local int64 end_point<hidden=true> = FTell() + length.value;
+    StoppingModelMessage stoppingdistancebyspeed_<bgcolor=0x00E000>;
+    while(!FEof() && FTell() < end_point) {
+        ProtoI32Field decelerationfunctionbyspeed_;
+    }
+} SpeedByDesiredSpeedAtDistanceMessage;
+
+typedef struct tagOverShootOnAngleMessage {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == LEN);
+
+    Varint length;
+    local int64 end_point<hidden=true> = FTell() + length.value;
+    ProtoI32Field cosangle_;
+    PieceWiseLinearFunctionMessage mapping_<bgcolor=0x000080>;
+} OverShootOnAngleMessage;
+
+typedef struct tagOverShootBySpeedMessage {
+    ProtoTag tag;
+    local WireType type = tag.value & 0x7;
+    local uint64 key = tag.value >> 0x3;
+    Assert(type == LEN);
+
+    Varint length;
+    local int64 end_point<hidden=true> = FTell() + length.value;
+    while(!FEof() && FTell() < end_point) {
+        OverShootOnAngleMessage functionsbyangle_<bgcolor=0x0000E0>;
+    }
+} OverShootBySpeedMessage;
+
+struct AnimAiConstraintsMessage;
+typedef struct tagAnimAiConstraintsMessage {
+    if(!FEof() && (DecodeVarint(FTell()) >> 0x3 == 0x1))
+        ProtoI32Field minspeed_<bgcolor=0xC0FF00>;
+    if(!FEof() && (DecodeVarint(FTell()) >> 0x3 == 0x2))
+        ProtoI32Field maxspeed_<bgcolor=0x00FFC0>;
+    if(!FEof() && (DecodeVarint(FTell()) >> 0x3 == 0x3))
+        TurnRadiusBySpeedMessage turnradiusbyspeed_<bgcolor=0xFF0000>;
+    if(!FEof() && (DecodeVarint(FTell()) >> 0x3 == 0x4))
+        SpeedByDesiredSpeedAtDistanceMessage speedbydesiredspeedatdistance_<bgcolor=0x00FF00>;
+    if(!FEof() && (DecodeVarint(FTell()) >> 0x3 == 0x5))
+        OverShootBySpeedMessage overshoot_<bgcolor=0x0000FF>;
+    if(!FEof() && (DecodeVarint(FTell()) >> 0x3 == 0x6))
+        AnimAiConstraintsMessage additionalconstraint_;
+} AnimAiConstraintsMessage;
+
+AnimAiConstraintsMessage msg;
