@@ -1,0 +1,1348 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Final Fantasy XV Animation Graph
+//   Authors: Can't come up with a dumb name rn
+//   Version: 1.0.0
+//   Purpose: Stores data used by FFXV to handle animation behavior
+//  Category: 
+// File Mask: *.anmgph
+//  ID Bytes: N/A
+//   History: Episode Duscae demo anmgph used old UDS format which was replaced
+//            with a FlatBuffers schema this template applies to.
+//------------------------------------------------
+
+typedef int16 offset16<fgcolor=cRed, format=hex>;
+typedef int32 offset32<fgcolor=cRed, format=hex, hidden=true>;
+
+typedef int16 size16<fgcolor=cGreen, format=hex>;
+typedef int32 size32<fgcolor=cGreen, format=hex>;
+typedef int64 size64<fgcolor=cGreen, format=hex>;
+
+typedef int64 unk64<fgcolor=0x0677D9, format=hex>;
+typedef int32 unk32<fgcolor=0x0677D9, format=hex>;
+typedef int16 unk16<fgcolor=0x0677D9, format=hex>;
+
+typedef int32 itr<hidden=true>;
+
+typedef uint32 FixId<format=hex, fgcolor=0x88FF55>;
+
+typedef enum LmEPackageType{
+    kUnknown = 0x0,
+    kAnimClip = 0x1,
+    kSelection = 0x2,
+    kTuningSet = 0x3,
+} PackageType<fgcolor=0xFFFF00>;
+
+typedef enum LmEAnimationSelectionType{
+    kLocomotionSet = 0,
+    kRelativeRootSingleParamBlendSet = 0x1,
+    kSingleParamBlendSet = 0x2,
+    kAdditiveBlend = 0x3,
+    kLuminousWalker = 0x4,
+    kStateMachine = 0x5,
+    kOverlay = 0x6,
+    kAutoJumpDetection = 0x7,
+    kAutoJumpPlayback = 0x8,
+    kShiftRotationCenterOfLocomotion = 0x9,
+    kSideTiltBiped = 0xA,
+    kConditionalOverlay = 0xB,
+    kStart_User = 0x1000,
+} AnimationSelectionType;
+
+typedef enum LmEStateMachineWorkLevel{
+    kNone = 0x0,
+    kMaster = 0x1,
+    kSubsidiary = 0x2,
+} StateMachineWorkLevel;
+
+typedef enum EFunctionId
+{
+  None = 0x0,
+  Base_Pi_0 = 0x100,
+  Base_Abs_1 = 0x201,
+  Base_Acos_1 = 0x301,
+  Base_Acosh_1 = 0x401,
+  Base_Asin_1 = 0x501,
+  Base_Asinh_1 = 0x601,
+  Base_Atan_1 = 0x701,
+  Base_Atanh_1 = 0x801,
+  Base_Ceiling_1 = 0x901,
+  Base_Cos_1 = 0xA01,
+  Base_Cosh_1 = 0xB01,
+  Base_Degrees_1 = 0xC01,
+  Base_Determ_1 = 0xD01,
+  Base_Exp_1 = 0xE01,
+  Base_Floor_1 = 0xF01,
+  Base_Inverse_1 = 0x1001,
+  Base_Length_1 = 0x1101,
+  Base_Length2_1 = 0x1201,
+  Base_Ln_1 = 0x1301,
+  Base_Log10_1 = 0x1401,
+  Base_Negate_1 = 0x1501,
+  Base_Radians_1 = 0x1601,
+  Base_Round_1 = 0x1701,
+  Base_Sign_1 = 0x1801,
+  Base_Sin_1 = 0x1901,
+  Base_Sinh_1 = 0x1A01,
+  Base_Sqrt_1 = 0x1B01,
+  Base_Tan_1 = 0x1C01,
+  Base_Tanh_1 = 0x1D01,
+  Base_Atan2_2 = 0x1E02,
+  Base_Crossproduct_2 = 0x1F02,
+  Base_Divide_2 = 0x2002,
+  Base_Dotproduct_2 = 0x2102,
+  Base_Mod_2 = 0x2202,
+  Base_Power_2 = 0x2302,
+  Base_Rand_2 = 0x2402,
+  Base_Subtract_2 = 0x2502,
+  Base_Clamp_3 = 0x2603,
+  Base_Add_N = 0x27FF,
+  Base_Max_N = 0x28FF,
+  Base_Min_N = 0x29FF,
+  Base_Multiply_N = 0x2AFF,
+  Base_Distance_2 = 0x2B02,
+  Base_AngleBetween_2 = 0x2C02,
+  Base_ReRange_1 = 0x2D01,
+  Base_FloatsToVector3_2 = 0x2E02,
+  Base_Vector3Angle_2 = 0x2F02,
+  Base_Vector3Distance_2 = 0x3002,
+  Base_Vector3OneInputArithmetic_1 = 0x3101,
+  Base_ToFloat_1 = 0x3201,
+  Base_ToInt_1 = 0x3301,
+  Float_Pi_0 = 0x10100,
+  Float_Abs_1 = 0x10201,
+  Float_Acos_1 = 0x10301,
+  Float_Acosh_1 = 0x10401,
+  Float_Asin_1 = 0x10501,
+  Float_Asinh_1 = 0x10601,
+  Float_Atan_1 = 0x10701,
+  Float_Atanh_1 = 0x10801,
+  Float_Ceiling_1 = 0x10901,
+  Float_Cos_1 = 0x10A01,
+  Float_Cosh_1 = 0x10B01,
+  Float_Degrees_1 = 0x10C01,
+  Float_Exp_1 = 0x10E01,
+  Float_Floor_1 = 0x10F01,
+  Float_Ln_1 = 0x11301,
+  Float_Log10_1 = 0x11401,
+  Float_Negate_1 = 0x11501,
+  Float_Radians_1 = 0x11601,
+  Float_Round_1 = 0x11701,
+  Float_Sign_1 = 0x11801,
+  Float_Sin_1 = 0x11901,
+  Float_Sinh_1 = 0x11A01,
+  Float_Sqrt_1 = 0x11B01,
+  Float_Tan_1 = 0x11C01,
+  Float_Tanh_1 = 0x11D01,
+  Float_Atan2_2 = 0x11E02,
+  Float_Divide_2 = 0x12002,
+  Float_Power_2 = 0x12302,
+  Float_Rand_2 = 0x12402,
+  Float_Subtract_2 = 0x12502,
+  Float_Clamp_3 = 0x12603,
+  Float_Add_2 = 0x12702,
+  Float_Add_3 = 0x12703,
+  Float_Add_4 = 0x12704,
+  Float_Add_5 = 0x12705,
+  Float_Add_6 = 0x12706,
+  Float_Add_7 = 0x12707,
+  Float_Add_8 = 0x12708,
+  Float_Add_9 = 0x12709,
+  Float_Add_10 = 0x1270A,
+  Float_Add_11 = 0x1270B,
+  Float_Add_12 = 0x1270C,
+  Float_Add_13 = 0x1270D,
+  Float_Add_14 = 0x1270E,
+  Float_Add_15 = 0x1270F,
+  Float_Add_16 = 0x12710,
+  Float_Max_2 = 0x12802,
+  Float_Max_3 = 0x12803,
+  Float_Max_4 = 0x12804,
+  Float_Max_5 = 0x12805,
+  Float_Max_6 = 0x12806,
+  Float_Max_7 = 0x12807,
+  Float_Max_8 = 0x12808,
+  Float_Max_9 = 0x12809,
+  Float_Max_10 = 0x1280A,
+  Float_Max_11 = 0x1280B,
+  Float_Max_12 = 0x1280C,
+  Float_Max_13 = 0x1280D,
+  Float_Max_14 = 0x1280E,
+  Float_Max_15 = 0x1280F,
+  Float_Max_16 = 0x12810,
+  Float_Min_2 = 0x12902,
+  Float_Min_3 = 0x12903,
+  Float_Min_4 = 0x12904,
+  Float_Min_5 = 0x12905,
+  Float_Min_6 = 0x12906,
+  Float_Min_7 = 0x12907,
+  Float_Min_8 = 0x12908,
+  Float_Min_9 = 0x12909,
+  Float_Min_10 = 0x1290A,
+  Float_Min_11 = 0x1290B,
+  Float_Min_12 = 0x1290C,
+  Float_Min_13 = 0x1290D,
+  Float_Min_14 = 0x1290E,
+  Float_Min_15 = 0x1290F,
+  Float_Min_16 = 0x12910,
+  Float_Multiply_2 = 0x12A02,
+  Float_Multiply_3 = 0x12A03,
+  Float_Multiply_4 = 0x12A04,
+  Float_Multiply_5 = 0x12A05,
+  Float_Multiply_6 = 0x12A06,
+  Float_Multiply_7 = 0x12A07,
+  Float_Multiply_8 = 0x12A08,
+  Float_Multiply_9 = 0x12A09,
+  Float_Multiply_10 = 0x12A0A,
+  Float_Multiply_11 = 0x12A0B,
+  Float_Multiply_12 = 0x12A0C,
+  Float_Multiply_13 = 0x12A0D,
+  Float_Multiply_14 = 0x12A0E,
+  Float_Multiply_15 = 0x12A0F,
+  Float_Multiply_16 = 0x12A10,
+  Float_ReRange_1 = 0x12D01,
+  Float_FloatsToVector3_2 = 0x12E02,
+  Float_Vector3Angle_2 = 0x12F02,
+  Float_Vector3Distance_2 = 0x13002,
+  Float_Vector3OneInputArithmetic_1 = 0x13101,
+  Float_ToInt_1 = 0x13301,
+  Int_Abs_1 = 0x20201,
+  Int_Negate_1 = 0x21501,
+  Int_Divide_2 = 0x22002,
+  Int_Mod_2 = 0x22202,
+  Int_Power_2 = 0x22302,
+  Int_Rand_2 = 0x22402,
+  Int_Subtract_2 = 0x22502,
+  Int_Clamp_3 = 0x22603,
+  Int_Add_2 = 0x22702,
+  Int_Add_3 = 0x22703,
+  Int_Add_4 = 0x22704,
+  Int_Add_5 = 0x22705,
+  Int_Add_6 = 0x22706,
+  Int_Add_7 = 0x22707,
+  Int_Add_8 = 0x22708,
+  Int_Add_9 = 0x22709,
+  Int_Add_10 = 0x2270A,
+  Int_Add_11 = 0x2270B,
+  Int_Add_12 = 0x2270C,
+  Int_Add_13 = 0x2270D,
+  Int_Add_14 = 0x2270E,
+  Int_Add_15 = 0x2270F,
+  Int_Add_16 = 0x22710,
+  Int_Max_2 = 0x22802,
+  Int_Max_3 = 0x22803,
+  Int_Max_4 = 0x22804,
+  Int_Max_5 = 0x22805,
+  Int_Max_6 = 0x22806,
+  Int_Max_7 = 0x22807,
+  Int_Max_8 = 0x22808,
+  Int_Max_9 = 0x22809,
+  Int_Max_10 = 0x2280A,
+  Int_Max_11 = 0x2280B,
+  Int_Max_12 = 0x2280C,
+  Int_Max_13 = 0x2280D,
+  Int_Max_14 = 0x2280E,
+  Int_Max_15 = 0x2280F,
+  Int_Max_16 = 0x22810,
+  Int_Min_2 = 0x22902,
+  Int_Min_3 = 0x22903,
+  Int_Min_4 = 0x22904,
+  Int_Min_5 = 0x22905,
+  Int_Min_6 = 0x22906,
+  Int_Min_7 = 0x22907,
+  Int_Min_8 = 0x22908,
+  Int_Min_9 = 0x22909,
+  Int_Min_10 = 0x2290A,
+  Int_Min_11 = 0x2290B,
+  Int_Min_12 = 0x2290C,
+  Int_Min_13 = 0x2290D,
+  Int_Min_14 = 0x2290E,
+  Int_Min_15 = 0x2290F,
+  Int_Min_16 = 0x22910,
+  Int_Multiply_2 = 0x22A02,
+  Int_Multiply_3 = 0x22A03,
+  Int_Multiply_4 = 0x22A04,
+  Int_Multiply_5 = 0x22A05,
+  Int_Multiply_6 = 0x22A06,
+  Int_Multiply_7 = 0x22A07,
+  Int_Multiply_8 = 0x22A08,
+  Int_Multiply_9 = 0x22A09,
+  Int_Multiply_10 = 0x22A0A,
+  Int_Multiply_11 = 0x22A0B,
+  Int_Multiply_12 = 0x22A0C,
+  Int_Multiply_13 = 0x22A0D,
+  Int_Multiply_14 = 0x22A0E,
+  Int_Multiply_15 = 0x22A0F,
+  Int_Multiply_16 = 0x22A10,
+  Int_ReRange_1 = 0x22D01,
+  Int_FloatsToVector3_2 = 0x22E02,
+  Int_Vector3Angle_2 = 0x22F02,
+  Int_Vector3Distance_2 = 0x23002,
+  Int_Vector3OneInputArithmetic_1 = 0x23101,
+  Int_ToFloat_1 = 0x23201,
+  Vector2_Abs_1 = 0x40201,
+  Vector2_Length_1 = 0x41101,
+  Vector2_Length2_1 = 0x41201,
+  Vector2_Negate_1 = 0x41501,
+  Vector2_Crossproduct_2 = 0x41F02,
+  Vector2_Divide_2 = 0x42002,
+  Vector2_Dotproduct_2 = 0x42102,
+  Vector2_Rand_2 = 0x42402,
+  Vector2_Subtract_2 = 0x42502,
+  Vector2_Clamp_3 = 0x42603,
+  Vector2_Add_2 = 0x42702,
+  Vector2_Add_3 = 0x42703,
+  Vector2_Add_4 = 0x42704,
+  Vector2_Add_5 = 0x42705,
+  Vector2_Add_6 = 0x42706,
+  Vector2_Add_7 = 0x42707,
+  Vector2_Add_8 = 0x42708,
+  Vector2_Add_9 = 0x42709,
+  Vector2_Add_10 = 0x4270A,
+  Vector2_Add_11 = 0x4270B,
+  Vector2_Add_12 = 0x4270C,
+  Vector2_Add_13 = 0x4270D,
+  Vector2_Add_14 = 0x4270E,
+  Vector2_Add_15 = 0x4270F,
+  Vector2_Add_16 = 0x42710,
+  Vector2_Multiply_2 = 0x42A02,
+  Vector2_Multiply_3 = 0x42A03,
+  Vector2_Multiply_4 = 0x42A04,
+  Vector2_Multiply_5 = 0x42A05,
+  Vector2_Multiply_6 = 0x42A06,
+  Vector2_Multiply_7 = 0x42A07,
+  Vector2_Multiply_8 = 0x42A08,
+  Vector2_Multiply_9 = 0x42A09,
+  Vector2_Multiply_10 = 0x42A0A,
+  Vector2_Multiply_11 = 0x42A0B,
+  Vector2_Multiply_12 = 0x42A0C,
+  Vector2_Multiply_13 = 0x42A0D,
+  Vector2_Multiply_14 = 0x42A0E,
+  Vector2_Multiply_15 = 0x42A0F,
+  Vector2_Multiply_16 = 0x42A10,
+  Vector2_Distance_2 = 0x42B02,
+  Vector2_AngleBetween_2 = 0x42C02,
+  Vector2_ReRange_1 = 0x42D01,
+  Vector2_FloatsToVector3_2 = 0x42E02,
+  Vector2_Vector3Angle_2 = 0x42F02,
+  Vector2_Vector3Distance_2 = 0x43002,
+  Vector2_Vector3OneInputArithmetic_1 = 0x43101,
+  Vector3_Abs_1 = 0x50201,
+  Vector3_Length_1 = 0x51101,
+  Vector3_Length2_1 = 0x51201,
+  Vector3_Negate_1 = 0x51501,
+  Vector3_Crossproduct_2 = 0x51F02,
+  Vector3_Divide_2 = 0x52002,
+  Vector3_Dotproduct_2 = 0x52102,
+  Vector3_Rand_2 = 0x52402,
+  Vector3_Subtract_2 = 0x52502,
+  Vector3_Clamp_3 = 0x52603,
+  Vector3_Add_2 = 0x52702,
+  Vector3_Add_3 = 0x52703,
+  Vector3_Add_4 = 0x52704,
+  Vector3_Add_5 = 0x52705,
+  Vector3_Add_6 = 0x52706,
+  Vector3_Add_7 = 0x52707,
+  Vector3_Add_8 = 0x52708,
+  Vector3_Add_9 = 0x52709,
+  Vector3_Add_10 = 0x5270A,
+  Vector3_Add_11 = 0x5270B,
+  Vector3_Add_12 = 0x5270C,
+  Vector3_Add_13 = 0x5270D,
+  Vector3_Add_14 = 0x5270E,
+  Vector3_Add_15 = 0x5270F,
+  Vector3_Add_16 = 0x52710,
+  Vector3_Multiply_2 = 0x52A02,
+  Vector3_Multiply_3 = 0x52A03,
+  Vector3_Multiply_4 = 0x52A04,
+  Vector3_Multiply_5 = 0x52A05,
+  Vector3_Multiply_6 = 0x52A06,
+  Vector3_Multiply_7 = 0x52A07,
+  Vector3_Multiply_8 = 0x52A08,
+  Vector3_Multiply_9 = 0x52A09,
+  Vector3_Multiply_10 = 0x52A0A,
+  Vector3_Multiply_11 = 0x52A0B,
+  Vector3_Multiply_12 = 0x52A0C,
+  Vector3_Multiply_13 = 0x52A0D,
+  Vector3_Multiply_14 = 0x52A0E,
+  Vector3_Multiply_15 = 0x52A0F,
+  Vector3_Multiply_16 = 0x52A10,
+  Vector3_Distance_2 = 0x52B02,
+  Vector3_AngleBetween_2 = 0x52C02,
+  Vector3_ReRange_1 = 0x52D01,
+  Vector3_FloatsToVector3_2 = 0x52E02,
+  Vector3_Vector3Angle_2 = 0x52F02,
+  Vector3_Vector3Distance_2 = 0x53002,
+  Vector3_Vector3OneInputArithmetic_1 = 0x53101,
+  Vector4_Abs_1 = 0x60201,
+  Vector4_Length_1 = 0x61101,
+  Vector4_Length2_1 = 0x61201,
+  Vector4_Negate_1 = 0x61501,
+  Vector4_Crossproduct_2 = 0x61F02,
+  Vector4_Divide_2 = 0x62002,
+  Vector4_Dotproduct_2 = 0x62102,
+  Vector4_Rand_2 = 0x62402,
+  Vector4_Subtract_2 = 0x62502,
+  Vector4_Clamp_3 = 0x62603,
+  Vector4_Add_2 = 0x62702,
+  Vector4_Add_3 = 0x62703,
+  Vector4_Add_4 = 0x62704,
+  Vector4_Add_5 = 0x62705,
+  Vector4_Add_6 = 0x62706,
+  Vector4_Add_7 = 0x62707,
+  Vector4_Add_8 = 0x62708,
+  Vector4_Add_9 = 0x62709,
+  Vector4_Add_10 = 0x6270A,
+  Vector4_Add_11 = 0x6270B,
+  Vector4_Add_12 = 0x6270C,
+  Vector4_Add_13 = 0x6270D,
+  Vector4_Add_14 = 0x6270E,
+  Vector4_Add_15 = 0x6270F,
+  Vector4_Add_16 = 0x62710,
+  Vector4_Multiply_2 = 0x62A02,
+  Vector4_Multiply_3 = 0x62A03,
+  Vector4_Multiply_4 = 0x62A04,
+  Vector4_Multiply_5 = 0x62A05,
+  Vector4_Multiply_6 = 0x62A06,
+  Vector4_Multiply_7 = 0x62A07,
+  Vector4_Multiply_8 = 0x62A08,
+  Vector4_Multiply_9 = 0x62A09,
+  Vector4_Multiply_10 = 0x62A0A,
+  Vector4_Multiply_11 = 0x62A0B,
+  Vector4_Multiply_12 = 0x62A0C,
+  Vector4_Multiply_13 = 0x62A0D,
+  Vector4_Multiply_14 = 0x62A0E,
+  Vector4_Multiply_15 = 0x62A0F,
+  Vector4_Multiply_16 = 0x62A10,
+  Vector4_Distance_2 = 0x62B02,
+  Vector4_AngleBetween_2 = 0x62C02,
+  Vector4_ReRange_1 = 0x62D01,
+  Vector4_FloatsToVector3_2 = 0x62E02,
+  Vector4_Vector3Angle_2 = 0x62F02,
+  Vector4_Vector3Distance_2 = 0x63002,
+  Vector4_Vector3OneInputArithmetic_1 = 0x63101,
+  Quaternion_Negate_1 = 0x71501,
+  Quaternion_Divide_2 = 0x72002,
+  Quaternion_Rand_2 = 0x72402,
+  Quaternion_Multiply_2 = 0x72A02,
+  Quaternion_Multiply_3 = 0x72A03,
+  Quaternion_Multiply_4 = 0x72A04,
+  Quaternion_Multiply_5 = 0x72A05,
+  Quaternion_Multiply_6 = 0x72A06,
+  Quaternion_Multiply_7 = 0x72A07,
+  Quaternion_Multiply_8 = 0x72A08,
+  Quaternion_Multiply_9 = 0x72A09,
+  Quaternion_Multiply_10 = 0x72A0A,
+  Quaternion_Multiply_11 = 0x72A0B,
+  Quaternion_Multiply_12 = 0x72A0C,
+  Quaternion_Multiply_13 = 0x72A0D,
+  Quaternion_Multiply_14 = 0x72A0E,
+  Quaternion_Multiply_15 = 0x72A0F,
+  Quaternion_Multiply_16 = 0x72A10,
+  Quaternion_AngleBetween_2 = 0x72C02,
+  Vector2ToFloat_X = 0x2000001,
+  Vector2ToFloat_Y = 0x2000002,
+  Vector3ToFloat_X = 0x2000003,
+  Vector3ToFloat_Y = 0x2000004,
+  Vector3ToFloat_Z = 0x2000005,
+  Vector4ToFloat_X = 0x2000006,
+  Vector4ToFloat_Y = 0x2000007,
+  Vector4ToFloat_Z = 0x2000008,
+  Vector4ToFloat_W = 0x2000009,
+  Vector3ToXZAngleWithOffset = 0x2010001,
+} FunctionId;
+
+typedef struct tagVTable{
+    size16 length;
+    size16 table_length;
+    
+    local uint64 field_count = (length - 4) / 2;
+    
+    offset16 field[field_count];
+} VTable<bgcolor=0xFF00FF, hidden=true>;
+
+typedef struct tagFbByteArray{
+    size32 len;
+    char data[len]<fgcolor=0xFFCC00>;  
+} FbByteArray<read=Str("Length: %d Bytes", this.len)>;
+
+typedef struct tagFbString{
+    size32 len;
+    char data[len];  
+} FbString<read=this.data>;
+
+typedef struct tagOffsetVector{
+    size32 len;
+    offset32 offset[len];
+} OffsetVector<read=Str("%d", this.len), hidden=true>;
+
+void JumpToVTable(OffsetVector& vec, uint64 i){
+    local int64 table_address = startof(vec.offset[i]) + vec.offset[i];
+    FSeek(table_address - ReadInt(table_address));
+}
+
+void JumpToTable(OffsetVector& vec, uint64 i){
+    local int64 table_address = startof(vec.offset[i]) + vec.offset[i];
+    FSeek(table_address);
+}
+
+void FindVTable(offset32& off){
+    local int64 table_address = startof(off) + off;
+    FSeek(table_address - ReadInt(table_address));
+}
+
+void FindTable(offset32& off){
+    local int64 table_address = startof(off) + off;
+    FSeek(table_address);
+}
+
+void RelativeJmp(offset32& offset)
+{
+    FSeek(startof(offset) + offset);
+}
+
+typedef struct tagTypeInfo(VTable& vtable){
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    unk32 field_0x00;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    offset32 field_0x01_offset;
+        RelativeJmp(field_0x01_offset);
+        FbString local_name;
+    }
+
+} TypeInfo<read=this.local_name.data>;
+
+typedef struct tagLmUSymbol(VTable& vtable){
+    offset32 vtable_offset<bgcolor=0xFFFFFF>;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    offset32 name_offset;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    FixId id<format=hex>;
+    }
+    
+    if(exists(name_offset))
+    {
+        FSeek(startof(name_offset) + name_offset);
+        FbString name;
+    }
+} LmUSymbol<bgcolor=0x00AAFF, read=Str("ID: %Xh", this.id)>;
+
+typedef struct tagPrimitveValue(VTable& vtable)
+{
+    offset32 vtable_offset;
+    if(vtable.field[4]){
+	    FSeek(startof(vtable_offset) + vtable.field[4]);
+	    offset32 field_0x04_offset;
+    }
+    if(vtable.field[3]){
+	    FSeek(startof(vtable_offset) + vtable.field[3]);
+	    offset32 field_0x03_offset;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    offset32 field_0x02_offset;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    FixId value_fixid;
+    }
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    offset32 field_0x00_offset;
+    }
+    
+    if(vtable.field[4]){
+	    RelativeJmp(field_0x04_offset);
+        FbByteArray max_value;
+    }
+    if(vtable.field[3]){
+	    RelativeJmp(field_0x03_offset);
+        FbByteArray min_value;
+    }
+    if(vtable.field[2]){
+	    RelativeJmp(field_0x02_offset);
+        FbByteArray value;
+    }
+    if(vtable.field[0])
+    {
+        FindVTable(field_0x00_offset);
+        VTable vtable_0x00;
+        
+        FindTable(field_0x00_offset);
+        TypeInfo value_type(vtable_0x00);
+    }
+} PrimitiveValue<read=Str("ID: %Xh (%s)",this.value_fixid, this.value_type.local_name.data)>;
+
+typedef struct tagPackageItem(VTable& vtable){
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    unk32 field_0x00;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    offset32 field_0x01_offset;
+        
+        FindVTable(field_0x01_offset);
+        VTable vtable_0x01;
+        
+        FindTable(field_0x01_offset);
+        LmUSymbol alias(vtable_0x01);
+        
+    }
+} PackageItem<read=Str("%Xh (%s)",this.alias.id, this.alias.name.data)>;
+
+typedef struct tagSourceAnimInfo(VTable& vtable){
+    offset32 vtable_offset;
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    float min_param_val;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    float max_param_val;
+    }
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    float playback_rate_scalar;;
+    }
+} SourceAnimInfo;
+
+typedef struct tagLocomotionSelectionData(VTable& vtable){
+    local itr i;
+    local itr r;
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    unk32 field_0x00;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    unk32 field_0x01;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    unk32 field_0x02;
+    }
+    if(vtable.field[3]){
+	    FSeek(startof(vtable_offset) + vtable.field[3]);
+	    unk32 field_0x03;
+    }
+    if(vtable.field[4]){
+	    FSeek(startof(vtable_offset) + vtable.field[4]);
+	    offset32 field_0x04_vector_offset;
+    }
+    if(vtable.field[5]){
+	    FSeek(startof(vtable_offset) + vtable.field[5]);
+	    offset32 field_0x05_vector_offset;
+    }
+    if(vtable.field[6]){
+	    FSeek(startof(vtable_offset) + vtable.field[6]);
+	    unk32 field_0x06;
+    }
+    if(vtable.field[7]){
+	    FSeek(startof(vtable_offset) + vtable.field[7]);
+	    unk32 field_0x07;
+    }
+    if(vtable.field[8]){
+	    FSeek(startof(vtable_offset) + vtable.field[8]);
+	    float field_0x08;
+    }
+    if(vtable.field[9]){
+	    FSeek(startof(vtable_offset) + vtable.field[9]);
+	    float field_0x09;
+    }
+    if(vtable.field[10]){
+	    FSeek(startof(vtable_offset) + vtable.field[10]);
+	    unk32 field_0x0A;
+    }
+    
+    if(vtable.field[5])
+    {
+        RelativeJmp(field_0x05_vector_offset);
+        OffsetVector field_0x05_vector;
+        i = field_0x05_vector.len - 1;
+        r = 0;
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x05_vector, i);
+            VTable vtable_0x05;
+            JumpToTable(field_0x05_vector, i);
+            SourceAnimInfo source_anim_info(vtable_0x05[r])<bgcolor=0x777777>;
+            i -= 1;
+            r += 1;
+        }
+    }
+    if(vtable.field[4])
+    {
+        RelativeJmp(field_0x04_vector_offset);
+        struct{
+            size32 len;
+            FixId data[len];
+        } field_0x04_vector;
+    }
+} LocomotionSelectionData;
+
+typedef struct tagSingleParamBlendSelectionData(VTable& vtable){
+    local itr i, r;
+    offset32 vtable_offset;
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    unk32 field_0x02;
+    }
+    if(vtable.field[3]){
+	    FSeek(startof(vtable_offset) + vtable.field[3]);
+	    unk32 field_0x03;
+    }
+    if(vtable.field[4]){
+	    FSeek(startof(vtable_offset) + vtable.field[4]);
+	    offset32 field_0x04_vector_offset;
+    }
+    if(vtable.field[5]){
+	    FSeek(startof(vtable_offset) + vtable.field[5]);
+	    offset32 field_0x05_vector_offset;
+    }
+    if(vtable.field[6]){
+	    FSeek(startof(vtable_offset) + vtable.field[6]);
+	    unk32 field_0x06;
+    }
+    if(vtable.field[7]){
+	    FSeek(startof(vtable_offset) + vtable.field[7]);
+	    unk32 field_0x07;
+    }
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    int32 id<format=hex>;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    unk32 field_0x01;
+    }
+    
+    if(vtable.field[5]){
+        RelativeJmp(field_0x05_vector_offset);
+        OffsetVector field_0x05_vector;
+        i = field_0x05_vector.len - 1;
+        r = 0;
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x05_vector, i);
+            VTable source_anim_info_vtable;
+            JumpToTable(field_0x05_vector, i);
+            SourceAnimInfo source_anim_info(source_anim_info_vtable[r])<bgcolor=0x777777>;
+            i -= 1;
+            r += 1;
+        }
+    }
+    
+    if(vtable.field[4]){
+        RelativeJmp(field_0x04_vector_offset);
+        struct{
+            size32 len;
+            FixId data[len];
+        } anim_ids;
+    }
+}   SingleParamBlendSelectionData;
+
+typedef struct tagRelativeRootSingleParamBlendSelectionData(VTable& vtable){
+    local itr i;
+    local itr r;
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    int32 id<format=hex>;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    unk32 field_0x01;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    unk32 field_0x02;
+    }
+    if(vtable.field[3]){
+	    FSeek(startof(vtable_offset) + vtable.field[3]);
+	    unk32 field_0x03;
+    }
+    if(vtable.field[4]){
+	    FSeek(startof(vtable_offset) + vtable.field[4]);
+	    offset32 field_0x04;
+    }
+    if(vtable.field[5]){
+	    FSeek(startof(vtable_offset) + vtable.field[5]);
+	    offset32 field_0x05;
+    }
+    if(vtable.field[6]){
+	    FSeek(startof(vtable_offset) + vtable.field[6]);
+	    unk32 field_0x06;
+    }
+    if(vtable.field[7]){
+	    FSeek(startof(vtable_offset) + vtable.field[7]);
+	    unk32 field_0x07;
+    }
+    
+    if(exists(field_0x05))
+    {
+        RelativeJmp(field_0x05);
+        OffsetVector source_anim_info_offsets;
+        i = source_anim_info_offsets.len - 1;
+        r = 0;
+        while(i >= 0)
+        {
+            JumpToVTable(source_anim_info_offsets, i);
+            VTable source_anim_info_vtable;
+            JumpToTable(source_anim_info_offsets, i);
+            SourceAnimInfo source_anim_info(source_anim_info_vtable[r])<bgcolor=0x777777>;
+            i -= 1;
+            r += 1;
+        }
+    }
+    
+    if(exists(field_0x04))
+    {
+        RelativeJmp(field_0x04);
+        struct{
+            size32 len;
+            FixId data[len];
+        } animation_ids;
+    }
+    
+}   RelativeRootSingleParamBlendSelectionData;
+
+typedef struct tagStateMachineSelectionData(VTable& vtable){
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    offset32 field_0x00;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    StateMachineWorkLevel field_0x01;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    unk32 field_0x02;
+    }
+    if(vtable.field[3]){
+	    FSeek(startof(vtable_offset) + vtable.field[3]);
+	    offset32 field_0x03;
+    }
+    if(vtable.field[4]){
+	    FSeek(startof(vtable_offset) + vtable.field[4]);
+	    int32 id<format=hex>;
+    }
+    
+    if(exists(field_0x03))
+    {
+        RelativeJmp(field_0x03);
+        size32 merged_statemachine_count;
+    }
+    
+    if(exists(field_0x00))
+    {
+        RelativeJmp(field_0x00);
+        struct{
+            size32 len;
+            FixId data[len]<format=hex>;
+        } transition_fixids;
+        
+    } 
+} StateMachineSelectionData;
+
+typedef struct tagSelectionData(VTable& vtable){
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    AnimationSelectionType type;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    int32 id<format=hex>;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    offset32 field_0x02;
+        RelativeJmp(field_0x02);
+        size32 size;
+
+        if(!vtable.field[0]){
+            offset32 table_offset;
+            FindVTable(table_offset);
+            VTable locomotion_sel_data_vtable;
+            FindTable(table_offset);
+            LocomotionSelectionData locomotion_selection_data(locomotion_sel_data_vtable)<bgcolor=0x999999>;
+        }
+        else{
+            switch(type){
+                case 0x1:{
+                    offset32 table_offset;
+                    FindVTable(table_offset);
+                    VTable rel_root_single_param_blend_sel_data_vtable;
+                    FindTable(table_offset);
+                    RelativeRootSingleParamBlendSelectionData rel_root_single_param_blend_sel_data(rel_root_single_param_blend_sel_data_vtable)<bgcolor=0x999999>;
+                } break;
+                case 0x2:{
+                    offset32 table_offset;
+                    FindVTable(table_offset);
+                    VTable single_param_blend_sel_data_vtable;
+                    FindTable(table_offset);
+                    SingleParamBlendSelectionData single_param_blend_sel_data(single_param_blend_sel_data_vtable)<bgcolor=0x999999>;
+                } break;
+                case 0x5:{
+                    offset32 table_offset;
+                    FindVTable(table_offset);
+                    VTable statemachine_sel_data_vtable;
+                    FindTable(table_offset);
+                    StateMachineSelectionData statemachine_selection_data(statemachine_sel_data_vtable)<bgcolor=0x999999>;
+                } break;
+                default: ubyte data[size]; break;
+            }
+        }
+    }
+} SelectionData<read=SelectionDataRead>;
+
+string SelectionDataRead( SelectionData& sd )
+{
+    if(!exists(sd.type))
+        return "kLocomotionSet";
+    string s;
+    SPrintf(s, "%s", EnumToString(sd.type));
+    return s;
+}
+
+typedef struct tagBlob{
+    size32 size;
+    unk64 field_0x01;
+    FixId id<format=hex>;
+    size32 size_1;
+    PackageType type;
+    size64 count;
+    OffsetVector members;
+    uint32 indices[count];
+    unk32 field_0x08;
+    FixId selection_ids[count];
+    
+    local itr i;
+    if(type == 0x2)
+    {
+        for(i = 0; i < count; i++)
+        {
+            FSeek(startof(field_0x01) + members.offset[i]);
+            offset32 root_offset<bgcolor=0xFFFFFF>;
+            FindVTable(root_offset);
+            VTable root_vtable;
+            FindTable(root_offset);
+            SelectionData selection_data(root_vtable[i])<bgcolor=0xCCCCCC>;
+        }
+    }
+} Blob;
+
+typedef struct tagMessage(VTable& vtable){
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    FixId message_id;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    FixId category_id;
+    }
+} Message<read=Str("MessageID: %Xh, CategoryID: %Xh", this.message_id, this.category_id)>;
+
+typedef struct tagStateMachineState(VTable& vtable){
+    local itr i, r;
+    offset32 vtable_offset;
+    if(vtable.field[5]){
+	    FSeek(startof(vtable_offset) + vtable.field[5]);
+	    FixId state_fixid;
+    }
+    if(vtable.field[4]){
+	    FSeek(startof(vtable_offset) + vtable.field[4]);
+	    offset32 field_0x04_vector_offset;
+    }
+    if(vtable.field[3]){
+	    FSeek(startof(vtable_offset) + vtable.field[3]);
+	    offset32 field_0x03_vector_offset;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    offset32 field_0x02_vector_offset;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    FixId selection_id;
+    }
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    unk32 field_0x00;
+    }
+    
+    if(vtable.field[4]){
+	    RelativeJmp(field_0x04_vector_offset);
+    }
+    if(vtable.field[3]){
+	    RelativeJmp(field_0x03_vector_offset);
+        struct{
+            size32 len;
+            FixId data[len];
+        } post_actions<read=Str("%d", this.len)>;
+    }
+    if(vtable.field[2]){
+	    RelativeJmp(field_0x02_vector_offset);
+        OffsetVector field_0x02_vector;
+        i = field_0x02_vector.len - 1;
+        r = 0;
+        while(i >= 0){
+            JumpToVTable(field_0x02_vector, i);
+            VTable vtable_0x02;
+        
+            JumpToTable(field_0x02_vector, i);
+            PrimitiveValue parameter(vtable_0x02[r]);
+            
+            i -= 1;
+            r += 1;
+        }
+    }
+    
+} StateMachineState<read=Str("State ID: %Xh", this.state_fixid)>;
+
+typedef struct tagStateTransitionBlendParam(VTable& vtable){
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    float duration;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    float start_time;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    unk32 field_0x02;
+    }
+} StateTransitionBlendParam;
+
+typedef struct tagStateMachineTransition(VTable& vtable){
+    offset32 vtable_offset;
+    if(vtable.field[8]){
+	    FSeek(startof(vtable_offset) + vtable.field[8]);
+	    offset32 field_0x08_offset;
+        
+    }
+    if(vtable.field[7]){
+	    FSeek(startof(vtable_offset) + vtable.field[7]);
+	    FixId destination_state_id;
+    }
+    if(vtable.field[6]){
+	    FSeek(startof(vtable_offset) + vtable.field[6]);
+	    FixId origin_state_id;
+    }
+    if(vtable.field[5]){
+	    FSeek(startof(vtable_offset) + vtable.field[5]);
+	    offset32 field_0x05_offset;
+    }
+    if(vtable.field[4]){
+	    FSeek(startof(vtable_offset) + vtable.field[4]);
+	    unk32 priority;
+    }
+    if(vtable.field[3]){
+	    FSeek(startof(vtable_offset) + vtable.field[3]);
+	    unk32 field_0x03;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    unk32 field_0x02;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    unk32 field_0x01;
+    }
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    FixId state_transition_id;
+    }
+    
+    if(vtable.field[8]){
+        RelativeJmp(field_0x08_offset);
+        FbByteArray compiled_condition;
+    }
+    
+    if(vtable.field[5]){
+        FindVTable(field_0x05_offset);
+        VTable vtable_0x05;
+        FindTable(field_0x05_offset);
+        StateTransitionBlendParam blend_args(vtable_0x05);
+    }
+} StateMachineTransition;
+
+typedef struct tagParamBinding(VTable& vtable)
+{
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    FixId param_fixid;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    FixId var_fixid;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    FixId member_fixid;
+    }
+} ParamBinding;
+
+typedef struct tagFunctionChain(VTable& vtable)
+{
+    local itr i, r;
+    offset32 vtable_offset;
+    if(vtable.field[0]){
+	    FSeek(startof(vtable_offset) + vtable.field[0]);
+	    unk32 field_0x00;
+    }
+    if(vtable.field[1]){
+	    FSeek(startof(vtable_offset) + vtable.field[1]);
+	    FunctionId type_id;
+    }
+    if(vtable.field[2]){
+	    FSeek(startof(vtable_offset) + vtable.field[2]);
+	    offset32 field_0x02_vector_offset;
+    }
+    if(vtable.field[3]){
+	    FSeek(startof(vtable_offset) + vtable.field[3]);
+	    FixId func_fixid;
+    }
+    
+    if(vtable.field[2])
+    {
+        RelativeJmp(field_0x02_vector_offset);
+        OffsetVector field_0x02_vector;
+        i = field_0x02_vector.len - 1;
+        r = 0;
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x02_vector, i);
+            VTable vtable_0x02;
+            
+            JumpToTable(field_0x02_vector, i);
+            LmUSymbol parameter(vtable_0x02[r]);
+            i -= 1;
+            r += 1;
+        }
+    }
+} FunctionChain<read=Str("ID: %Xh (%s)", this.func_fixid, EnumToString(this.type_id))>;
+
+local itr i, r;
+
+offset32 root_table_offset;
+FSeek(root_table_offset - ReadInt(root_table_offset));
+VTable vtable;
+
+FSeek(root_table_offset);
+offset32 vtable_offset;
+if(vtable.field[0]){
+	FSeek(startof(vtable_offset) + vtable.field[0]);
+	offset32 field_0x00_offset;
+    
+    RelativeJmp(field_0x00_offset);
+    Blob selection_blob<read=Str("Count: %d", this.count)>;
+}
+if(vtable.field[1]){
+	FSeek(startof(vtable_offset) + vtable.field[1]);
+	PackageType resource_type;
+}
+if(vtable.field[2]){
+	FSeek(startof(vtable_offset) + vtable.field[2]);
+	offset32 field_0x02_offset;
+    FindVTable(field_0x02_offset);
+    VTable vtable_0x02;
+    FindTable(field_0x02_offset);
+    LmUSymbol id(vtable_0x02);
+}
+if(vtable.field[3]){
+	FSeek(startof(vtable_offset) + vtable.field[3]);
+	offset32 field_0x03_vector_offset;
+    struct{
+        RelativeJmp(field_0x03_vector_offset);
+        OffsetVector field_0x03_vector;
+        i = field_0x03_vector.len - 1;
+        r = 0;
+        while(i >= 0){
+            JumpToVTable(field_0x03_vector, i);
+            VTable vtable_0x03;
+            
+            JumpToTable(field_0x03_vector, i);
+            PackageItem item(vtable_0x03[r]);
+            
+            i -= 1;
+            r += 1;
+        }
+    } items<read=Str("Count: %d", field_0x03_vector.len)>;
+}
+if(vtable.field[4]){
+	FSeek(startof(vtable_offset) + vtable.field[4]);
+	offset32 field_0x04_vector_offset;
+    struct{
+        RelativeJmp(field_0x04_vector_offset);
+        OffsetVector field_0x04_vector;
+        i = field_0x04_vector.len - 1;
+        r = 0;
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x04_vector, i);
+            VTable vtable_0x04;
+            
+            JumpToTable(field_0x04_vector, i);
+            StateMachineState state_machine_state(vtable_0x04[r]);
+            i -= 1;
+            r += 1;
+        }
+    } state_machine_states<read=Str("Count: %d", field_0x04_vector.len)>;
+}
+if(vtable.field[5]){
+	FSeek(startof(vtable_offset) + vtable.field[5]);
+	offset32 field_0x05_vector_offset;
+    struct{
+        RelativeJmp(field_0x05_vector_offset);
+        OffsetVector field_0x05_vector;
+        i = field_0x05_vector.len - 1;
+        r = 0;
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x05_vector, i);
+            VTable vtable_0x05;
+            
+            JumpToTable(field_0x05_vector, i);
+            StateMachineTransition state_machine_transition(vtable_0x05[r])<read=Str("ID: %Xh", this.state_transition_id)>;
+            i -= 1;
+            r += 1;
+        }
+    } state_machine_transitions<read=Str("Count: %d", field_0x05_vector.len)>;
+}
+if(vtable.field[6]){
+	FSeek(startof(vtable_offset) + vtable.field[6]);
+	offset32 field_0x06_vector_offset;
+    
+    struct{
+        RelativeJmp(field_0x06_vector_offset);
+        OffsetVector field_0x06_vector;
+        i = field_0x06_vector.len - 1;
+        r = 0;
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x06_vector, i);
+            VTable vtable_0x06;
+            
+            JumpToTable(field_0x06_vector, i);
+            PrimitiveValue blackboard_variable(vtable_0x06[r]);
+            i -= 1;
+            r += 1;
+        }
+    } blackboard_variables<read=Str("Count: %d", field_0x06_vector.len)>;
+}
+if(vtable.field[7]){
+	FSeek(startof(vtable_offset) + vtable.field[7]);
+	offset32 field_0x07_vector_offset;
+    struct{
+        RelativeJmp(field_0x07_vector_offset);
+        OffsetVector field_0x07_vector;
+        i = field_0x07_vector.len - 1;
+        r = 0;
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x07_vector, i);
+            VTable vtable_0x07;
+            
+            JumpToTable(field_0x07_vector, i);
+            FunctionChain function_chain(vtable_0x07[r]);
+            i -= 1;
+            r += 1;
+        }
+    } function_chains<read=Str("Count: %d", field_0x07_vector.len)>;
+}
+if(vtable.field[8]){
+	FSeek(startof(vtable_offset) + vtable.field[8]);
+	offset32 field_0x08_vector_offset;
+    RelativeJmp(field_0x08_vector_offset);
+
+    OffsetVector field_0x08_vector;
+    i = field_0x08_vector.len - 1;
+    r = 0;
+    struct{
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x08_vector, i);
+            VTable vtable_0x08;
+            
+            JumpToTable(field_0x08_vector, i);
+            PrimitiveValue constant(vtable_0x08[r]);
+            i -= 1;
+            r += 1;
+        }
+    } constants<read=Str("Count: %d", field_0x08_vector.len)>;
+}
+if(vtable.field[9]){
+	FSeek(startof(vtable_offset) + vtable.field[9]);
+	offset32 field_0x09_vector_offset;
+    RelativeJmp(field_0x09_vector_offset);
+
+    OffsetVector field_0x09_vector;
+    i = field_0x09_vector.len - 1;
+    r = 0;
+    struct{
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x09_vector, i);
+            VTable vtable_0x09;
+            
+            JumpToTable(field_0x09_vector, i);
+            ParamBinding binding(vtable_0x09);
+            i -= 1;
+            r += 1;
+        }
+    } bindings<read=Str("Count: %d", field_0x09_vector.len)>;
+}
+if(vtable.field[10]){
+	FSeek(startof(vtable_offset) + vtable.field[10]);
+	offset32 field_0x0A_vector_offset;
+    
+    struct{
+        RelativeJmp(field_0x0A_vector_offset);
+        OffsetVector field_0x0A_vector;
+        i = field_0x0A_vector.len - 1;
+        r = 0;
+        while(i >= 0)
+        {
+            JumpToVTable(field_0x0A_vector, i);
+            VTable vtable_0x0A;
+            
+            JumpToTable(field_0x0A_vector, i);
+            Message message(vtable_0x0A[r]);
+            i -= 1;
+            r += 1;
+        }
+    } messages<read=Str("Count: %d", field_0x0A_vector.len)>;
+}
+if(vtable.field[11]){
+	FSeek(startof(vtable_offset) + vtable.field[11]);
+	offset32 field_0x0B_vector_offset;
+    struct{
+        RelativeJmp(field_0x0B_vector_offset);
+        OffsetVector field_0x0B_vector;
+        i = field_0x0B_vector.len - 1;
+        while(i >= 0)
+        {
+            RelativeJmp(field_0x0B_vector.offset[i]);
+            FbString dependent_resource;
+            i -= 1;
+        }
+    } dependent_resources<read=Str("Count: %d", field_0x0B_vector.len)>;
+}

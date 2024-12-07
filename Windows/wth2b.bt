@@ -1,0 +1,844 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: weatherset.wth2b
+//   Authors: Guy who should read up on on-demand structs
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.wth2b
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct CyclicKeyframesBase{
+    unsigned int ID_<bgcolor=cBlue>;
+    char name_[64]<bgcolor=cYellow>;
+};
+
+struct CyclicKeyframe(unsigned int paramNum){
+    float time_<bgcolor=cGreen>;
+    float data_[paramNum]<bgcolor=cLtBlue, optimize=false>;    
+};
+
+struct CyclicKeyframeSet(unsigned int paramNum){
+    unsigned short numKeyframe_<bgcolor=cRed>;
+    CyclicKeyframe keyFrames(paramNum)[numKeyframe_]<optimize=false>;
+};
+
+struct ExtinctionParam {
+  float time_<bgcolor=cGreen>;
+  float EXTINCTION_START;
+  float EXTINCTION_END;
+  float EXTINCTION_FALLOFF;
+  float EXTINCTION_MIDGROUND_COLOR_R;
+  float EXTINCTION_MIDGROUND_COLOR_G;
+  float EXTINCTION_MIDGROUND_COLOR_B;
+  float EXTINCTION_VIEW_ELEVATION_ANGLE;
+  float EXTINCTION_VIEW_ELEVATION_ATTENUATION;
+};
+
+struct KeyframeSet_ExtinctionParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	ExtinctionParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct PreExposureParam {
+  float time_<bgcolor=cGreen>;
+  float EXPOSURE_EXPOSURE;
+};
+
+struct KeyframeSet_PreExposureParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	PreExposureParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct MieParam {
+  float time_<bgcolor=cGreen>;
+  float MIE_ASYMMETRY;
+  float MIE_COLOR_R;
+  float MIE_COLOR_G;
+  float MIE_COLOR_B;
+};
+
+struct KeyframeSet_MieParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	MieParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct PostExposureParam {
+  float time_<bgcolor=cGreen>;
+  float VW_COLOR_FILTER_SCENEEV;
+};
+
+struct KeyframeSet_PostExposureParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	PostExposureParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct TurbidityParam {
+  float time_<bgcolor=cGreen>;
+  float RAYLEIGH_OVERCAST;
+  float TURBIDITY_R;
+  float TURBIDITY_M;
+  float AIR_THICKNESS;
+};
+
+struct KeyframeSet_TurbidityParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	TurbidityParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct AutoExposureParam {
+  float time_<bgcolor=cGreen>;
+  float AUTO_EXPOSURE_BRIGHTNESS;
+  float AUTO_EXPOSURE_UPPER;
+  float AUTO_EXPOSURE_LOWER;
+  float AUTO_EXPOSURE_MEASURE_MIN;
+  float AUTO_EXPOSURE_MEASURE_MAX;
+  float AUTO_EXPOSURE_SPEED_UP;
+  float AUTO_EXPOSURE_SPEED_DOWN;
+};
+
+struct KeyframeSet_AutoExposureParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	AutoExposureParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct StarParam {
+  float time_<bgcolor=cGreen>;
+  float STAR_TWINKLE_SPEED;
+  float TILING_STAR_TWINKLE_SPEED;
+  float STAR_EXTINCTION_NEAR_HORIZON;
+  float STAR_DISK_SIZE;
+};
+
+struct KeyframeSet_StarParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	StarParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct RainParam {
+  float time_<bgcolor=cGreen>;
+  float RAIN_PARTICLE_EMIT_RATE;
+  float RAIN_DEPTH_MAP_RADIUS;
+  float RAIN_EMIT_RADIUS;
+  float RAIN_EMIT_HEIGHT;
+  float RAIN_EMIT_SPEED;
+  float RAIN_EMIT_SPEEDRANDOM;
+  float RAIN_EMIT_SPREAD;
+  float RAIN_LIFE_SPAN;
+  float RAIN_GRAVITY;
+  float RAIN_WIND_DIR_X;
+  float RAIN_WIND_DIR_Y;
+  float RAIN_WIND_DIR_Z;
+  float RAIN_WIND_SPEED;
+  float RAIN_WIND_SCALE;
+  float RAIN_SIZE_NEAR;
+  float RAIN_SIZE_FAR;
+  float RAIN_SIZE_RANDOM;
+  float RAIN_STRETCH_SCALE;
+};
+
+struct KeyframeSet_RainParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	RainParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct RainColorParam {
+  float time_<bgcolor=cGreen>;
+  float RAIN_SPECULAR;
+  float RAIN_COLOR_GAIN_R;
+  float RAIN_COLOR_GAIN_G;
+  float RAIN_COLOR_GAIN_B;
+  float RAIN_COLOR_GAIN_A;
+  float RAIN_EMISSIVE_R;
+  float RAIN_EMISSIVE_G;
+  float RAIN_EMISSIVE_B;
+};
+
+struct KeyframeSet_RainColorParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	RainColorParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct RainSplashParam {
+  float time_<bgcolor=cGreen>;
+  float RAIN_SPLASH_EMIT_RATE;
+  float RAIN_SPLASH_EMIT_RADIUS;
+  float RAIN_SPLASH_BIRTH_SCALE_X;
+  float RAIN_SPLASH_BIRTH_SCALE_Y;
+  float RAIN_SPLASH_BIRTH_SCALE_Z;
+  float RAIN_SPLASH_DEATH_SCALE_X;
+  float RAIN_SPLASH_DEATH_SCALE_Y;
+  float RAIN_SPLASH_DEATH_SCALE_Z;
+};
+
+struct KeyframeSet_RainSplashParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	RainSplashParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct RainSplashColorParam {
+  float time_<bgcolor=cGreen>;
+  float RAIN_SPLASH_SPECULAR;
+  float RAIN_SPLASH_COLOR_GAIN_R;
+  float RAIN_SPLASH_COLOR_GAIN_G;
+  float RAIN_SPLASH_COLOR_GAIN_B;
+  float RAIN_SPLASH_COLOR_GAIN_A;
+  float RAIN_SPLASH_EMISSIVE_R;
+  float RAIN_SPLASH_EMISSIVE_G;
+  float RAIN_SPLASH_EMISSIVE_B;
+};
+
+struct KeyframeSet_RainSplashColorParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	RainSplashColorParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct WetnessParam {
+  float time_<bgcolor=cGreen>;
+  float WETNESS_SCALE;
+  float WET_SPEED_SCALE;
+  float DRY_SPEED_SCALE;
+  float SURFACE_WET_OFFSET;
+  float CRACK_WET_OFFSET;
+};
+
+struct KeyframeSet_WetnessParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	WetnessParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct FlashLightParam {
+  float time_<bgcolor=cGreen>;
+  float FLASHLIGHT_COLOR_R;
+  float FLASHLIGHT_COLOR_G;
+  float FLASHLIGHT_COLOR_B;
+  float FLASHLIGHT_INTENSITY;
+  float FLASHLIGHT_LIGHT_EV;
+  float FLASHLIGHT_RADIUS;
+  float FLASHLIGHT_SPEC_RADIUS;
+  float FLASHLIGHT_RANGE;
+  float FLASHLIGHT_VOLLIGHT_INTENSITY;
+  float FLASHLIGHT_VOLLIGHT_ZOFFSET;
+  float FLASHLIGHT_SPOT_CONE_ANGLE;
+  float FLASHLIGHT_SPOT_PENUMBRA_ANGLE;
+  float FLASHLIGHT_SHADOW_Z_NEAR;
+  float FLASHLIGHT_SHADOW_Z_BIAS;
+  float FLASHLIGHT_SHADOW_SLOPE_BIAS;
+  float FLASHLIGHT_SHADOW_POWER;
+  float FLASHLIGHT_ROUGHNESS_MOD;
+};
+
+struct KeyframeSet_FlashLightParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	FlashLightParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VolLightParam {
+  float time_<bgcolor=cGreen>;
+  float VOLLIGHT_ZNEAR;
+  float VOLLIGHT_ZFAR;
+  float VOLLIGHT_FOGTHICKNESS;
+  float VOLLIGHT_NEARFARCONTRAST;
+  float VOLLIGHT_NOISEPERIOD;
+  float VOLLIGHT_NOISESCROLLSPEED;
+  float VOLLIGHT_NOISESCROLL_ROT;
+  float VOLLIGHT_NOISESCROLL_TILT;
+  float VOLLIGHT_TENPERCENTHEIGHT;
+  float VOLLIGHT_STARTY;
+  float VOLLIGHT_TINT_R;
+  float VOLLIGHT_TINT_G;
+  float VOLLIGHT_TINT_B;
+  float VOLLIGHT_EXTINCTION;
+  float VOLLIGHT_PLAYERRELATIVE;
+  float VOLLIGHT_FADEIN_DISTANCE;
+  float VOLLIGHT_NOISEAMOUNT;
+};
+
+struct KeyframeSet_VolLightParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VolLightParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VolLightEmissiveParam {
+  float time_<bgcolor=cGreen>;
+  float VOLLIGHT_EMISSIVE_R;
+  float VOLLIGHT_EMISSIVE_G;
+  float VOLLIGHT_EMISSIVE_B;
+  float VOLLIGHT_EMISSIVE_POWER;
+};
+
+struct KeyframeSet_VolLightEmissiveParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VolLightEmissiveParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VolLightPowerParam {
+  float time_<bgcolor=cGreen>;
+  float VOLLIGHTPOWER_MAINLIGHT;
+  float VOLLIGHTPOWER_AMBIENT;
+  float VOLLIGHTPOWER_CUBEMAP;
+};
+
+struct KeyframeSet_VolLightPowerParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VolLightPowerParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VolLightFarFogParam {
+  float time_<bgcolor=cGreen>;
+  float VOLLIGHT_FARFOG_THICKNESS;
+  float VOLLIGHT_FARFOG_ZNEAR;
+  float VOLLIGHT_FARFOG_ZFAR;
+  float VOLLIGHT_FARFOG_HEIGHT_DECAY;
+  float VOLLIGHT_FARFOG_DISTANCE_DECAY;
+  float VOLLIGHT_FARFOG_DEPTH_DECAY;
+  float VOLLIGHT_FARFOG_EXTINCTION;
+  float VOLLIGHT_FARFOG_TINT_R;
+  float VOLLIGHT_FARFOG_TINT_G;
+  float VOLLIGHT_FARFOG_TINT_B;
+  float VOLLIGHT_FARFOG_STANDARD_HEIGHT;
+  float VOLLIGHT_FARFOG_BOTTOM_HEIGHT;
+  float VOLLIGHT_FARFOG_PLAYER_RELATIVE;
+};
+
+struct KeyframeSet_VolLightFarFogParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VolLightFarFogParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct GodRayParam {
+  float time_<bgcolor=cGreen>;
+  float GODRAY_ALPHA;
+  float GODRAY_EXPOSURE;
+};
+
+struct KeyframeSet_GodRayParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	GodRayParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct WindParam {
+  float time_<bgcolor=cGreen>;
+  float WIND_DIRECTION;
+  float WIND_WIND_MULTIPLIER;
+  float WIND_SPEED_MULTIPLIER;
+};
+
+struct KeyframeSet_WindParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	WindParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct ColorToSkyParam {
+  float time_<bgcolor=cGreen>;
+  float NEWSKY_SUN_COLOR_TO_SKY_R;
+  float NEWSKY_SUN_COLOR_TO_SKY_G;
+  float NEWSKY_SUN_COLOR_TO_SKY_B;
+  float NEWSKY_MOON_COLOR_TO_SKY_R;
+  float NEWSKY_MOON_COLOR_TO_SKY_G;
+  float NEWSKY_MOON_COLOR_TO_SKY_B;
+};
+
+struct KeyframeSet_ColorToSkyParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	ColorToSkyParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct DiskParam {
+  float time_<bgcolor=cGreen>;
+  float NEWSKY_SUN_DISK_R;
+  float NEWSKY_SUN_DISK_G;
+  float NEWSKY_SUN_DISK_B;
+  float NEWSKY_MOON_DISK_R;
+  float NEWSKY_MOON_DISK_G;
+  float NEWSKY_MOON_DISK_B;
+  float NEWSKY_SUN_DISK_SIZE;
+  float NEWSKY_MOON_DISK_SIZE;
+};
+
+struct KeyframeSet_DiskParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	DiskParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct GroundColorParam {
+  float time_<bgcolor=cGreen>;
+  float GROUND_COLOR_R;
+  float GROUND_COLOR_G;
+  float GROUND_COLOR_B;
+  float GROUND_COLOR_ALBEDO;
+  float GROUND_COLOR_STRETCH;
+  float GROUND_HORIZON_OFFSET;
+  float GROUND_HORIZON_UP;
+};
+
+struct KeyframeSet_GroundColorParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	GroundColorParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct BackgroundColorParam {
+  float time_<bgcolor=cGreen>;
+  float BACKGROUND_COLOR_R;
+  float BACKGROUND_COLOR_G;
+  float BACKGROUND_COLOR_B;
+};
+
+struct KeyframeSet_BackgroundColorParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	BackgroundColorParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct LightEVParam {
+  float time_<bgcolor=cGreen>;
+  float LIGHT_EV_COSMOS_SUN_INTENSITY;
+  float LIGHT_EV_COSMOS_MOON_INTENSITY;
+  float LIGHT_EV_BILLBOARD_STAR_BRIGHTNESS;
+  float LIGHT_EV_TILING_STAR_BRIGHTNESS;
+  float LIGHT_EV_MILKY_WAY_BRIGHTNESS;
+  float LIGHT_EV_BACKGROUND_INTENSITY;
+};
+
+struct KeyframeSet_LightEVParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	LightEVParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct MulMapGeneralParam {
+  float time_<bgcolor=cGreen>;
+  float MULMAP_BG_COLOR_R;
+  float MULMAP_BG_COLOR_G;
+  float MULMAP_BG_COLOR_B;
+  float MULMAP_BG_POWER;
+  float MULMAP_BLEND_POWER;
+};
+
+struct KeyframeSet_MulMapGeneralParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	MulMapGeneralParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWColorFilterParam {
+  float time_<bgcolor=cGreen>;
+  float VW_COLOR_FILTER_G_M;
+  float VW_COLOR_FILTER_B_Y;
+};
+
+struct KeyframeSet_VWColorFilterParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWColorFilterParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWColorToneCurveParam {
+  float time_<bgcolor=cGreen>;
+  float VW_COLOR_TONECURVE_HIGH_RANGE;
+  float VW_COLOR_TONECURVE_CONTRAST;
+  float VW_COLOR_TONECURVE_ZERO_SLOPE;
+  float VW_COLOR_TONECURVE_DARK;
+};
+
+struct KeyframeSet_VWColorToneCurveParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWColorToneCurveParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWColorHueParam {
+  float time_<bgcolor=cGreen>;
+  float VW_COLOR_HUE_ROTM;
+  float VW_COLOR_HUE_ROTY;
+  float VW_COLOR_HUE_ROTG;
+  float VW_COLOR_HUE_ROTB;
+};
+
+struct KeyframeSet_VWColorHueParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWColorHueParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWColorSaturationParam {
+  float time_<bgcolor=cGreen>;
+  float VW_COLOR_SATURATION_ALL;
+  float VW_COLOR_SATURATION_M;
+  float VW_COLOR_SATURATION_Y;
+  float VW_COLOR_SATURATION_G;
+  float VW_COLOR_SATURATION_B;
+};
+
+struct KeyframeSet_VWColorSaturationParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWColorSaturationParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWColorSaturationClampParam {
+  float time_<bgcolor=cGreen>;
+  float VW_COLOR_SATURATIONCLAMP_ALL;
+  float VW_COLOR_SATURATIONCLAMP_M;
+  float VW_COLOR_SATURATIONCLAMP_Y;
+  float VW_COLOR_SATURATIONCLAMP_G;
+  float VW_COLOR_SATURATIONCLAMP_B;
+};
+
+struct KeyframeSet_VWColorSaturationClampParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWColorSaturationClampParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWColorSaturationKidoParam {
+  float time_<bgcolor=cGreen>;
+  float VW_COLOR_SATURATIONKIDO_S0;
+  float VW_COLOR_SATURATIONKIDO_S1;
+  float VW_COLOR_SATURATIONKIDO_S2;
+  float VW_COLOR_SATURATIONKIDO_S3;
+  float VW_COLOR_SATURATIONKIDO_S4;
+};
+
+struct KeyframeSet_VWColorSaturationKidoParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWColorSaturationKidoParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWGlareParam {
+  float time_<bgcolor=cGreen>;
+  float VW_GLARE_SOFT_AMOUNT;
+  float VW_GLARE_SOFT_EXPAND;
+  float VW_GLARE_FOGGY_AMOUNT;
+  float VW_GLARE_FOGGY_EXPAND;
+  float VW_GLARE_SOFT_COLORING_R;
+  float VW_GLARE_SOFT_COLORING_G;
+  float VW_GLARE_SOFT_COLORING_B;
+  float VW_GLARE_FOGGY_COLORING_R;
+  float VW_GLARE_FOGGY_COLORING_G;
+  float VW_GLARE_FOGGY_COLORING_B;
+  float VW_GLARE_GAMMASPACE;
+};
+
+struct KeyframeSet_VWGlareParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWGlareParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWGlareSparkParam {
+  float time_<bgcolor=cGreen>;
+  float VW_GLARE_SPARK_BLEND;
+  float VW_GLARE_SPARK_ATTENUATION;
+  float VW_GLARE_SPARK_ROTATION;
+  float VW_GLARE_SPARK_COLORING_R;
+  float VW_GLARE_SPARK_COLORING_G;
+  float VW_GLARE_SPARK_COLORING_B;
+};
+
+struct KeyframeSet_VWGlareSparkParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWGlareSparkParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct BokehParam {
+  float time_<bgcolor=cGreen>;
+  float BOKEH_FOCAL_LENGTH;
+  float BOKEH_F_NUMBER;
+  float BOKEH_FOCAL_PLANE;
+  float BOKEH_FOCAL_PLANE_RADIUS;
+  float BOKEH_NEAR_COC_MULTIPLIER;
+  float BOKEH_FAR_COC_MULTIPLIER;
+  float BOKEH_MAX_COC_SIZE_NEAR;
+  float BOKEH_MAX_COC_SIZE_FAR;
+};
+
+struct KeyframeSet_BokehParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	BokehParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VignetteBlurParam {
+  float time_<bgcolor=cGreen>;
+  float VIGNETTE_BLUR_Y_SCALE;
+  float VIGNETTE_BLUR_START;
+  float VIGNETTE_BLUR_STRENGTH;
+  float VIGNETTE_BLUR_POWER;
+};
+
+struct KeyframeSet_VignetteBlurParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VignetteBlurParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWVignetteParam {
+  float time_<bgcolor=cGreen>;
+  float VW_VIGNETTE_AMOUNT;
+  float VW_VIGNETTE_Y_SCALE;
+  float VW_VIGNETTE_CORNER_ATTENUATION;
+  float VW_VIGNETTE_CORNER_R;
+  float VW_VIGNETTE_CORNER_G;
+  float VW_VIGNETTE_CORNER_B;
+};
+
+struct KeyframeSet_VWVignetteParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWVignetteParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct VWSharpenParam {
+  float time_<bgcolor=cGreen>;
+  float VW_SHARPEN_AMOUNT;
+};
+
+struct KeyframeSet_VWSharpenParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	VWSharpenParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct SSRFadeParam {
+  float time_<bgcolor=cGreen>;
+  float SSR_FADE_STRENGTH;
+  float SSR_FADE_Z_STRENGTH;
+  float SSR_FADE_START;
+  float SSR_FADE_END;
+};
+
+struct KeyframeSet_SSRFadeParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	SSRFadeParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct MainLightParam {
+  float time_<bgcolor=cGreen>;
+  float MAIN_LIGHT_DIRECTIONAL_INTENSITY;
+  float MAIN_LIGHT_AMBIENT_INTENSITY;
+  float MAIN_LIGHT_AMBIENTSPEC_USE_DIRLIGHTSHADOW;
+  float MAIN_LIGHT_SHADOW_POWER;
+};
+
+struct KeyframeSet_MainLightParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	MainLightParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct TimeOfDayMainLightParam {
+  float time_<bgcolor=cGreen>;
+  float TOD_MAIN_LIGHT_SUNCOLOR_R;
+  float TOD_MAIN_LIGHT_SUNCOLOR_G;
+  float TOD_MAIN_LIGHT_SUNCOLOR_B;
+  float TOD_MAIN_LIGHT_MOONCOLOR_R;
+  float TOD_MAIN_LIGHT_MOONCOLOR_G;
+  float TOD_MAIN_LIGHT_MOONCOLOR_B;
+  float TOD_MAIN_ENV_SUNCOLOR_R;
+  float TOD_MAIN_ENV_SUNCOLOR_G;
+  float TOD_MAIN_ENV_SUNCOLOR_B;
+  float TOD_MAIN_ENV_MOONCOLOR_R;
+  float TOD_MAIN_ENV_MOONCOLOR_G;
+  float TOD_MAIN_ENV_MOONCOLOR_B;
+};
+
+struct KeyframeSet_TimeOfDayMainLightParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	TimeOfDayMainLightParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct TimeOfDayParam {
+  float time_<bgcolor=cGreen>;
+  float TOD_SUN_AXIS_TILT;
+  float TOD_SUN_AXIS_AZIMUTH;
+  float TOD_SUN_ROT_OFFSET;
+  float TOD_MOON_AXIS_TILT;
+  float TOD_MOON_AXIS_AZIMUTH;
+  float TOD_MOON_ROT_OFFSET;
+  float TOD_MOON_MERIDIAN_TIME;
+  float TOD_STAR_AXIS_TILT;
+  float TOD_STAR_AXIS_AZIMUTH;
+  float TOD_STAR_MERIDIAN_TIME;
+  float TOD_MOONRISE_OFFSET;
+};
+
+struct KeyframeSet_TimeOfDayParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	TimeOfDayParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct CloudParam {
+  float time_<bgcolor=cGreen>;
+  float CLOUD_COVERAGE;
+  float CLOUD_ALTITUDE;
+  float CLOUD_THICKNESS;
+  float CLOUD_PARTICLE_DENSITY;
+  float CLOUD_ATM_SCATTER_SCALE;
+  float CLOUD_ATM_SCATTER_POWER;
+  float CLOUD_HEIGHT_DENSITY_FALLOFF;
+  float CLOUD_ATM_SCATTER_SCALE_SUN_COVER;
+  float CLOUD_ATM_SCATTER_POWER_SUN_COVER;
+};
+
+struct KeyframeSet_CloudParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	CloudParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct CloudWindParam {
+  float time_<bgcolor=cGreen>;
+  float CLOUD_WIND_DIRECTION;
+  float CLOUD_WIND_SPEED;
+};
+
+struct KeyframeSet_CloudWindParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	CloudWindParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct CloudLightingParam {
+  float time_<bgcolor=cGreen>;
+  float CLOUD_MAINLIGHT_INTENSITY;
+  float CLOUD_MAINLIGHT_COLOR_R;
+  float CLOUD_MAINLIGHT_COLOR_G;
+  float CLOUD_MAINLIGHT_COLOR_B;
+  float CLOUD_AMBIENT_TOP_INTENSITY;
+  float CLOUD_AMBIENT_TOP_COLOR_R;
+  float CLOUD_AMBIENT_TOP_COLOR_G;
+  float CLOUD_AMBIENT_TOP_COLOR_B;
+  float CLOUD_AMBIENT_BOTTOM_INTENSITY;
+  float CLOUD_AMBIENT_BOTTOM_COLOR_R;
+  float CLOUD_AMBIENT_BOTTOM_COLOR_G;
+  float CLOUD_AMBIENT_BOTTOM_COLOR_B;
+  float CLOUD_ANISOTROPY;
+  float CLOUD_LIGHTING_CONTRAST;
+};
+
+struct KeyframeSet_CloudLightingParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	CloudLightingParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct CloudNoiseParam {
+  float time_<bgcolor=cGreen>;
+  float CLOUD_FREQUENCE_MULT_ALL;
+};
+
+struct KeyframeSet_CloudNoiseParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	CloudNoiseParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct CloudShadowParam {
+  float time_<bgcolor=cGreen>;
+  float CLOUD_SHADOW_OPACITY;
+  float CLOUD_SHADOW_CONTRAST;
+};
+
+struct KeyframeSet_CloudShadowParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	CloudShadowParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+struct HighCloudParam {
+  float time_<bgcolor=cGreen>;
+  float HIGH_CLOUD_OPACITY;
+  float HIGH_CLOUD_ANISOTROPY;
+};
+
+struct KeyframeSet_HighCloudParam{
+	unsigned short numKeyframe_<bgcolor=cRed>;
+	HighCloudParam keyframes_[numKeyframe_]<optimize=false>;
+};
+
+
+
+struct WeatherKeyframeSet{
+    CyclicKeyframesBase base;
+    KeyframeSet_MainLightParam MainLightParams;
+    KeyframeSet_TimeOfDayMainLightParam TimeOfDayMainLightParams;
+    KeyframeSet_TimeOfDayParam TimeOfDayParams;
+    KeyframeSet_CloudParam CloudParams;
+    KeyframeSet_CloudWindParam CloudWindParams;
+    KeyframeSet_CloudLightingParam CloudLightingParams;
+    KeyframeSet_CloudNoiseParam CloudNoiseParams;
+    KeyframeSet_CloudShadowParam CloudShadowParams;
+    KeyframeSet_HighCloudParam HighCloudParams;
+    KeyframeSet_ExtinctionParam ExtinctionParams;
+    KeyframeSet_MieParam MieParams;
+    KeyframeSet_TurbidityParam TurbidityParams;
+    KeyframeSet_StarParam StarParams;
+    KeyframeSet_RainParam RainParams;
+    KeyframeSet_RainColorParam RainColorParams;
+    KeyframeSet_RainSplashParam RainSplashParams;
+    KeyframeSet_RainSplashColorParam RainSplashColorParams;
+    KeyframeSet_WetnessParam WetnessParams;
+    KeyframeSet_VolLightParam VolLightParams;
+    KeyframeSet_VolLightEmissiveParam VolLightEmissiveParams;
+    KeyframeSet_VolLightPowerParam VolLightPowerParams;
+    KeyframeSet_VolLightFarFogParam VolLightFarFogParams;
+    KeyframeSet_GodRayParam GodRayParams;
+    KeyframeSet_WindParam WindParams;
+    KeyframeSet_ColorToSkyParam ColorToSkyParams;
+    KeyframeSet_DiskParam DiskParams;
+    KeyframeSet_GroundColorParam GroundColorParams;
+    KeyframeSet_BackgroundColorParam BackgroundColorParams;
+    KeyframeSet_LightEVParam LightEVParams;
+    KeyframeSet_MulMapGeneralParam MulMapGeneralParams;
+    CyclicKeyframeSet MulMapDisc1Params(9);
+    CyclicKeyframeSet MulMapDisc2Params(9);
+};
+
+struct WeatherKeyframeSetList{
+    unsigned short count_;
+    WeatherKeyframeSet WeatherKeyFrameSets[count_]<optimize=false, name = (this.base.name_)>;
+};
+
+struct ExposureKeyframeSet{
+  CyclicKeyframesBase base;
+  KeyframeSet_PreExposureParam PreExposureParams;
+  KeyframeSet_PostExposureParam PostExposureParams;
+  KeyframeSet_AutoExposureParam AutoExposureParams;
+};
+
+struct ExposureKeyframeSetList{
+    unsigned short count_;
+    ExposureKeyframeSet ExposureKeyframeSets[count_]<optimize=false, name = (this.base.name_)>;
+};
+
+struct PostEffectKeyframeSet{
+    CyclicKeyframesBase base;
+    KeyframeSet_VWColorFilterParam VWColorFilterParams;
+    KeyframeSet_VWColorToneCurveParam VWColorToneCurveParams;
+    KeyframeSet_VWColorHueParam VWColorHueParams;
+    KeyframeSet_VWColorSaturationParam VWColorSaturationParams;
+    KeyframeSet_VWColorSaturationClampParam VWColorSaturationClampParams;
+    KeyframeSet_VWColorSaturationKidoParam VWColorSaturationKidoParams;
+    KeyframeSet_VWGlareParam VWGlareParams;
+    KeyframeSet_VWGlareSparkParam VWGlareSparkParams;
+    KeyframeSet_BokehParam BokehParams;
+    KeyframeSet_VignetteBlurParam VignetteBlurParams;
+    KeyframeSet_VWVignetteParam VWVignetteParams;
+    KeyframeSet_VWSharpenParam VWSharpenParams;
+    KeyframeSet_SSRFadeParam SSRFadeParams;
+};
+
+struct PostEffectKeyframeSetList{
+    unsigned short count_;
+    PostEffectKeyframeSet PostEffectKeyframeSets[count_]<optimize=false, name = (this.base.name_)>;
+};
+
+struct CameraLightKeyframeSet{
+    CyclicKeyframesBase base;
+    KeyframeSet_FlashLightParam FlashLightParams[4]<optimize=false>;
+};
+
+struct CameraLightKeyframeSetList{
+    unsigned short count_;
+    CameraLightKeyframeSet CameraLightKeyframeSets[count_]<optimize=false, name = (this.base.name_)>;
+};
+
+struct Header{
+    char magic[13] <bgcolor=cYellow>;
+    char padding[3] <bgcolor=cNone, hidden=true>;   
+};
+
+struct Weather2Bin{
+    Header header;
+    WeatherKeyframeSetList weatherKeyframeSetList;
+    ExposureKeyframeSetList exposureKeyframeSetList;
+    PostEffectKeyframeSetList postEffectKeyframeSetList;
+    CameraLightKeyframeSetList cameraLightKeyframeSetList;
+};
+
+Weather2Bin weather2Bin<bgcolor=cLtBlue>;
