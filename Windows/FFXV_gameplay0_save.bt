@@ -4,10 +4,10 @@
 //      File: FFXV_gameplay0_save.bt
 //   Authors: Rinual
 //   Version: 1.0
-//   Purpose: Analyzing and debuging FFXV gameplay saves
+//   Purpose: Analyzing and debugging FFXV gameplay saves
 //  Category: Save Files
 //   History: Surihix - Header, Footer, Encryption // Alex - Misc Help
-//   (Needs a decrypted save, for example https://github.com/Surihix/FFXVSaveCrypt)
+//   (Needs a decrypted save, for example, https://github.com/Surihix/FFXVSaveCrypt)
 //
 //------------------------------------------------
 LittleEndian();
@@ -2936,7 +2936,7 @@ typedef struct Black_Save_Player_SavePlayerStruct {
         }
     } weapon_Attack_Struct<name="WeaponType", comment="type: Black.Actor.WEAPON_TYPE, count: Black.Actor.WEAPON_ATTACK_AMOUNT", bgcolor=cDkYellow>;
     uint32 Black_Save_SAVE_ABILITY_AMOUNT;
-    Black_Save_Ability_SaveAbilityStruct ability[Black_Save_SAVE_ABILITY_AMOUNT]<name="Ability", read=(this.ability_id), comment="type: Black.Save.Ability.SaveAbilityStruct, count: Black::Save::SAVE_ABILITY_AMOUNT", bgcolor=cDkYellow, optimize=false>;
+    Black_Save_Ability_SaveAbilityStruct ability[Black_Save_SAVE_ABILITY_AMOUNT]<name="Ability", read=EnumToString(this.ability_id), comment="type: Black.Save.Ability.SaveAbilityStruct, count: Black::Save::SAVE_ABILITY_AMOUNT", bgcolor=cDkYellow, optimize=false>;
     uint32 Black_Actor_ABILITY_TYPE_AMOUNT;
     SaveAbilityCountStruct ability_count[Black_Actor_ABILITY_TYPE_AMOUNT]<name="AbilityCount", comment="type: Black.Save.Ability.SaveAbilityCountStruct, count: Black::Actor::ABILITY_TYPE_AMOUNT", bgcolor=cDkYellow, optimize=false>;
     uint32 Black_Actor_ABILITY_EFFECT_AMOUNT;
