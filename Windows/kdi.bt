@@ -1,0 +1,608 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Final Fantasy XV KineDriver Binary
+//   Authors: Headache
+//   Version: 1.0.0
+//   Purpose: Stores data used to drive auxiliary joints
+//  Category: Animation
+// File Mask: *.kdi
+//  ID Bytes: 0x53 0x45 0x44 0x42 0x4B 0x44 0x42 0x20 (SEDBKDB )
+//   History: 
+//------------------------------------------------
+
+typedef int16 offset16<fgcolor=0x0000FF, format=hex>;
+typedef int32 offset32<fgcolor=0x0000FF, format=hex>;
+typedef int64 offset64<fgcolor=0x0000FF, format=hex>;
+
+typedef int16 size16<fgcolor=0x00FF00>;
+typedef int32 size32<fgcolor=0x00FF00>;
+typedef int64 size64<fgcolor=0x00FF00>;
+
+local int64 g_string_address = 0;
+
+// ------------------------------------
+// SECTION DATA BINARY 
+// ------------------------------------
+
+struct PhbHeader {
+    char Type[4];
+    Assert(Type == "SEDB", Type);
+
+    char SubType[4];
+    Assert(SubType == "KDB ");
+
+    uint32 Version;
+
+    enum<byte> {
+        Little,
+        Big
+    } EndianType;
+
+    byte AlignmentBits;
+    offset16 Offset;
+    size64 Size;
+    uint64 DateTime;
+    uint32 Reserved[4];
+};
+
+// ------------------------------------
+// KINEDRIVER BINARY 
+// ------------------------------------
+
+struct HappyKineDriverReadHeaderData {
+    size16 SourceNum;
+    size16 TargetNum;
+    size16 LinkNum;
+    size16 StringNum;
+    size32 InstanceAllocDataSize;
+    size32 ReadDataSize;
+    size32 SourcesDataSize;
+    size32 TargetsDataSize;
+    size32 LinksDataSize;
+    size32 StringDataSize;
+    enum<byte>{
+        MODE_PRIMARY,
+        MODE_SECONDARY,
+        MODE_MATERIAL
+    } mode;
+    byte isCharaViewer<read=(this == 0 ? "False" : "True")>;
+    char padding[30]<bgcolor=0x000000>;
+
+    local int64 sources_offset = FTell();
+    local int64 targets_offset = FTell() + SourcesDataSize;
+    local int64 links_offset = FTell() + SourcesDataSize + TargetsDataSize;
+    local int64 strings_offset = FTell() + ReadDataSize;
+    g_string_address = strings_offset;
+};
+
+string GetHeaderString(offset32& o) {
+    local int64 str_location = g_string_address + o;
+    return ReadString(str_location);
+}
+
+// ------------------------------------
+// KINEDRIVER SOURCE DATA
+// ------------------------------------
+
+typedef struct tagExpressionQuat {
+    float x, y, z, w;
+} ExpressionQuat<read=Str("%.3f, %.3f, %.3f, %.3f", this.x, this.y, this.z, this.w)>;
+
+typedef struct tagExpressionVector {
+    float x, y, z, w;
+} ExpressionVector<read=Str("%.3f, %.3f, %.3f, %.3f", this.x, this.y, this.z, this.w)>;
+
+typedef enum EKineDriverSourceType {
+    EHappyKineDriverSourceTranslate = 0x0,
+    EHappyKineDriverSourceRotate = 0x1,
+} KineDriverSourceType<bgcolor=0xFFFFFF>;
+
+typedef struct tagSourceObjectData {
+    offset32 sourceNodeNameId;
+    float weight;
+
+    local string name_data = GetHeaderString(sourceNodeNameId);
+} SourceObjectData<name=this.name_data, read=this.weight>;
+
+// Added the contents of this to the following structs since 010 doesn't have inheritance
+struct HappyKineDriverSourceBase {
+    KineDriverSourceType type;
+    offset32 name_offset;
+    offset32 baseSpaceNodeNameId;
+    size16 numSourceObjects;
+    int16 segmentScaleCompensate;
+    ExpressionQuat neutralRotate;
+
+    if(type == EHappyKineDriverSourceTranslate)
+        ExpressionVector neutralTranslate;
+    else {
+        ExpressionVector aimVector;
+        ExpressionVector upVector;
+    }
+
+    SourceObjectData sourceObjectData[numSourceObjects]<optimize=false>;
+
+    local string name_data = GetHeaderString(name_offset);
+};
+
+typedef struct tagHappyKineDriverSourceRotate {
+    KineDriverSourceType type;
+    offset32 name_offset;
+    offset32 baseSpaceNodeNameId;
+    size16 numSourceObjects;
+    int16 segmentScaleCompensate;
+    ExpressionQuat neutralRotate;
+    
+    ExpressionVector aimVector;
+    ExpressionVector upVector;
+
+    SourceObjectData sourceObjectData[numSourceObjects]<optimize=false>;
+
+    local string name_data = GetHeaderString(name_offset);
+} HappyKineDriverSourceRotate<read=this.name_data, name=EnumToString(this.type)>;
+
+typedef struct tagHappyKineDriverSourceTranslate {
+    KineDriverSourceType type;
+    offset32 name_offset;
+    offset32 baseSpaceNodeNameId;
+    size16 numSourceObjects;
+    int16 segmentScaleCompensate;
+    ExpressionQuat neutralRotate;
+
+    ExpressionVector neutralTranslate;
+
+    SourceObjectData sourceObjectData[numSourceObjects]<optimize=false>;
+
+    local string name_data = GetHeaderString(name_offset);
+} HappyKineDriverSourceTranslate<read=this.name_data, name=EnumToString(this.type)>;
+
+void PlaceSourceData() {
+    local KineDriverSourceType type = ReadInt();
+    switch(type) {
+        case 0: HappyKineDriverSourceTranslate source<bgcolor=0x00FF00>; break;
+        case 1: HappyKineDriverSourceRotate source<bgcolor=0x00CC00>; break;
+        default: break;
+    }
+}
+
+// Structure where all source operator computations are stored
+// Not present in format, but worth having as a reference
+struct SourceOutputWork {
+    ExpressionVector translate;
+    ExpressionQuat rotation_quat;
+    ExpressionQuat bending_quat;
+    float distance;
+    float rotation_angle;
+    float bending_angle;
+    float bend_swing;
+    float bend_tilt;
+    float roll;
+    ubyte is_calc;
+    ubyte c_dummy_0, c_dummy_1, c_dummy_2;
+    int32 i_dummy_0, i_dummy_1, i_dummy_2;
+};
+
+enum EKDSourceParam {
+    kSourceTranslate = 0x0,
+    kSourceRotationQuat = 0x1,
+    kSourceBendingQuat = 0x2,
+    kDistance = 0x3,
+    kRotationAngle = 0x4,
+    kBendingAngle = 0x5,
+    kBendSwing = 0x6,
+    kBendTilt = 0x7,
+    kRoll = 0x8,
+};
+
+// ------------------------------------
+// KINEDRIVER EXPRESSION TARGET DATA
+// ------------------------------------
+
+typedef enum ETargetDataType {
+    EHappyKineDriverTranslateOp = 0x0,
+    EHappyKineDriverScaleOp = 0x1,
+    EHappyKineDriverRotateOp = 0x2,
+    EHappyKineDriverBendRollOp = 0x3,
+    EHappyKineDriverBendSTRollOp = 0x4,
+    EHappyKineDriverPoscnsOp = 0x5,
+    EHappyKineDriverOricnsOp = 0x6,
+    EHappyKineDriverDircnsOp = 0x7,
+    ETechCgfxShader = 0x8,
+    ELuminyShader = 0x9,
+    EERROR = 0xFF,
+} TargetDataType<bgcolor=0xFF00FF>;
+
+// Added the contents of this to the following structs since 010 doesn't have inheritance
+struct ExpressionTargetHappyKineDriverDataBase {
+    TargetDataType type;
+    offset32 name;
+};
+
+typedef struct tagExpressionTargetHappyTranslateOpData {
+    TargetDataType type;
+    offset32 name;
+    offset32 targetNodeNameId;
+    offset32 baseSpaceNodeNameId;
+    ExpressionVector translate;
+    ExpressionVector neutralTranslate;
+    ExpressionQuat neutralRotate;
+
+    local string name_data = GetHeaderString(name);
+    local string target_node_name_data = GetHeaderString(targetNodeNameId);
+} ExpressionTargetHappyTranslateOpData<name=EnumToString(this.type), read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyScaleOpData {
+    TargetDataType type;
+    offset32 name;
+    offset32 targetNodeNameId;
+    offset32 baseSpaceNodeNameId;
+    ExpressionVector scale;
+    int32 segmentScaleCompensate;
+    ubyte padding[12];
+
+    local string name_data = GetHeaderString(name);
+    local string target_node_name_data = GetHeaderString(targetNodeNameId);
+} ExpressionTargetHappyScaleOpData<name=EnumToString(this.type), read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyRotateOpData {
+    TargetDataType type;
+    offset32 name;
+    offset32 targetNodeNameId;
+    offset32 sourceQuatNodeNameId;
+    int32 sourceQuatSourceNo;
+    float quatWeight;
+    float quatAngle;
+    offset32 baseSpaceNodeNameId;
+    ExpressionQuat neutralRotate;
+    int segmentScaleCompensate;
+    ubyte padding[12];
+
+    local string name_data = GetHeaderString(name);
+} ExpressionTargetHappyRotateOpData<name=EnumToString(this.type), read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyBendRollOpData {
+    TargetDataType type;
+    offset32 name;
+
+    offset32 targetNodeNameId;
+    offset32 sourceQuatNodeNameId;
+    int32 sourceQuatSourceNo;
+    float quatWeight;
+    float quatAngle;
+    float roll;
+    ExpressionQuat neutralRotate;
+    ExpressionVector aimVector;
+    offset32 baseSpaceNodeNameId;
+    int segmentScaleCompensate;
+    uint64 padding;
+
+    local string name_data = GetHeaderString(name);
+    local string target_node_name_data = GetHeaderString(targetNodeNameId);
+} ExpressionTargetHappyBendRollOpData<name=EnumToString(this.type), read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyBendSTRollOpData {
+    TargetDataType type;
+    offset32 name;
+    offset32 targetNodeNameId;
+    float bendS;
+    float bendT;
+    float roll;
+    offset32 baseSpaceNodeNameId;
+    int32 segmentScaleCompensate;
+    ExpressionQuat neutralRotate;
+    ExpressionVector aimVector;
+    ExpressionVector upVector;
+
+    local string name_data = GetHeaderString(name);
+    local string target_node_name_data = GetHeaderString(targetNodeNameId);
+} ExpressionTargetHappyBendSTRollOpData<name=EnumToString(this.type), read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyKineDriverCnsPrimData_Quat {
+    offset32 sourceNodeNameId;
+    float weight;
+    int padding[2];
+    ExpressionQuat offset;
+
+    local string name_data = GetHeaderString(sourceNodeNameId);
+} ExpressionTargetHappyKineDriverCnsPrimData_Quat<read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyKineDriverCnsPrimData_Vec {
+    offset32 sourceNodeNameId;
+    float weight;
+    int padding[2];
+    ExpressionVector offset;
+
+    local string name_data = GetHeaderString(sourceNodeNameId);
+} ExpressionTargetHappyKineDriverCnsPrimData_Vec<read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyPoscnsOpData {
+    TargetDataType type;
+    offset32 name;
+    offset32 targetNodeNameId;
+    int32 orientAffect;
+    ExpressionVector offsetTranslate;
+    int32 scaleAffect;
+    size32 numSourceObjects;
+    ubyte padding[8];
+
+    ExpressionTargetHappyKineDriverCnsPrimData_Vec source_objects[numSourceObjects]<optimize=false>;
+
+    local string name_data = GetHeaderString(name);
+    local string target_node_name_data = GetHeaderString(targetNodeNameId);
+} ExpressionTargetHappyPoscnsOpData<name=EnumToString(this.type), read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyOricnsOpData {
+    TargetDataType type;
+    offset32 name;
+    offset32 targetNodeNameId;
+    size32 numSourceObjects;
+    ExpressionQuat offsetRotate;
+
+    ExpressionTargetHappyKineDriverCnsPrimData_Quat source_objects[numSourceObjects]<optimize=false>;
+
+    local string name_data = GetHeaderString(name);
+    local string target_node_name_data = GetHeaderString(targetNodeNameId);
+} ExpressionTargetHappyOricnsOpData<name=EnumToString(this.type), read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyDircnsOpData {
+    TargetDataType type;
+    offset32 name;
+    uint64 padding;
+    ExpressionQuat neutralRotate;
+    ExpressionVector aimVector;
+    ExpressionVector upVector;
+    ExpressionVector aimSrcOffset;
+    ExpressionVector upSrcOffset;
+    offset32 targetNodeNameId;
+    offset32 aimNodeNameId;
+    offset32 upNodeNameId;
+    int32 aimTransformAffect;
+    int32 upTransformAffect;
+    ubyte padding_2[12];
+
+    local string name_data = GetHeaderString(name);
+    local string target_node_name_data = GetHeaderString(targetNodeNameId);
+    local string aim_node_name_data = GetHeaderString(aimNodeNameId);
+    local string up_node_name_data = GetHeaderString(upNodeNameId);
+} ExpressionTargetHappyDircnsOpData<name=EnumToString(this.type), read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyTechCgfxShaderData {
+    TargetDataType type;
+    offset32 name;
+    int32 materialNameStrNo;
+    int padding;
+
+    local string name_data = GetHeaderString(name);
+} ExpressionTargetHappyTechCgfxShaderData<name=EnumToString(this.type), read=this.name_data>;
+
+typedef struct tagExpressionTargetHappyLuminyShaderData {
+    TargetDataType type;
+    offset32 name;
+    int32 materialNameStrNo;
+    size16 valueSize;
+    byte row;
+    byte col;
+
+    local string name_data = GetHeaderString(name);
+} ExpressionTargetHappyLuminyShaderData<name=EnumToString(this.type), read=this.name_data>;
+
+void PlaceTargetData() {
+    local TargetDataType type = ReadInt();
+    switch(type) {
+        case 0: ExpressionTargetHappyTranslateOpData target<bgcolor=0xFF0000>; break;
+        case 1: ExpressionTargetHappyScaleOpData target<bgcolor=0xFF5000>; break;
+        case 2: ExpressionTargetHappyRotateOpData target<bgcolor=0xFF5030>; break;
+        case 3: ExpressionTargetHappyBendRollOpData target<bgcolor=0x0000FF>; break;
+        case 4: ExpressionTargetHappyBendSTRollOpData target<bgcolor=0x0050FF>; break;
+        case 5: ExpressionTargetHappyPoscnsOpData target<bgcolor=0xFFFF00>; break;
+        case 6: ExpressionTargetHappyOricnsOpData target<bgcolor=0xFFFF00>; break;
+        case 7: ExpressionTargetHappyDircnsOpData target<bgcolor=0xFFFF00>; break;
+        case 8: ExpressionTargetHappyTechCgfxShaderData target<bgcolor=0xFF00FF>; break;
+        case 9: ExpressionTargetHappyLuminyShaderData target<bgcolor=0xFFFFFF>; break;
+        default: break;
+    }
+}
+
+// ------------------------------------
+// KINEDRIVER EXPRESSION LINK DATA
+// ------------------------------------
+
+typedef enum EExpressionLinkDataType {
+    EEquals = 0x0,
+    ELinkWith = 0x1,
+    EHappyEZParamLinkOp = 0x2,
+    EHappyEZParamLinkLinearOp = 0x3,
+} ExpressionLinkDataType<bgcolor=0x00C0FF>;
+
+union LinkUnion {
+    uint64 pOutTargetParam;
+    int32 parameterWorkContainerIndex;
+    uint64 padding;
+};
+
+// Added the contents of this to the following structs since 010 doesn't have inheritance
+struct ExpressionLinkDataBase {
+    ExpressionLinkDataType type;
+    int32 inSourceNo;
+    EKDSourceParam inSourceParam;
+    int32 outTargetNo;
+    int32 outTargetParam;
+    int32 isMaterial;
+    int32 inSourceParamOffset;
+    uint32 padding;
+    LinkUnion unnamed_field;
+};
+
+typedef struct tagExpressionLinkEqualsData {
+    ExpressionLinkDataType type;
+    int32 inSourceNo <read=Str("%i (%s)", this, sources.source[this].name_data)>;
+    EKDSourceParam inSourceParam;
+    int32 outTargetNo <read=Str("%i (%s)", this, targets.target[this].name_data)>;
+    int32 outTargetParam;
+    int32 isMaterial;
+    int32 inSourceParamOffset;
+    uint32 padding;
+    LinkUnion unnamed_field;
+    float coef;
+    uint32 padding;
+} ExpressionLinkEqualsData<name=Str("%d => %d", this.inSourceNo, this.outTargetNo), read=EnumToString(this.type)>;
+
+enum ECurveType {
+    eCurveType_Constant = 0x0,
+    eCurveType_Gradient = 0x1,
+    eCurveType_Cycle = 0x2,
+    eCurveType_RelativeCycle = 0x3,
+    eCurveType_Oscillate = 0x4,
+};
+
+enum InterpolationType {
+    eInterpolationType_Default = 0x0,
+    eInterpolationType_Step = 0x1,
+    eInterpolationType_Linear = 0x2,
+    eInterpolationType_Spline = 0x3,
+};
+
+typedef struct tagExpressionLinkLinkWithKeyData {
+    float in;
+    float out;
+    float leftTanX;
+    float leftTanY;
+    float rightTanX;
+    float rightTanY;
+    InterpolationType interpolate;
+} ExpressionLinkLinkWithKeyData;
+
+typedef struct tagExpressionLinkLinkWithData {
+    ExpressionLinkDataType type;
+    int32 inSourceNo <read=Str("%i (%s)", this, sources.source[this].name_data)>;
+    EKDSourceParam inSourceParam;
+    int32 outTargetNo <read=Str("%i (%s)", this, targets.target[this].name_data)>;
+    int32 outTargetParam;
+    int32 isMaterial;
+    int32 inSourceParamOffset;
+    uint32 padding;
+    LinkUnion unnamed_field;
+    int32 extrapolate;
+    size32 numkey;
+    
+    ExpressionLinkLinkWithKeyData keys[numkey];
+} ExpressionLinkLinkWithData<name=Str("%d => %d", this.inSourceNo, this.outTargetNo), read=EnumToString(this.type)>;
+
+// Seems to go unused
+typedef struct tagExpressionLinkHappyEZParamLinkOpParamData {
+    float inMin;
+    float outMin;
+    int32 tanMin;
+    float clampMin;
+    float inNeutral;
+    float outNeutral;
+    int32 tanNeutral;
+    int32 enableNeutral;
+    float inMax;
+    float outMax;
+    int32 tanMax;
+    float clampMax;
+    int32 byCoef;
+} ExpressionLinkHappyEZParamLinkOpParamData;
+
+// Uses two cubic bezier curves for interpolation
+typedef struct tagExpressionLinkHappyEZParamLinkOpData {
+    ExpressionLinkDataType type;
+    int32 inSourceNo <read=Str("%i (%s)", this, sources.source[this].name_data)>;
+    EKDSourceParam inSourceParam;
+    int32 outTargetNo <read=Str("%i (%s)", this, targets.target[this].name_data)>;
+    int32 outTargetParam;
+    int32 isMaterial;
+    int32 inSourceParamOffset;
+    uint32 padding;
+    LinkUnion unnamed_field;
+    float px0;   // p1's x component
+    float vx1_0; // horizontal distance from p0 to p1
+    float vx2_1; // horizontal distance from p1 to p2
+    float grad0; // left-hand slope (when falling below min input)
+    float grad1; // right-hand slope (when going over max input)
+    float py0;   // p0's y component
+    float py0a;  // p0's right-hand handle
+    float py0b;  // p1's left-hand handle
+    float py1; 
+    float py1a;  // p1's right-hand handle
+    float py1b;  // p2's left-hand handle
+    float py2;
+    int32 byCoef;
+    uint32 padding;
+} ExpressionLinkHappyEZParamLinkOpData<name=Str("%d => %d", this.inSourceNo, this.outTargetNo), read=EnumToString(this.type)>;
+
+typedef struct tagExpressionLinkHappyEZParamLinkLinearOpData {
+    ExpressionLinkDataType type;
+    int32 inSourceNo <read=Str("%i (%s)", this, sources.source[this].name_data)>;
+    EKDSourceParam inSourceParam;
+    int32 outTargetNo <read=Str("%i (%s)", this, targets.target[this].name_data)>;
+    int32 outTargetParam;
+    int32 isMaterial;
+    int32 inSourceParamOffset;
+    uint32 padding;
+    LinkUnion unnamed_field;
+    float scale;
+    float srcOffset;
+    float offset;
+    float clampMin;
+    float clampMax;
+    int32 enableMin;
+    int32 enableMax;
+    int32 padding_2[3];
+} ExpressionLinkHappyEZParamLinkLinearOpData<name=Str("%d => %d", this.inSourceNo, this.outTargetNo), read=EnumToString(this.type)>;
+
+void PlaceLinkData() {
+    local ExpressionLinkDataType type = ReadInt();
+    switch(type) {
+        case 0: ExpressionLinkEqualsData link_data<bgcolor=0x00D0D0>; break;
+        case 1: ExpressionLinkLinkWithData link_data<bgcolor=0x00D0A0>; break;
+        case 2: ExpressionLinkHappyEZParamLinkOpData link_data<bgcolor=0x00A00D0>; break;
+        case 3: ExpressionLinkHappyEZParamLinkLinearOpData link_data<bgcolor=0x00A0A0>; break;
+        default: break;
+    }
+}
+
+// ------------------------------------
+// KINEDRIVER STRING DATA
+// ------------------------------------
+
+typedef struct tagStringItem {
+    string data;
+} StringItem<read=this.data, fgcolor=0x00FFFF>;
+
+// ------------------------------------
+// TEMPLATE LOGIC
+// ------------------------------------
+
+PhbHeader header<bgcolor=0x00FFFF>;
+
+HappyKineDriverReadHeaderData read_header_data;
+
+struct {
+    local int i<hidden=true>;
+    for(i = 0; i < read_header_data.SourceNum; i++) {
+        PlaceSourceData();
+    }
+} sources<read=read_header_data.SourceNum>;
+
+Assert(FTell() == read_header_data.targets_offset);
+struct {
+    local int i<hidden=true>;
+    for(i = 0; i < read_header_data.TargetNum; i++) {
+        PlaceTargetData();
+    }
+} targets<read=read_header_data.TargetNum>;
+
+Assert(FTell() == read_header_data.links_offset);
+struct {
+    local int i<hidden=true>;
+    for(i = 0; i < read_header_data.LinkNum; i++) {
+        PlaceLinkData();
+    }
+} link_datas<read=read_header_data.LinkNum>;
+
+Assert(FTell() == read_header_data.strings_offset);
+char null_string<bgcolor=0x0000FF>;
+StringItem strings[read_header_data.StringNum]<optimize=false, bgcolor=0xFFC000>;
