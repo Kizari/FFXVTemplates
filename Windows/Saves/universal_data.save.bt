@@ -1,0 +1,152 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: universal_data.save.bt
+//   Authors: Rinual
+//   Version: 1.0
+//   Purpose: Analyzing and debuging FFXV universal_data saves
+//  Category: Save Files
+//   History: Surihix - Header, Footer, Encryption
+//   (Needs a decrypted save, for example https://github.com/Surihix/FFXVSaveCrypt)
+//
+//------------------------------------------------
+LittleEndian();
+
+typedef int32 FIXID;
+
+typedef uint64 structid_t <format=hex, fgcolor=0x00C0FF>;
+typedef ubyte bool <read=(this == 0 ? "false" : "true")>;
+
+// Shared structs
+
+typedef struct STRING_T
+{
+    int stringLength; 
+    if (stringLength != 0)
+    {
+        char stringData[stringLength];
+    }
+} string_t <name="string_t", read=(this.stringLength == 0 ? "null" : this.stringData)>;
+
+//------------------
+
+typedef struct HEADER
+{
+    char magic[4]<comment="not decrypted correctly", bgcolor=cDkPurple>;
+    uint32 version<bgcolor=cDkRed>;
+    uint32 reserved;
+    uint32 footerStructsOffset<bgcolor=cWhite>;
+    uint32 formatId<bgcolor=cYellow>;
+    uint32 versionId<bgcolor=cBlue>;
+}Header;
+
+typedef struct STRUCTMEMBER
+{
+    string_t memberName<name="memberName", bgcolor=cLtGreen>;
+    string_t memberType<name="memberType", bgcolor=cDkGreen>;
+    uint32 relativeMemoryOffsetInStruct<bgcolor=cDkYellow>;
+    uint32 memberSize<bgcolor=cYellow>;
+    uint16 itemCount<bgcolor=cGreen>;
+    ubyte primitiveType<bgcolor=cWhite>;
+    ubyte itemPrimitiveType <bgcolor=cLtBlue>;
+    ubyte attr <bgcolor=cDkBlue>;		   
+}StructMember <name=this.memberName.stringData, read=this.memberType.stringData>;
+
+typedef struct STRUCTENTRY
+{
+    string_t structName<name="structName", bgcolor=cDkBlue>;
+    structid_t structId<bgcolor=cBlack>;
+    ubyte padding[8];
+    uint16 memberCount<bgcolor=cLtRed>;
+    struct STRUCTMEMBERS
+    {
+        StructMember structMember[memberCount]<optimize=false>;
+    }StructMembers<name="Struct Members">;
+} StructEntry<name=this.structName.stringData>;
+
+typedef struct FOOTERSTRUCTS
+{
+    uint32 footerStructsCount<bgcolor=cLtGreen>;
+    StructEntry structEntry[footerStructsCount]<optimize=false>;
+}FooterStructs;
+
+typedef struct ENCRYPTIONFOOTER
+{
+    uint64 iv1<bgcolor=cDkGreen>;
+    uint64 iv2<bgcolor=cDkGreen>;
+    uint64 tweak1<bgcolor=cDkGreen>;
+    uint64 tweak2<bgcolor=cDkGreen>;
+    uint32 seed<bgcolor=cDkGreen>;
+    uint64 nullPaddingA;
+    uint64 nullPaddingB;
+    ubyte end2Value<bgcolor=cDkGreen>;
+}EncryptionFooter;
+
+//--------------
+
+typedef struct SaveTimedQuestLabelStruct {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    FIXID labelId<name="Label FIXID", bgcolor=cDkGreen>;
+    int32 var<name="Variable", bgcolor=cDkRed>;
+} SaveTimedQuestLabelStruct;
+
+typedef struct SaveTimedQuestPointStruct {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    FIXID scheduleId<name="Schedule FIXID", bgcolor=cDkGreen>;
+    int64 acquisition<name="Acquisition", bgcolor=cDkRed>;
+    int64 consumption<name="Consumption", bgcolor=cYellow>;
+} SaveTimedQuestPointStruct;
+
+typedef struct SaveTimedQuestTitleStruct {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    FIXID titleId<name="Title FIXID", bgcolor=cDkGreen>;
+    uint32 additionalParam1<name="Additional Parameter #1", bgcolor=cDkRed>;
+    uint32 additionalParam2<name="Additional Parameter #2", bgcolor=cYellow>;
+    uint32 flag<name="Flag", bgcolor=cDkBlue>;
+} SaveTimedQuestTitleStruct;
+
+typedef struct Black_Save_TimedQuest_SaveTimedQuestStruct {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int32 version<name="Timed Quest Version", bgcolor=cDkBlue>;
+    int32 titleCount <name="Timed Quest Title Array Size", comment="size of title array", bgcolor=cDkYellow>;
+    SaveTimedQuestTitleStruct title[titleCount]<name="Quest Title Struct", read=Str("Title ID: %d", this.titleId), bgcolor=cDkBlue>;
+    int32 questPointCount <name="Timed Quest Point Array Size", comment="size of questPoint array", bgcolor=cDkYellow>;
+    SaveTimedQuestPointStruct point[questPointCount]<name="Quest Point Struct", read=Str("Schedule ID: %d", this.scheduleId), bgcolor=cLtBlue>;
+    int32 labelCount <name="Timed Quest Label Array Size", comment="size of labelCount array", bgcolor=cDkYellow>;
+    SaveTimedQuestLabelStruct label[labelCount]<name="Quest Point Struct", read=Str("Label ID: %d", this.labelId), bgcolor=cLtBlue>;
+} Black_Save_TimedQuest_SaveTimedQuestStruct;
+
+typedef struct Black_Save_Universal_SaveUniversalStruct {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int32 var<name="Variable", bgcolor=cDkRed>;
+} Black_Save_Universal_SaveUniversalStruct;
+
+//-----------
+ 
+struct FILE
+{
+    local structid_t structIdCheck = ReadUInt64(24);   
+    local int64 fileSize = FileSize();
+    if (structIdCheck == 7563955397963846490)
+    {
+       // Header
+       Header header<name="Header", optimize=false, open=false>; 
+       //Save Structs          
+       Black_Save_TimedQuest_SaveTimedQuestStruct SaveTimedQuestStruct <name="Timed Quest Data", optimize=false, open=false>;  
+       Black_Save_Universal_SaveUniversalStruct SaveUniversalStruct <name="Universal Save Struct", optimize=false, open=false>;           
+       // Footer Structs
+       FSeek(header.footerStructsOffset);
+       FooterStructs footerStructs<name="Footer Structs", optimize=false>;
+       // Encryption Footer
+       FSeek(fileSize - 53);
+       EncryptionFooter encryptionFooter<name="Encryption Footer", optimize=false>;
+    }
+    else
+    {
+       Printf("File is encrypted!");
+       FSeek(fileSize - 53);
+       EncryptionFooter encryptionFooter<name="Encryption Footer", optimize=false>;
+    }    
+    Printf("Template finished\n");
+
+}File<name="FFXV universal_data.save file", open=true>;
