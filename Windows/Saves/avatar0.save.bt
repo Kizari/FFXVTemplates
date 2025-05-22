@@ -1,0 +1,776 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: avatar0.save.bt
+//   Authors: Rinual
+//   Version: 1.0
+//   Purpose: Analyzing and debuging FFXV avatar0 save files
+//  Category: Save Files
+//   History: Surihix - Header, Footer, Encryption // Alex - Misc Help 
+//   (Needs a decrypted save, for example https://github.com/Surihix/FFXVSaveCrypt)
+//
+//------------------------------------------------
+LittleEndian();
+
+typedef int32 FIXID;
+
+typedef uint64 structid_t <format=hex, fgcolor=0x00C0FF>;
+typedef ubyte bool <read=(this == 0 ? "false" : "true")>;
+
+//enums
+
+ enum WEAPON_ATTACK
+ {                                      
+     WEAPON_ATTACK_NONE       = 0xFFFFFFFF,
+     WEAPON_ATTACK_MAIN_UP    = 0x0,     
+     WEAPON_ATTACK_MAIN_LEFT  = 0x1,     
+     WEAPON_ATTACK_MAIN_RIGHT = 0x2,     
+     WEAPON_ATTACK_MAIN_DOWN  = 0x3,     
+     WEAPON_ATTACK_AMOUNT     = 0x4,
+     WEAPON_ATTACK_TOP        = 0x0,
+     WEAPON_ATTACK_MAIN       = 0x0,
+     WEAPON_ATTACK_SUB        = 0x1,
+     WEAPON_ATTACK_MAGIC      = 0x2,
+ };
+
+enum STATUS_COUNT 
+{
+    STATUS_COUNT_NONE                = 0xFFFFFFFF,
+    STATUS_COUNT_STRENGTH_UP         = 0x0,
+    STATUS_COUNT_VITALITY_UP         = 0x1,
+    STATUS_COUNT_MAGIC_UP            = 0x2,
+    STATUS_COUNT_SPIRIT_UP           = 0x3,
+    STATUS_COUNT_ATTACK_FIRE         = 0x4,
+    STATUS_COUNT_ATTACK_ICE          = 0x5,
+    STATUS_COUNT_ATTACK_THUNDER      = 0x6,
+    STATUS_COUNT_DEFENSE_FIRE        = 0x7,
+    STATUS_COUNT_DEFENSE_ICE         = 0x8,
+    STATUS_COUNT_DEFENSE_THUNDER     = 0x9,
+    STATUS_COUNT_AVOID               = 0xA,
+    STATUS_COUNT_MP0                 = 0xB,
+    STATUS_COUNT_REGEN               = 0xC,
+    STATUS_COUNT_STRONG              = 0xD,
+    STATUS_COUNT_THROUGH             = 0xE,
+    STATUS_COUNT_PINCH               = 0xF,
+    STATUS_COUNT_FIRE                = 0x10,
+    STATUS_COUNT_ICE                 = 0x11,
+    STATUS_COUNT_THUNDER             = 0x12,
+    STATUS_COUNT_EARTH               = 0x13,
+    STATUS_COUNT_WATER               = 0x14,
+    STATUS_COUNT_LIGHT               = 0x15,
+    STATUS_COUNT_DARK                = 0x16,
+    STATUS_COUNT_POISON              = 0x17,
+    STATUS_COUNT_CONFUSE             = 0x18,
+    STATUS_COUNT_TOAD                = 0x19,
+    STATUS_COUNT_STONE               = 0x1A,
+    STATUS_COUNT_STOP                = 0x1B,
+    STATUS_COUNT_WEAK                = 0x1C,
+    STATUS_COUNT_WET                 = 0x1D,
+    STATUS_COUNT_DEATH_SENTENCE      = 0x1E,
+    STATUS_COUNT_AURA                = 0x1F,
+    STATUS_COUNT_ATTACH_TARGET       = 0x20,
+    STATUS_COUNT_CONCENTRATION       = 0x21,
+    STATUS_COUNT_WEAK_DAEMON         = 0x22,
+    STATUS_COUNT_HYPER_SHIFT_BREAK   = 0x23,
+    STATUS_COUNT_MAGIC_SWORD_FIRE    = 0x24,
+    STATUS_COUNT_MAGIC_SWORD_BLIZZARD = 0x25,
+    STATUS_COUNT_MAGIC_SWORD_THUNDER = 0x26,
+    STATUS_COUNT_CARBUNCLE_PROTECT   = 0x27,
+    STATUS_COUNT_JOB_COMMAND_CRITICAL = 0x28,
+    STATUS_COUNT_EXP_UP              = 0x29,
+    STATUS_COUNT_CRITICAL            = 0x2A,
+    STATUS_COUNT_LIBRA               = 0x2B,
+    STATUS_COUNT_BERSERK             = 0x2C,
+    STATUS_COUNT_ATTACK_PARTS_BREAK  = 0x2D,
+    STATUS_COUNT_DEFENSE_PARTS_BREAK = 0x2E,
+    STATUS_COUNT_DEADLY_POISON       = 0x2F,
+    STATUS_COUNT_COMMAND_POWER_UP    = 0x30,
+    STATUS_COUNT_GLADIOLUS           = 0x31,
+    STATUS_COUNT_NOCTIS              = 0x32,
+    STATUS_COUNT_MAGIC_RATIO_UP      = 0x33,
+    STATUS_COUNT_SPIRIT_RATIO_UP     = 0x34,
+    STATUS_COUNT_BURNING             = 0x35,
+    STATUS_COUNT_FRIGID              = 0x36,
+    STATUS_COUNT_STRENGTH_RATIO_UP   = 0x37,
+    STATUS_COUNT_VITALITY_RATIO_UP   = 0x38,
+    STATUS_COUNT_PHOENIX_PROTECT     = 0x39,
+    STATUS_COUNT_PINCH_GUARD         = 0x3A,
+    STATUS_COUNT_INVINCIBLE_SUITS    = 0x3B,
+    STATUS_COUNT_GUARD_BREAK         = 0x3C,
+    STATUS_COUNT_SHIFT_MARK          = 0x3D,
+    STATUS_COUNT_KILL_SIGHT          = 0x3E,
+    STATUS_COUNT_AMOUNT              = 0x40,
+};
+
+enum STATUS_ELEMENT 
+{
+    STATUS_ELEMENT_NONE            = 0xFFFFFFFF,
+    STATUS_ELEMENT_PHYSICS         = 0x0,
+    STATUS_ELEMENT_MAGIC           = 0x1,
+    STATUS_ELEMENT_SLASH           = 0x2,
+    STATUS_ELEMENT_STRUCK          = 0x3,
+    STATUS_ELEMENT_STAB            = 0x4,
+    STATUS_ELEMENT_BULLET          = 0x5,
+    STATUS_ELEMENT_DAGGER          = 0x6,
+    STATUS_ELEMENT_SHIELD          = 0x7,
+    STATUS_ELEMENT_MACHINE         = 0x8,
+    STATUS_ELEMENT_FIRE            = 0x9,
+    STATUS_ELEMENT_ICE             = 0xA,
+    STATUS_ELEMENT_THUNDER         = 0xB,
+    STATUS_ELEMENT_EARTH           = 0xC,
+    STATUS_ELEMENT_WATER           = 0xD,
+    STATUS_ELEMENT_LIGHT           = 0xE,
+    STATUS_ELEMENT_DARK            = 0xF,
+    STATUS_ELEMENT_PHANTOM_SWORD   = 0x10,
+    STATUS_ELEMENT_AMOUNT          = 0x11,
+    STATUS_ELEMENT_FIRE_ICE        = 0x12,
+    STATUS_ELEMENT_FIRE_THUNDER    = 0x13,
+    STATUS_ELEMENT_ICE_FIRE        = 0x14,
+    STATUS_ELEMENT_ICE_THUNDER     = 0x15,
+    STATUS_ELEMENT_THUNDER_FIRE    = 0x16,
+    STATUS_ELEMENT_THUNDER_ICE     = 0x17,
+    STATUS_ELEMENT_MISCELLANEOUS   = 0x18,
+};
+
+enum STATUS_NORMAL
+{
+    STATUS_NORMAL_DEATH    = 0x0,
+    STATUS_NORMAL_ALTERNA  = 0x1,
+    STATUS_NORMAL_RESERVE1 = 0x2,
+    STATUS_NORMAL_RESERVE2 = 0x3,
+    STATUS_NORMAL_RESERVE3 = 0x4,
+    STATUS_NORMAL_RESERVE4 = 0x5,
+    STATUS_NORMAL_RESERVE5 = 0x6,
+    STATUS_NORMAL_RESERVE6 = 0x7,
+    STATUS_NORMAL_AMOUNT   = 0x8,
+};
+
+enum SortieStatus 
+ {   
+     SORTIE_STATUS_ON             = 0x0,
+     SORTIE_STATUS_OFF            = 0x1,
+     SORTIE_STATUS_OFF_VISIBLE_ON = 0x2,
+     SORTIE_STATUS_AMOUNT         = 0x3,
+ };
+ 
+ enum WEAPON_TYPE 
+ {                                       
+     WEAPON_TYPE_NONE                = 0xFFFFFFFF,
+     WEAPON_TYPE_SWORD               = 0x0, 
+     WEAPON_TYPE_LARGE_SWORD         = 0x1, 
+     WEAPON_TYPE_SPEAR               = 0x2,                                                                                  
+     WEAPON_TYPE_DAGGER              = 0x3,
+     WEAPON_TYPE_GUN                 = 0x4, 
+     WEAPON_TYPE_SHIELD              = 0x5,                                        
+     WEAPON_TYPE_MACHINE             = 0x6, 
+     WEAPON_TYPE_RIFLE               = 0x7,
+     WEAPON_TYPE_SUBMACHINE_GUN      = 0x8,
+     WEAPON_TYPE_GRENADE             = 0x9,
+     WEAPON_TYPE_ROCKET_LAUNCHER     = 0xA,
+     WEAPON_TYPE_MAGIC               = 0xC,
+     WEAPON_TYPE_RING_MAGIC          = 0xD,
+     WEAPON_TYPE_ITEM                = 0xE,
+     WEAPON_TYPE_CAMERA              = 0xF,
+     WEAPON_TYPE_PHANTOM_SWORD       = 0x14,
+     WEAPON_TYPE_PHANTOM_AXE         = 0x15,
+     WEAPON_TYPE_PHANTOM_BOW         = 0x16,
+     WEAPON_TYPE_PHANTOM_DUAL        = 0x17,
+     WEAPON_TYPE_PHANTOM_LONG        = 0x18,
+     WEAPON_TYPE_PHANTOM_SHURIKEN    = 0x19,
+     WEAPON_TYPE_PHANTOM_LARGE       = 0x1A,
+     WEAPON_TYPE_PHANTOM_SHIELD      = 0x1B,
+     WEAPON_TYPE_PHANTOM_MACE        = 0x1C,
+     WEAPON_TYPE_PHANTOM_WAND        = 0x1D,
+     WEAPON_TYPE_PHANTOM_SPEAR       = 0x1E,
+     WEAPON_TYPE_PHANTOM_KATANA      = 0x1F,
+     WEAPON_TYPE_PHANTOM_REGIS       = 0x20,
+     WEAPON_TYPE_AMOUNT              = 0x21,
+     WEAPON_TYPE_TOP                 = 0x0,
+     WEAPON_TYPE_ACCESSORY           = 0x30,
+     WEAPON_TYPE_ACCESSORY_NOCTIS    = 0x31,
+     WEAPON_TYPE_ACCESSORY_GLADIOLUS = 0x32,
+     WEAPON_TYPE_ACCESSORY_IGNIS     = 0x33,
+     WEAPON_TYPE_ACCESSORY_PROMPTO   = 0x34,
+     WEAPON_TYPE_ACCESSORY_FRIEND    = 0x35,
+     WEAPON_TYPE_KATANA              = 0x40,
+     WEAPON_TYPE_ENEMY_FIREARMS      = 0x41,
+     WEAPON_TYPE_NORMAL              = 0x50,
+     WEAPON_TYPE_PHANTOM             = 0x51,
+ };
+ 
+ enum WEAPON_CATEGORY
+ {
+     WEAPON_CATEGORY_NONE          = 0xFFFFFFFF,
+     WEAPON_CATEGORY_NORMAL        = 0x0,
+     WEAPON_CATEGORY_PHANTOM_SWORD = 0x1,
+     WEAPON_CATEGORY_MAGIC         = 0x2,
+     WEAPON_CATEGORY_RING          = 0x3,
+     WEAPON_CATEGORY_ITEM          = 0x4,
+     WEAPON_CATEGORY_ACCESSORY     = 0x5,
+     WEAPON_CATEGORY_AMOUNT        = 0x6,
+ };
+ 
+ enum BUFF 
+ {                                       
+     BUFF_NONE                    = 0xFFFFFFFF,
+     BUFF_GOOD                    = 0x0, 
+     BUFF_BEST                    = 0x1, 
+     BUFF_BAD                     = 0x2, 
+     BUFF_WORST                   = 0x3, 
+     BUFF_CRITICAL                = 0x4, 
+     BUFF_ABSOLUTE_CRITICAL       = 0x5, 
+     BUFF_ATTACK_SMALL            = 0x6, 
+     BUFF_MAGIC_SMALL             = 0x7, 
+     BUFF_SPIRIT_SMALL            = 0x8, 
+     BUFF_DEFENSE_FIRE            = 0x9, 
+     BUFF_DEFENSE_ICE             = 0xA, 
+     BUFF_DEFENSE_THUNDER         = 0xB, 
+     BUFF_LINK_BOOST              = 0xC, 
+     BUFF_COMMAND_BOOST           = 0xD, 
+     BUFF_DEFIANT                 = 0xE, 
+     BUFF_WEAK_ATTACK             = 0xF, 
+     BUFF_VICTORY                 = 0x10,
+     BUFF_MAX_HP_UP               = 0x11,
+     BUFF_DEFENSE_SMALL           = 0x12,
+     BUFF_REGEN_SMALL             = 0x13,
+     BUFF_TOLERANCE               = 0x14,
+     BUFF_IMMUNITY                = 0x15,
+     BUFF_PERSEVERANCE            = 0x16,
+     BUFF_NO_POISON               = 0x17,
+     BUFF_NO_TOAD                 = 0x18,
+     BUFF_INDOMITABLE             = 0x19,
+     BUFF_DESPERATE               = 0x1A,
+     BUFF_DISCOVERY               = 0x1B,
+     BUFF_STAMINA                 = 0x1C,
+     BUFF_INFINITY_STAMINA        = 0x1D,
+     BUFF_EXP                     = 0x1E,
+     BUFF_ENERGY                  = 0x1F,
+     BUFF_SUMMON_RECAST           = 0x20,
+     BUFF_LIGHTNING_SPEED         = 0x21,
+     BUFF_PINCH_ATTACK            = 0x22,
+     BUFF_REVENGE                 = 0x23,
+     BUFF_NO_INSTANT_DEATH        = 0x24,
+     BUFF_INVALID_ELEMENT         = 0x25,
+     BUFF_MASTER_MAGIC            = 0x26,
+     BUFF_BATTLE_DAEMON           = 0x27,
+     BUFF_BACK_WALL               = 0x28,
+     BUFF_CLEAR                   = 0x29,
+     BUFF_CHOCOBO_SPEED_UP        = 0x2A,
+     BUFF_CHOCOBO_JUMP_UP         = 0x2B,
+     BUFF_CHOCOBO_STAMINA_UP      = 0x2C,
+     BUFF_DEFENSE                 = 0x2D,
+     BUFF_DAMAGE_UP               = 0x2E,
+     BUFF_REGEN                   = 0x2F,
+     BUFF_ATTACK                  = 0x30,
+     BUFF_CRUSH_BOOST             = 0x31,
+     BUFF_PHANTOM_BOOST           = 0x32,
+     BUFF_REST                    = 0x33,
+     BUFF_CHOCOBO_COST            = 0x34,
+     BUFF_FISHING_LINE            = 0x35,
+     BUFF_CRAFT_WEAPON_ABILITY_UP = 0x36,
+     BUFF_CRAFT_WEAPON_EFFECT_UP  = 0x37,
+     BUFF_SHOP_DISCOUNT           = 0x38,
+     BUFF_AMOUNT                  = 0x39,
+ };
+
+// Shared structs
+typedef struct STRING_T
+{
+    int stringLength; 
+    if (stringLength != 0)
+    {
+        char stringData[stringLength];
+    }
+} string_t <name="string_t", read=(this.stringLength == 0 ? "null" : this.stringData)>;
+
+//------------------
+typedef struct HEADER
+{
+    char magic[4]<comment="not decrypted correctly", bgcolor=cDkPurple>;
+    uint32 version<bgcolor=cDkRed>;
+    uint32 reserved;
+    uint32 footerStructsOffset<bgcolor=cWhite>;
+    uint32 formatId<bgcolor=cYellow>;
+    uint32 versionId<bgcolor=cBlue>;
+}Header;
+typedef struct STRUCTMEMBER
+{
+    string_t memberName<name="memberName", bgcolor=cLtGreen>;
+    string_t memberType<name="memberType", bgcolor=cDkGreen>;
+    uint32 relativeMemoryOffsetInStruct<bgcolor=cDkYellow>;
+    uint32 memberSize<bgcolor=cYellow>;
+    uint16 itemCount<bgcolor=cGreen>;
+    ubyte primitiveType<bgcolor=cWhite>;
+    ubyte itemPrimitiveType <bgcolor=cLtBlue>;
+    ubyte attr <bgcolor=cDkBlue>;		   
+}StructMember <name=this.memberName.stringData, read=this.memberType.stringData>;
+
+typedef struct STRUCTENTRY
+{
+    string_t structName<name="structName", bgcolor=cDkBlue>;
+    structid_t structId<bgcolor=cBlack>;
+    ubyte padding[8];
+    uint16 memberCount<bgcolor=cLtRed>;
+    struct STRUCTMEMBERS
+    {
+        StructMember structMember[memberCount]<optimize=false>;
+    }StructMembers<name="Struct Members">;
+} StructEntry<name=this.structName.stringData>;
+
+typedef struct FOOTERSTRUCTS
+{
+    uint32 footerStructsCount<bgcolor=cLtGreen>;
+    StructEntry structEntry[footerStructsCount]<optimize=false>;
+}FooterStructs;
+
+typedef struct ENCRYPTIONFOOTER
+{
+    uint64 iv1<bgcolor=cDkGreen>;
+    uint64 iv2<bgcolor=cDkGreen>;
+    uint64 tweak1<bgcolor=cDkGreen>;
+    uint64 tweak2<bgcolor=cDkGreen>;
+    uint32 seed<bgcolor=cDkGreen>;
+    uint64 nullPaddingA;
+    uint64 nullPaddingB;
+    ubyte end2Value<bgcolor=cDkGreen>;
+}EncryptionFooter;
+
+//--------------
+ 
+typedef struct SaveAbilityEquipmentStruct 
+ {                                  
+     structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+     FIXID equipmentAbility;
+     int32 bank_number;                          
+ };
+ 
+ typedef struct SaveAbilityEquipmentMenuStruct 
+ {                                  
+     structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+     FIXID equipmentMenuAbility;                          
+ };
+ 
+  typedef struct SaveWeaponEquipmentStruct 
+ {                                  
+     structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+     FIXID weaponFixid <name="Equipment ID">;
+     WEAPON_TYPE equipmentType;
+     WEAPON_CATEGORY equipmentCategory;
+     int32 bank_number;                          
+ };
+ 
+  typedef struct SaveJobCommandEquipmentStruct 
+ {                                  
+     structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+     FIXID jobCommand;
+     int32 bank_number;                          
+ };
+
+typedef struct SaveBuffStruct 
+ {                                  
+     structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+     BUFF buff;
+     int32 level;                          
+ }; 
+ 
+ typedef struct SaveClothEquipmentStruct 
+ {                                  
+     structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+     FIXID clothFixid <name="Cloth ID">;
+     FIXID clothType;
+     int32 bank_number;                          
+ };
+
+typedef struct Black_Save_Player_SaveStatusStruct
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    uint32 id <name="CharaParamId", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 party_index <name="party_index", comment="type: int32_t", bgcolor=cDkGreen>;
+    bool join : 1 <name="join", comment="type: bool", bgcolor=cDkGreen>;
+    bool joined : 1 <name="joined", comment="type: bool", bgcolor=cDkGreen>;
+    SortieStatus sortie <name="sortie", comment="type: Black.Actor.SORTIE_STATUS", bgcolor=cDkGreen>;
+    bool disable_sortie : 1 <name="disable_sortie", comment="type: bool", bgcolor=cDkGreen>;
+    bool menu_invisible : 1 <name="menu_invisible", comment="type: bool", bgcolor=cDkGreen>;
+    bool immortal : 1 <name="immortal", comment="type: bool", bgcolor=cDkGreen>;
+    bool pinch_available : 1 <name="pinch_available", comment="type: bool", bgcolor=cDkGreen>;
+    bool damage_limit_over : 1 <name="damage_limit_over", comment="type: bool", bgcolor=cDkGreen>;
+    bool parameter_limit_over : 1 <name="parameter_limit_over", comment="type: bool", bgcolor=cDkGreen>;
+    int32 pinch_time <name="pinch_time", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 pinch_no_hit_time <name="pinch_no_hit_time", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 pinch_recover_no_hit_time <name="pinch_recover_no_hit_time", comment="type: int32_t", bgcolor=cDkGreen>;
+    bool recover_non_battle_only <name="recover_non_battle_only", comment="type: bool", bgcolor=cDkGreen>;
+    int32 hp <name="hp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 hp_max <name="hp_max", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 maximum_hp_max <name="maximum_hp_max", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 minimum_hp_max <name="minimum_hp_max", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 maximum_hp_max_buffer <name="maximum_hp_max_buffer", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_minimum_hp_max <name="ratio_minimum_hp_max", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_auto_recover_hp <name="ratio_auto_recover_hp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_pinch_damage_hp_max <name="ratio_pinch_damage_hp_max", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_poison_damage_hp <name="ratio_poison_damage_hp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_poison_damage_hp_max <name="ratio_poison_damage_hp_max", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_pinch_poison_hp_max <name="ratio_pinch_poison_hp_max", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_deadly_poison_damage_hp <name="ratio_deadly_poison_damage_hp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_burning_damage_hp <name="ratio_burning_damage_hp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_frigid_damage_hp <name="ratio_frigid_damage_hp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_ring_damage_hp <name="ratio_ring_damage_hp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_auto_recover_mp <name="ratio_auto_recover_mp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_armed_form_use_mp <name="ratio_armed_form_use_mp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_death_use_mp <name="ratio_death_use_mp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 ratio_holy_use_mp <name="ratio_holy_use_mp", comment="type: int32_t", bgcolor=cDkGreen>;
+    float death_sentence <name="death_sentence", comment="type: float", bgcolor=cDkGreen>;
+    int32 hp_bonus <name="hp_bonus", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 mp <name="mp", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 mp_max <name="mp_max", comment="type: int32_t", bgcolor=cDkGreen>;
+    float ep <name="ep", comment="type: float", bgcolor=cDkGreen>;
+    float ep_max <name="ep_max", comment="type: float", bgcolor=cDkGreen>;
+    float stamina <name="stamina", comment="type: float", bgcolor=cDkGreen>;
+    float stamina_max <name="stamina_max", comment="type: float", bgcolor=cDkGreen>;
+    uint32 level <name="level", comment="type: uint32_t", bgcolor=cDkGreen>;
+    uint32 level_cap <name="level_cap", comment="type: uint32_t", bgcolor=cDkGreen>;
+    uint32 level_max <name="level_max", comment="type: uint32_t", bgcolor=cDkGreen>;
+    int32 strength <name="strength", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 vitality <name="vitality", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 magic <name="magic", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 spirit <name="spirit", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 critical <name="critical", comment="type: int32_t", bgcolor=cDkGreen>;
+    uint32 element_attack <name="element_attack", comment="type: uint32_t", bgcolor=cDkGreen>;
+    uint32 element_absorption <name="element_absorption", comment="type: uint32_t", bgcolor=cDkGreen>;
+    uint32 element_invalidity <name="element_invalidity", comment="type: uint32_t", bgcolor=cDkGreen>;    
+   
+    uint32 elementTolerenceCount;
+    typedef struct enumElementTolerenceField(int32 val) {
+        local STATUS_ELEMENT Name = val;
+        int16 value;
+    } EnumeratedElementTolerence<name=EnumToString(this.Name), read=this.value>;
+    struct elementTolerenceStruct { 
+      local int32 i <hidden=true>;
+      for(i = 0; i < elementTolerenceCount; i++) {
+        EnumeratedElementTolerence reserved(i);
+      }
+    }elementTolerence <name="elementTolerence", comment="type: uint32_t", bgcolor=cDkBlue>; 
+    uint32 status_auto <name="status_auto", comment="type: uint32_t", bgcolor=cDkGreen>;
+    uint32 status <name="status", comment="type: uint32_t", bgcolor=cDkGreen>;    
+    uint32 status_attackCount;
+    typedef struct enumStatusField(int32 val) {
+        local STATUS_NORMAL Name = val;
+        uint8 value;
+    } EnumeratedStatus<name=EnumToString(this.Name), read=this.value, bgcolor=cDkGreen>; 
+    struct statusAttackStruct { 
+      local int32 i <hidden=true>;
+      for(i = 0; i < status_attackCount; i++) {
+        EnumeratedStatus reserved(i);
+      }
+    }statusAttack<name="Status Attack", bgcolor=cDkRed>; 
+    uint32 status_DefenceCount;
+	struct statusDefenceStruct { 
+      local int32 i <hidden=true>;
+      for(i = 0; i < status_DefenceCount; i++) {
+        EnumeratedStatus reserved(i);
+      }
+    }statusDefence<name="Status Defence", bgcolor=cDkRed>;     
+    uint64 status_count_auto <name="status_count_auto", comment="type: uint64_t", bgcolor=cDkGreen>;    
+    uint32 status_countCount;
+    typedef struct enumStatusCountField(int32 val) {
+        local STATUS_COUNT Name = val;
+        int8 value;
+    } EnumeratedStatusCount<name=EnumToString(this.Name), read=this.value, bgcolor=cDkBlue>; 
+    
+    struct statusCountStruct { 
+        local int32 i <hidden=true>;
+        for(i = 0; i < status_countCount; i++) {
+            EnumeratedStatusCount reserved(i - 1);
+        }
+    } statusCount;    
+    uint32 status_countAttackCount;
+    typedef struct enumStatusCountAttackField(int32 val) {
+        local STATUS_COUNT Name = val;
+        uint8 value;
+    } EnumeratedStatusCountAttack<name=EnumToString(this.Name), read=this.value, bgcolor=cDkRed>;    
+    struct statusCountAttackStruct { 
+        local int32 i <hidden=true>;
+        for(i = 0; i < status_countAttackCount; i++) {
+            EnumeratedStatusCountAttack reserved(i - 1);
+        }
+    } statusCountAttack;    
+    uint32 status_countAttackTimeCount;
+    typedef struct enumStatusCountAttackTimeField(int32 val) {
+        local STATUS_COUNT Name = val;
+        int8 value;
+    } EnumeratedStatusCountAttackTime<name=EnumToString(this.Name), read=this.value, bgcolor=cLtBlue>;    
+    struct statusCountAttackTimeStruct { 
+        local int32 i <hidden=true>;
+        for(i = 0; i < status_countAttackTimeCount; i++) {
+            EnumeratedStatusCountAttackTime reserved(i - 1);
+        }
+    } statusCountAttackTime;    
+    uint32 status_countDefenceCount;
+    typedef struct enumStatusCountDefenceField(int32 val) {
+        local STATUS_COUNT Name = val;
+        uint8 value;
+    } EnumeratedStatusCountDefence<name=EnumToString(this.Name), read=this.value, bgcolor=cLtGreen>;    
+    struct statusCountDefenceStruct { 
+        local int32 i <hidden=true>;
+        for(i = 0; i < status_countDefenceCount; i++) {
+            EnumeratedStatusCountDefence reserved(i - 1);
+        }
+    } statusCountDefence;    
+    uint32 status_countDefenseTimeCount;
+    typedef struct enumStatusCountTimeField(int32 val) {
+        local STATUS_COUNT Name = val;
+        uint16 value;
+    } EnumeratedStatusCountTime<name=EnumToString(this.Name), read=this.value, bgcolor=cLtRed>;    
+    struct statusCountTimeStruct { 
+        local int32 i <hidden=true>;
+        for(i = 0; i < status_countDefenseTimeCount; i++) {
+            EnumeratedStatusCountTime reserved(i - 1);
+        }
+    } statusCountTime;    
+    uint32 status_countDeltaTimeCount;
+    typedef struct enumStatusCountDeltaTimeField(int32 val) {
+        local STATUS_COUNT Name = val;
+        float value;
+    } EnumeratedStatusCountDeltaTime<name=EnumToString(this.Name), read=this.value, bgcolor=cYellow>;    
+    struct statusCountDeltaTimeStruct { 
+        local int32 i <hidden=true>;
+        for(i = 0; i < status_countDeltaTimeCount; i++) {
+            EnumeratedStatusCountDeltaTime reserved(i - 1);
+        }
+    } statusCountDeltaTime;    
+    uint32 status_countRecordCount;
+    typedef struct enumStatusCountRecordField(int32 val) {
+        local STATUS_COUNT Name = val;
+        uint8 value;
+    } EnumeratedStatusCountRecord<name=EnumToString(this.Name), read=this.value, bgcolor=cLtGray>;    
+    struct statusCountRecordStruct { 
+        local int32 i <hidden=true>;
+        for(i = 0; i < status_countRecordCount; i++) {
+            EnumeratedStatusCountRecord reserved(i - 1);
+        }
+    } statusCountRecord;
+    int32 buff_registration_count <name="buff_registration_count", comment="type: int32_t", bgcolor=cDkGreen>;
+    uint32 Black_Actor_BuffEquipmentAmount;
+    SaveBuffStruct buff[Black_Actor_BuffEquipmentAmount] <name="buff", comment="type: Black.Save.Player.SaveBuffStruct", bgcolor=cDkGreen>;    
+    uint32 buffAmount;
+    typedef struct buffCountField(int32 val) {
+        local BUFF Name = val;
+        int32 value;
+    } EnumeratedBuffCount<name=EnumToString(this.Name), read=this.value, bgcolor=cDkBlue>;    
+    struct buffCountStruct { 
+        local int32 i <hidden=true>;
+        for(i = 0; i < buffAmount; i++) {
+            EnumeratedBuffCount reserved(i);
+        }
+    } buffCount;
+    float buff_time <name="buff_time", comment="type: float", bgcolor=cDkGreen>;
+    float start_buff_time <name="start_buff_time", comment="type: float", bgcolor=cDkGreen>;
+    float mp_burst_time <name="mp_burst_time", comment="type: float", bgcolor=cDkGreen>;
+    float mp_burst_time_max <name="mp_burst_time_max", comment="type: float", bgcolor=cDkGreen>;
+    float element_damage_time <name="element_damage_time", comment="type: float", bgcolor=cDkGreen>;
+    WEAPON_ATTACK weapon_use_number <name="weapon_use_number", comment="type: Black.Actor.WEAPON_ATTACK", bgcolor=cDkGreen>;
+    int32 weapon_slot_amount <name="weapon_slot_amount", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 knights_of_eos <name="knights_of_eos", comment="type: int32_t", bgcolor=cDkGreen>;
+    bool age : 1 <name="age", comment="type: bool", bgcolor=cDkGreen>;
+    bool injured : 1 <name="injured", comment="type: bool", bgcolor=cDkGreen>;
+    bool child : 1 <name="child", comment="type: bool", bgcolor=cDkGreen>;
+    bool miners : 1 <name="miners", comment="type: bool", bgcolor=cDkGreen>;
+    bool first_person : 1 <name="first_person", comment="type: bool", bgcolor=cDkGreen>;
+    bool friend_control : 1 <name="friend_control", comment="type: bool", bgcolor=cDkGreen>;
+    bool jacket_off : 1 <name="jacket_off", comment="type: bool", bgcolor=cDkGreen>;
+    bool tears : 1 <name="tears", comment="type: bool", bgcolor=cDkGreen>;
+    bool ring : 1 <name="ring", comment="type: bool", bgcolor=cDkGreen>;
+    bool ability_available : 1 <name="ability_available", comment="type: bool", bgcolor=cDkGreen>;
+    float dirty <name="dirty", comment="type: float", bgcolor=cDkGreen>;
+    uint32 abilityEquipmentAmount;
+    SaveAbilityEquipmentStruct ability[abilityEquipmentAmount] <name="ability", read=(this.equipmentAbility), comment="type: Black.Save.Ability.SaveAbilityEquipmentStruct", bgcolor=cDkGreen>;
+    uint32 equipmentMenuAmount;
+    SaveAbilityEquipmentMenuStruct ability_menu[equipmentMenuAmount] <name="ability_menu", read=(this.equipmentMenuAbility), comment="type: Black.Save.Ability.SaveAbilityEquipmentMenuStruct", bgcolor=cDkGreen>;
+    uint32 weaponAttackAmount;
+    SaveWeaponEquipmentStruct weapon[weaponAttackAmount] <name="weapon", read=(this.weaponFixid), comment="type: Black.Save.Equipment.SaveWeaponEquipmentStruct", bgcolor=cDkGreen>;
+    SaveJobCommandEquipmentStruct job_command <name="job_command", read=(this.jobCommand), comment="type: Black.Save.Ability.SaveJobCommandEquipmentStruct", bgcolor=cDkGreen>;
+    uint32 AccessoryEquipmentAmount;
+    SaveWeaponEquipmentStruct accessory[AccessoryEquipmentAmount] <name="accessory", read=(this.weaponFixid), comment="type: Black.Save.Equipment.SaveWeaponEquipmentStruct", bgcolor=cDkGreen>;
+    uint32 ClothEquipmentAmount;
+    SaveClothEquipmentStruct cloth[ClothEquipmentAmount] <name="cloth", read=(this.clothFixid), comment="type: Black.Save.Equipment.SaveClothEquipmentStruct", bgcolor=cDkGreen>;
+    int32 reserve1 <name="reserve1", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 reserve2 <name="reserve2", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 reserve3 <name="reserve3", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 reserve4 <name="reserve4", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 reserve5 <name="reserve5", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 reserve6 <name="reserve6", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 reserve7 <name="reserve7", comment="type: int32_t", bgcolor=cDkGreen>;
+    int32 reserve8 <name="reserve8", comment="type: int32_t", bgcolor=cDkGreen>;   
+} Black_Save_Player_SaveStatusStruct;
+
+//--- Avatar Specific Structs -------------------
+
+typedef struct Black_Save_Multiplay_SaveAvatarColor {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    float R <name="Red Channel", comment="type: float", bgcolor=cRed>;
+    float G <name="Green Channel", comment="type: float", bgcolor=cGreen>;
+    float B <name="Blue Channel", comment="type: float", bgcolor=cBlue>;
+    bool IsDefault <name="Is Default Color", comment="type: bool", bgcolor=cLtGray>;
+} Black_Save_Multiplay_SaveAvatarColor;
+
+typedef struct Black_Save_Multiplay_SaveAvatarScalar {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    float Value <name="Scalar Value", comment="type: float", bgcolor=cYellow>;
+    bool IsDefault <name="Is Default Scalar", comment="type: bool", bgcolor=cDkGreen>;
+} Black_Save_Multiplay_SaveAvatarScalar;
+
+typedef struct Black_Save_Multiplay_SaveAvatarColorSet {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    Black_Save_Multiplay_SaveAvatarColor Color1  <name="Color Slot 1">;
+    Black_Save_Multiplay_SaveAvatarColor Color2  <name="Color Slot 2">;
+    Black_Save_Multiplay_SaveAvatarColor Color3  <name="Color Slot 3">;
+    Black_Save_Multiplay_SaveAvatarColor Color4  <name="Color Slot 4">;
+    Black_Save_Multiplay_SaveAvatarColor Color5  <name="Color Slot 5">;
+    Black_Save_Multiplay_SaveAvatarColor Color6  <name="Color Slot 6">;
+    Black_Save_Multiplay_SaveAvatarColor Color7  <name="Color Slot 7">;
+    Black_Save_Multiplay_SaveAvatarColor Color8  <name="Color Slot 8">;
+    Black_Save_Multiplay_SaveAvatarColor Color9  <name="Color Slot 9">;
+    Black_Save_Multiplay_SaveAvatarColor Color10 <name="Color Slot 10">;
+    Black_Save_Multiplay_SaveAvatarColor Color11 <name="Color Slot 11">;
+    Black_Save_Multiplay_SaveAvatarColor Color12 <name="Color Slot 12">;
+    Black_Save_Multiplay_SaveAvatarColor Color13 <name="Color Slot 13">;
+    Black_Save_Multiplay_SaveAvatarColor Color14 <name="Color Slot 14">;
+    Black_Save_Multiplay_SaveAvatarColor Color15 <name="Color Slot 15">;
+} Black_Save_Multiplay_SaveAvatarColorSet;
+
+typedef struct Black_Save_Multiplay_SaveAvatarDataStruct {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    uint8 BaseModelType <name="Base Model Type", comment="type: byte", bgcolor=cGray>;
+    float BaseScale <name="Base Scale", comment="type: float", bgcolor=cBlue>;
+    float HeadScale <name="Head Scale", comment="type: float", bgcolor=cBlue>;
+    FIXID FaceA <name="Face A", comment="type: uint32", bgcolor=cLtBlue>;
+    FIXID FaceB <name="Face B", comment="type: uint32", bgcolor=cLtBlue>;
+    float FaceBlendWeight <name="Face Blend Weight", comment="type: float", bgcolor=cDkBlue>;
+    float FaceBlendWeightMaterial <name="Face Blend Weight Material", comment="type: float", bgcolor=cDkBlue>;
+    float BodyBlendWeight <name="Body Blend Weight", comment="type: float", bgcolor=cDkBlue>;
+    FIXID Tops <name="Tops", comment="type: uint32", bgcolor=cDkRed>;
+    FIXID Bottoms <name="Bottoms", comment="type: uint32", bgcolor=cDkRed>;
+    FIXID Shoes <name="Shoes", comment="type: uint32", bgcolor=cDkRed>;
+    FIXID Gloves <name="Gloves", comment="type: uint32", bgcolor=cDkRed>;
+    FIXID Hair <name="Hair", comment="type: uint32", bgcolor=cLtGreen>;
+    FIXID Beard <name="Beard", comment="type: uint32", bgcolor=cLtBlue>;
+    FIXID Wear <name="Wear", comment="type: uint32", bgcolor=cLtGreen>;
+    FIXID Eyebrow <name="Eyebrow", comment="type: uint32", bgcolor=cLtGreen>;
+    FIXID Accessory <name="Accessory", comment="type: uint32", bgcolor=cLtGreen>;
+    FIXID Eyelash <name="Eyelash", comment="type: uint32", bgcolor=cLtGreen>;
+    FIXID VoiceType <name="Voice Type", comment="type: uint32", bgcolor=cLtBlue>;
+    Black_Save_Multiplay_SaveAvatarColor SkinColor <name="SkinColor", comment="type: Black_Save_Multiplay_SaveAvatarColor">;
+    Black_Save_Multiplay_SaveAvatarColor LipColor <name="LipColor", comment="type: Black_Save_Multiplay_SaveAvatarColor">;
+    Black_Save_Multiplay_SaveAvatarColor EyeColor <name="EyeColor", comment="type: Black_Save_Multiplay_SaveAvatarColor">;
+    Black_Save_Multiplay_SaveAvatarColor HairColor <name="HairColor", comment="type: Black_Save_Multiplay_SaveAvatarColor">;
+    Black_Save_Multiplay_SaveAvatarColor HairtipColor <name="HairtipColor", comment="type: Black_Save_Multiplay_SaveAvatarColor">;
+    Black_Save_Multiplay_SaveAvatarColor BeardColor <name="BeardColor", comment="type: Black_Save_Multiplay_SaveAvatarColor">;
+    Black_Save_Multiplay_SaveAvatarColor BeardtipColor <name="BeardtipColor", comment="type: Black_Save_Multiplay_SaveAvatarColor">;
+    Black_Save_Multiplay_SaveAvatarColor EyebrowColor <name="EyebrowColor", comment="type: Black_Save_Multiplay_SaveAvatarColor">;
+    Black_Save_Multiplay_SaveAvatarScalar HairNuance <name="HairNuance", comment="type: Black_Save_Multiplay_SaveAvatarColor">;
+    FIXID FaceSticker <name="FaceSticker", comment="type: uint32", bgcolor=cLtGreen>;
+    FIXID FacePaint <name="FacePaint", comment="type: uint32", bgcolor=cLtBlue>;
+    FIXID BodyPaint <name="BodyPaint", comment="type: uint32", bgcolor=cLtGreen>;
+    FIXID ArmRightPaint <name="ArmRightPaint", comment="type: uint32", bgcolor=cLtRed>;
+    FIXID ArmLeftPaint <name="ArmLeftPaint", comment="type: uint32", bgcolor=cLtRed>;
+    FIXID BackPaint <name="BackPaint", comment="type: uint32", bgcolor=cLtGreen>;    
+    float NeckThickness <name="NeckThickness", comment="type: float", bgcolor=cDkRed>;
+    float BodyThickness <name="BodyThickness", comment="type: float", bgcolor=cDkGreen>;
+    float TrapeziusMuscleThickness <name="TrapeziusMuscleThickness", comment="type: float", bgcolor=cYellow>;
+    float ChestSize <name="ChestSize", comment="type: float", bgcolor=cDkBlue>;
+    float ArmThickness <name="ArmThickness", comment="type: float", bgcolor=cDkGray>;   
+    float ArmThicknessBalance <name="Arm Thickness Balance", bgcolor=cDkGreen>;
+    float WaistSize <name="Waist Size", bgcolor=cDkGreen>;
+    float StomachThickness <name="Stomach Thickness", bgcolor=cDkGreen>;
+    float HipSize <name="Hip Size", bgcolor=cDkGreen>;
+    float FootThickness <name="Foot Thickness", bgcolor=cDkGreen>;
+    float EyebrowTail_FR <name="Eyebrow Tail (FR)", bgcolor=0xFFAAAA>;
+    float EyebrowTop_FR <name="Eyebrow Top (FR)", bgcolor=0xAAFFAA>;
+    float TemporalWidth <name="Temporal Width", bgcolor=0xAAAAFF>;
+    float EyebrowHead_UD <name="Eyebrow Head (UD)", bgcolor=0xFFFFAA>;
+    float EyebrowTop_UD <name="Eyebrow Top (UD)", bgcolor=0xFFAAFF>;
+    float EyebrowTail_UD <name="Eyebrow Tail (UD)", bgcolor=0xAAFFFF>;
+    float EyebrowInterval <name="Eyebrow Interval", bgcolor=0xDDAAFF>;
+    float Eye_UD <name="Eye (UD)", bgcolor=0xFFAAAA>;
+    float EyeInterval <name="Eye Interval", bgcolor=0xAAFFAA>;
+    float Eye_FB <name="Eye (FB)", bgcolor=0xAAAAFF>;
+    float TopEyelid_UD <name="Top Eyelid (UD)", bgcolor=0xFFFFAA>;
+    float EyeInclination <name="Eye Inclination", bgcolor=0xFFAAFF>;
+    float BottomEyelid_UD <name="Bottom Eyelid (UD)", bgcolor=0xAAFFFF>;
+    float NoseHeight <name="Nose Height", bgcolor=0xDDAAFF>;
+    float Nose_UD <name="Nose (UD)", bgcolor=0xFFAAAA>;
+    float NoseTopHeight <name="Nose Top Height", bgcolor=0xAAFFAA>;
+    float NoseTopWidth <name="Nose Top Width", bgcolor=0xAAAAFF>;
+    float NoseRidgeHeight <name="Nose Ridge Height", bgcolor=0xFFFFAA>;
+    float NoseRidgeWidth <name="Nose Ridge Width", bgcolor=0xFFAAFF>;
+    float NoseTip_UD <name="Nose Tip (UD)", bgcolor=0xAAFFFF>;
+    float NoseTipContour <name="Nose Tip Contour", bgcolor=0xDDAAFF>;
+    float NoseTipSize <name="Nose Tip Size", bgcolor=0xFFAAAA>;
+    float Nostril_UD <name="Nostril (UD)", bgcolor=0xAAFFAA>;
+    float NostrilWidth <name="Nostril Width", bgcolor=0xAAAAFF>;
+    float CheekTopWidth <name="Cheek Top Width", bgcolor=0xFFFFAA>;
+    float CheekTop_FR <name="Cheek Top (FR)", bgcolor=0xFFAAFF>;
+    float CheekContour <name="Cheek Contour", bgcolor=0xAAFFFF>;
+    float CheekMiddle_FR <name="Cheek Middle (FR)", bgcolor=0xDDAAFF>;
+    float CheekMiddleWidth <name="Cheek Middle Width", bgcolor=0xFFAAAA>;
+    float CheekBottomWidth <name="Cheek Bottom Width", bgcolor=0xAAFFAA>;
+    float Mouth_UD <name="Mouth (UD)", bgcolor=0xAAAAFF>;
+    float MouthWidth <name="Mouth Width", bgcolor=0xFFFFAA>;
+    float Mouth_FR <name="Mouth (FR)", bgcolor=0xFFAAFF>;
+    float LipThickness <name="Lip Thickness", bgcolor=0xAAFFFF>;
+    float LowerLip_FR <name="Lower Lip (FR)", bgcolor=0xDDAAFF>;
+    float MouthCorner_UD <name="Mouth Corner (UD)", bgcolor=0xFFAAAA>;
+    float MouthCorner_FR <name="Mouth Corner (FR)", bgcolor=0xAAFFAA>;
+    float Jaw_UD <name="Jaw (UD)", bgcolor=0xAAAAFF>;
+    float JawDistort_LR <name="Jaw Distort (LR)", bgcolor=0xFFFFAA>;
+    float Jaw_FR <name="Jaw (FR)", bgcolor=0xFFAAFF>;
+    float Chin_UD <name="Chin (UD)", bgcolor=0xAAFFFF>;
+    float Chin_FR <name="Chin (FR)", bgcolor=0xDDAAFF>;
+    float ChinContour <name="Chin Contour", bgcolor=0xFFAAAA>;
+    float ChinWidth <name="Chin Width", bgcolor=0xAAFFAA>;
+    float Gills_UD <name="Gills (UD)", bgcolor=0xAAAAFF>;
+    float GillsBottomWidth <name="Gills Bottom Width", bgcolor=0xFFFFAA>;
+    float Gills_FR <name="Gills (FR)", bgcolor=0xFFAAFF>;
+    float GillsTopWidth <name="Gills Top Width", bgcolor=0xAAFFFF>;
+    Black_Save_Multiplay_SaveAvatarColorSet TopsColor <name="Tops Color Set">;
+    Black_Save_Multiplay_SaveAvatarColorSet BottomsColor <name="Bottoms Color Set">;
+    Black_Save_Multiplay_SaveAvatarColorSet ShoesColor <name="Shoes Color Set">;
+    Black_Save_Multiplay_SaveAvatarColorSet GloveColor <name="Glove Color Set">;
+    Black_Save_Multiplay_SaveAvatarColorSet WearColor <name="Wear Color Set">;
+} Black_Save_Multiplay_SaveAvatarDataStruct;
+
+ typedef struct Black_Save_Multiplay_SaveAvatarStruct 
+ {                                  
+     structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+     int32 version <name="Avatar Version", bgcolor=cRed>;
+     Black_Save_Multiplay_SaveAvatarDataStruct saveAvatarDataStruct <name="Avatar Data", bgcolor=cBlue>;                          
+ }Black_Save_Multiplay_SaveAvatarStruct;
+
+//-----------
+ 
+struct FILE
+{
+    local structid_t structIdCheck = ReadUInt64(24);   
+    local int64 fileSize = FileSize();
+    if (structIdCheck == 11090407864822326972)
+    {
+       // Header
+       Header header<name="Header", optimize=false, open=false>; 
+       //Save Structs          
+       Black_Save_Player_SaveStatusStruct SaveStatusStruct <name="Avatar Status Info", optimize=false, open=false>;  
+       Black_Save_Multiplay_SaveAvatarStruct SaveAvatarStruct <name="Avatar Save Info", optimize=false, open=false>;        
+       // Footer Structs
+       FSeek(header.footerStructsOffset);
+       FooterStructs footerStructs<name="Footer Structs", optimize=false>;
+       // Encryption Footer
+       FSeek(fileSize - 53);
+       EncryptionFooter encryptionFooter<name="Encryption Footer", optimize=false>;
+    }
+    else
+    {
+       Printf("File is encrypted!");
+       FSeek(fileSize - 53);
+       EncryptionFooter encryptionFooter<name="Encryption Footer", optimize=false>;
+    }    
+    Printf("Template finished\n");
+
+}File<name="FFXV avatar0.save file", open=true>;
