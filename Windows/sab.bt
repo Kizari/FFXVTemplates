@@ -10,6 +10,7 @@
 //  ID Bytes: 73 61 62 66
 //   History: 1.0 - started file
 //   History: 2.0 - used FFXV file sturcts
+//   History: 3.0 - 10/08/25 - Updated SABTRACKCENTERCOMMAND & ZeroOnes
 //------------------------------------------------
 
 //also known as .sbin files
@@ -72,6 +73,7 @@ enum <ubyte> SAB_MATERIAL_FORMAT_TYPES
   SAB_MATERIAL_FORMAT_XMA2 = 0x5,
   SAB_MATERIAL_FORMAT_MSMP3 = 0x6,
   SAB_MATERIAL_FORMAT_HCA = 0x7,
+  SAB_MATERIAL_FORMAT_SWITCHOPUS = 0x8
 };
 
 //in SABTRACKHEADER
@@ -400,9 +402,10 @@ typedef struct
     ZEROONE_SLOPE_TYPES slopeType;
     int reserved3[3];
     if(useParamNamelen){
-      char name[useParamNamelen];
+        char name[useParamNamelen];
+        AlignS(16);
     } else {
-     local string name = "0";
+        local string name = "0";
     }
     if(numPoints){
         SABZEROONEPOINT ZEROONEPOINT[numPoints]<open=true>;
@@ -472,10 +475,15 @@ typedef struct (SectionRead &s) {
     uint reserved3[2];
     local int z<hidden=true> = 0;
     local int test<hidden=true> = 0;
+    local int off<hidden=true> = 0;
     if(Count){
-        int loc[Count];
+        int loc[Count];        
         for(z=0;z<Count;z++){
-            FSeek(loc[z] + s.Offset);
+            off = loc[z];
+            if(off == -1){
+                continue;
+            }
+            FSeek(off + s.Offset);
             switch(s.name){
                 //for sbin (sabf)
                 case ("snd "): //Sound
@@ -531,7 +539,7 @@ typedef struct (SectionRead &s) {
                             SABSOUNDSEQUENCEINFO SEQUENCEINFO[numSequences]<open=true>;
                           } 
                         } SOUNDHEADER <open=true, read=sndName8>;
-                    } else {
+                    } else if(test < 22){
                         test = FTell();
                         struct SABSOUNDHEADER
                         {
@@ -593,13 +601,91 @@ typedef struct (SectionRead &s) {
                           //guessing this is how it works based on data
                           if(numZeroOneParam){
                               FSeek(test+zerooneParamOffset);
-                              SABSOUNDZEROONEPARAM SOUNDZEROONEPARAM[numZeroOneParam]<open=true>;
+                              SABSOUNDZEROONEPARAM SOUNDZEROONEPARAM[numZeroOneParam]<optimize=false, open=true>;
                           }
                           if(numSequences){
                             FSeek(test+sequenceOffset);
-                            SABSOUNDSEQUENCEINFO SEQUENCEINFO[numSequences]<open=true>;
+                            SABSOUNDSEQUENCEINFO SEQUENCEINFO[numSequences]<optimize=false, open=true>;
                           } 
                         } SOUNDHEADER <open=true, read=sndName>;
+                    } else {
+                        test = FTell();
+                        struct SABSOUNDHEADER_V22
+                        {
+                          ubyte version;
+                          ubyte work;
+                          ushort structSize;
+                          SAB_SOUND_TYPES type;
+                          ubyte numSequences;
+                          OOCategory category;
+                          ubyte priority;
+                          ushort number;
+                          ubyte startMacro;
+                          ubyte stopMacro;
+                          float volume;
+                          uint cycleIntervalLow;
+                          uint cycleIntervalHigh;
+                          ubyte cycleMaxPlayGroups;
+                          ubyte flgs;
+                          ushort sequenceOffset;
+                          float audibleRange;
+                          ubyte output;
+                          ubyte distanceAttenuationCurve;
+                          SAB_SOUND_PORT_TYPES port;
+                          ubyte namelen;
+                          float playLength;
+                          float interiorFactor;
+                          float innerRange;
+                          char auxSendBusses[4];
+                          float auxSendVolumes[4];
+                          char numAuxSends;
+                          ubyte numEffects;
+                          ushort effectTableOffset;
+                          Assert(numEffects == 0); //not found in any sample files
+                          float dopplerFactor;
+                          ushort zerooneParamOffset;
+                          ubyte numZeroOneParam;
+                          Assert(numZeroOneParam == 0); //not found in any sample files
+                          ubyte finishMacro;
+                          SAB_SOUND_PANNING_TYPES panningType;
+                          if(version >= 24){
+                              ubyte sub_version;
+                              ushort reserved;
+                              float convergenceFactor[9];
+                              ushort unkn1;
+                              ushort unkn2;
+                              uint sampleRate;
+                          } else {
+                              ubyte reserved[3];
+                              float convergenceFactor;
+                              uint reserved2[10];
+                          }
+                          if(namelen){
+                              char name[namelen];
+                          } else {
+                             local string name = "0";
+                          }
+                          AlignS(16);
+                          //guessing this is how it works based on data
+                          if(numEffects){
+                              FSeek(test+effectTableOffset);
+                              int locs[numEffects]; 
+                              local int y<hidden=true> = 0;
+                              for(y=0;y<numEffects;y++){
+                                  FSeek(test+locs[y]);
+                                  SABSOUNDEFFECTHEADER SOUNDEFFECTHEADER<open=true>;
+                              }
+                          }
+                          //guessing this is how it works based on data
+                          if(numZeroOneParam){
+                              FSeek(test+zerooneParamOffset);
+                              SABSOUNDZEROONEPARAM SOUNDZEROONEPARAM[numZeroOneParam]<optimize=false, open=true>;
+                          }
+                          if(numSequences){
+                            FSeek(test+sequenceOffset);
+                            SABSOUNDSEQUENCEINFO SEQUENCEINFO[numSequences]<optimize=false, open=true>;
+                          } 
+                        } SOUNDHEADER <open=true, read=sndName22>;
                     }
                     break;
                 case ("seq "): //Sequence
@@ -648,15 +734,17 @@ typedef struct (SectionRead &s) {
                           ubyte version;
                           ubyte reserved;
                           ushort structSize;
-                          ushort id;
+                          ushort number;
                           ushort commandOffset;
                           ubyte numZeroOnes;
-                          Assert(numZeroOnes == 0); //this was missing from all the files I checked
                           ubyte reserved2[3];
                           int reserved3;
                           //guessing here based on data
                           if(numZeroOnes){
-                              SABZEROONEHEADER ZEROONEHEADER[numZeroOnes]<open=true, read=SABZEROONEName>;
+                              int reserved4[4];
+                              uint offsetZeroOnes[numZeroOnes];
+                              AlignS(16);
+                              SABZEROONEHEADER ZEROONEHEADER[numZeroOnes]<open=true, optimize=false, read=SABZEROONEName>;
                           }
                           FSeek(test + commandOffset);
                           local int ss<hidden=true> = 1;
@@ -676,7 +764,7 @@ typedef struct (SectionRead &s) {
                       ushort structSize;
                       short mtrl_index;
                       short bank_id;
-                      short id;
+                      short trk_index;
                       short childID;
                       uint reserved;
                       local int tt<hidden=true> = 1;
@@ -706,8 +794,12 @@ typedef struct (SectionRead &s) {
                                     {
                                       float vol;
                                       uint shiftTime;
-                                      ubyte curve;
-                                      ubyte reserved[3];
+                                      if(commandSize == 20){
+                                          float curve[3];
+                                      } else {
+                                          ubyte curve;
+                                          ubyte reserved[3];
+                                      }
                                     }VOLUMECOMMAND<open=true>;
                                     break;
                                 case SAB_TRACK_COMMAND_PITCH:
@@ -715,8 +807,12 @@ typedef struct (SectionRead &s) {
                                     {
                                       float pitch;
                                       uint shiftTime;
-                                      ubyte curve;
-                                      ubyte reserved[3];
+                                      if(commandSize == 20){
+                                          float curve[3];
+                                      } else {
+                                          ubyte curve;
+                                          ubyte reserved[3];
+                                      }
                                     }PITCHCOMMAND<open=true>;
                                     break;
                                 case SAB_TRACK_COMMAND_PANNING:
@@ -724,8 +820,12 @@ typedef struct (SectionRead &s) {
                                     {
                                       float pan;
                                       uint shiftTime;
-                                      ubyte curve;
-                                      ubyte reserved[3];
+                                      if(commandSize == 20){
+                                          float curve[3];
+                                      } else {
+                                          ubyte curve;
+                                          ubyte reserved[3];
+                                      }
                                     }PANNINGCOMMAND<open=true>;
                                     break;
                                 case SAB_TRACK_COMMAND_FRPANNING:
@@ -733,8 +833,12 @@ typedef struct (SectionRead &s) {
                                     {
                                       float frpan;
                                       uint shiftTime;
-                                      ubyte curve;
-                                      ubyte reserved[3];
+                                      if(commandSize == 20){
+                                          float curve[3];
+                                      } else {
+                                          ubyte curve;
+                                          ubyte reserved[3];
+                                      }
                                     }FRPANNINGCOMMAND <open=true>;
                                     break;
                                 case SAB_TRACK_COMMAND_VOLUME_RANDOM:
@@ -790,8 +894,12 @@ typedef struct (SectionRead &s) {
                                     {
                                       float lfe;
                                       uint shiftTime;
-                                      ubyte curve;
-                                      ubyte reserved[3];
+                                      if(commandSize == 20){
+                                          float curve[3];
+                                      } else {
+                                          ubyte curve;
+                                          ubyte reserved[3];
+                                      }
                                     }LFECOMMAND <open=true>;
                                     break;
                                 case SAB_TRACK_COMMAND_CENTER:
@@ -799,8 +907,12 @@ typedef struct (SectionRead &s) {
                                     {
                                       float center;
                                       uint shiftTime;
-                                      ubyte curve;
-                                      ubyte reserved[3];
+                                      if(commandSize == 20){
+                                          float curve[3];
+                                      } else {
+                                          ubyte curve;
+                                          ubyte reserved[3];
+                                      }
                                     }CENTERCOMMAND <open=true>;
                                     break;
                                 case SAB_TRACK_COMMAND_SURROUNDPAN:
@@ -826,9 +938,9 @@ typedef struct (SectionRead &s) {
                       ubyte version;
                       ubyte reserved;
                       short structSize;
-                      ubyte channel;
+                      ubyte channels;
                       SAB_MATERIAL_FORMAT_TYPES format;
-                      short number;
+                      short mtrl_index;
                       uint sampleRate;
                       uint loopStart;
                       uint loopEnd;
@@ -978,6 +1090,10 @@ string SABZEROONEName(SABZEROONEHEADER &t) {
 };
 
 string sndName8(SABSOUNDHEADER_V8 &t) {
+    return t.name;
+};
+
+string sndName22(SABSOUNDHEADER_V22 &t) {
     return t.name;
 };
 
