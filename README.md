@@ -12,7 +12,7 @@ If you have any contributions to add to this repository, please either make a pu
 | Forspoken | New file formats and updated format versions for Forspoken |
 | PlayStation4 | Alternative versions of the file formats with differences for the PS4 version of FFXV |
 | Utilities | Helper functions that can be referenced from templates |
-| Windows | The most important folder—contains the file format templates for FFXV Windows Edition |  
+| Windows | The most important folderâ€”contains the file format templates for FFXV Windows Edition |  
 
 &nbsp;
 
