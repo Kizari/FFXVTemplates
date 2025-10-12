@@ -1,0 +1,76 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.1 Binary Template
+//
+//      File: GameFrameworkModules
+//   Authors: neptuwunium (yretenai)
+//   Version: 1.0
+//------------------------------------------------
+
+// Reads the game module hash map from a minidump.
+
+local uint64 BASE_ADDR = 0x149bd2fb0;
+
+// note:
+// If you do not have ASLR or use Wine, the BASE will be 0x140000000
+// If you do have ASLR, BASE will be some random address between 0x7800000000000000 and 0x7fffffffffffffff
+//    forspoken: 0x149bd2fb0 / BASE+0x9bd2fb0 / .data+0x24e7bb0
+
+#include "../../Windows/Memory/MDMP.bt"
+
+typedef struct {
+	Ptr data;
+	uint32 size;
+	uint32 capacity;
+} DynamicArray;
+
+typedef struct {
+    uint64 allocFunc; // void* alloc(void* this, bool reset);
+    uint64 getNameFunc; // static const char* getName();
+    uint64 getDependenciesFunc; // static const char** getDependencies();
+    uint64 initFunc; // bool init(void* this);
+    uint64 deinitFunc; // bool deinit(void* this);
+} ModuleVtable;
+
+typedef struct {
+    uint32 key; // ordered numerically, uses a binary tree search
+    uint32 key2<hidden=true>; // random junk?
+    Ptr value;
+
+    if (value.offset > 0) {
+        Ptr vtablePtr<pos=value.offset>;
+        // this is actually the full instance so there may be data after this
+        // but usually it only has a vtable and 1 extra pointer for the actual component
+        ModuleVtable vtable<pos=vtablePtr.offset>;
+    };
+} ModuleMapEntry;
+
+typedef struct(int size) {
+    ModuleMapEntry entries[size]<optimize=false>;
+} ModuleMapEntryArray;
+
+typedef struct(int size) {
+    Ptr entries[size]<optimize=false>;
+} PtrArray;
+
+typedef struct {
+    DynamicArray pendingInitializePtr; // empty if the game has fully initialized
+    DynamicArray moduleLookupPtr;
+    DynamicArray moduleListPtr;
+
+    if (pendingInitializePtr.data.offset > 0 && pendingInitializePtr.size > 0) {
+        ModuleMapEntryArray pendingInitialize(pendingInitializePtr.size)<optimize=false, pos=pendingInitializePtr.data.offset>;
+    };
+
+    if (moduleLookupPtr.data.offset > 0 && moduleLookupPtr.size > 0) {
+        ModuleMapEntryArray moduleLookup(moduleLookupPtr.size)<optimize=false, pos=moduleLookupPtr.data.offset>;
+    };
+
+    if (moduleListPtr.data.offset > 0 && moduleListPtr.size > 0) {
+        PtrArray moduleList(moduleListPtr.size)<optimize=false, pos=moduleListPtr.data.offset>; // list of all modules
+    };
+} ModuleMap;
+
+local PtrOffset map_addr(BASE_ADDR);
+
+Ptr moduleMapPtr<pos=map_addr.offset>;
+ModuleMap moduleMap<pos=moduleMapPtr.offset>;
