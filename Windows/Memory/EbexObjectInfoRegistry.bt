@@ -142,7 +142,8 @@ typedef struct {
     uint32 hashCode;
     uint32 versionHashCode;
     uint16 allPropertiesClassFieldCount;
-    uint8 padding[6]; // sometimes not actually zero?
+    uint32 unknown;
+    uint8 padding[2];
     Ptr parentPtr;
     DynamicArray myPropertiesPtr;
     DynamicArray allPropertiesPtr;
@@ -150,8 +151,6 @@ typedef struct {
     if (IS_FORSPOKEN == 1) {
         DynamicArray myPropertiesMapPtr;
         DynamicArray allPropertiesMapPtr;
-        uint64 unk; // always zero, padding?
-        Assert(unk == 0);
     } else {
         // this is kind of ass to implement in bt since it's a giant double-linked list.
         // luckily we can omit fields at the end of the struct since we're dealing with pointers not strides
@@ -301,9 +300,13 @@ typedef struct {
 } ObjectTypeElement;
 
 typedef struct {
-    ObjectTypeElement element[0x100]<optimize=false>;
+    ObjectTypeElement element[0x1000]<optimize=false>;
 } ObjectTypeSlice;
+
+typedef struct {
+    ObjectTypeSlice map[0x20]<optimize=false>;
+} ObjectMap;
 
 local PtrOffset map_addr(BASE_ADDR + GAME_ADDR);
 
-ObjectTypeSlice map[0x20]<optimize=false, pos=map_addr.offset>;
+ObjectMap map<optimize=false, pos=map_addr.offset>;
