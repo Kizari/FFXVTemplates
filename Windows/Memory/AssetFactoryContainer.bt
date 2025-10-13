@@ -1,0 +1,161 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.1 Binary Template
+//
+//      File: AssetFactoryContainer
+//   Authors: neptuwunium (yretenai)
+//   Version: 1.0
+//------------------------------------------------
+
+// Parses the Asset Factory Registry.
+// This is useful for finding asset loaders.
+
+local uint64 BASE_ADDR = 0x1479d3458;
+local uint8 IS_FORSPOKEN = 1;
+
+// note:
+// If you do not have ASLR or use Wine, the BASE will be 0x140000000
+// If you do have ASLR, BASE will be some random address between 0x7800000000000000 and 0x7fffffffffffffff
+// Here are the static offsets for the element array:
+//    ffxvfinal: 0x144ce7ba8 / BASE+0x4ce7ba8 / .data+0x833ba8
+//    forspoken: 0x1479d3458 / BASE+0x79d3458 / .data+0x670458
+#include "./MDMP.bt"
+
+typedef struct {
+	Ptr address;
+	uint32 memorySize;
+	union {
+		uint32 length : 24;
+		byte allocated : 1;
+		byte readOnly : 1;
+	} flags;
+
+	if (address.offset > 0) {
+		char name[flags.length]<pos=address.offset>;
+	}
+} EbonyString;
+
+typedef struct {
+	Ptr vtable;
+	uint64 refCount;
+} IntrusivePointerTarget;
+
+struct PropertyContainer;
+
+typedef struct {
+	Ptr data;
+	uint32 size;
+	uint32 capacity;
+} DynamicArray;
+
+typedef struct {
+    uint64 debugInfoPtr;
+    LONG lockCount;
+    LONG recursionCount;
+    uint64 owningThread;
+    uint64 lockSemaphore;
+    uint64 spinCount;
+} CRITICAL_SECTION;
+
+typedef struct {
+    uint64 unknown;
+    CRITICAL_SECTION mutex;
+} LuminousMutex;
+
+struct AssetFactory;
+
+typedef struct {
+    uint64 currentSize;
+    uint64 peakSize;
+    uint32 currentCount;
+    uint32 peakCount;
+} FactoryStatistics;
+
+typedef struct {
+    Ptr factoryPtr;
+    FactoryStatistics statistics;
+    char name[IS_FORSPOKEN ? 0x10 : 0x20];
+
+    if (factoryPtr.offset > 0) {
+        AssetFactory factory<pos=factoryPtr.offset>;
+    }
+} FactoryStatisticsHolder;
+
+struct AssetFactoryContainerBucket;
+
+typedef struct {
+    Ptr nextPtr;
+    Ptr valuePtr;
+    uint64 key; // NullHasher(name) -> (Fnv1a64(name, 0x14650fb0739d0383) << 44)
+
+    if (valuePtr.offset > 0) {
+        FactoryStatisticsHolder value<pos=valuePtr.offset>;
+    }
+
+    if (nextPtr.offset > 0) {
+        AssetFactoryContainerBucket next<pos=nextPtr.offset>;
+    }
+} AssetFactoryContainerBucket;
+
+typedef struct(uint32 size) {
+    AssetFactoryContainerBucket buckets[size]<optimize=false>;
+} AssetFactoryContainerBuckets;
+
+typedef struct {
+    Ptr bucketsPtr;
+    Ptr chainedPtr;
+    Ptr freeChainPtr;
+    uint32 bucketCount;
+    uint32 chainCount;
+    uint32 occupancy;
+    uint32 chainUsed;
+    float expandRate;
+    float chainToBucketRatio;
+    uint64 hasher;
+
+    if (bucketsPtr.offset > 0) {
+        AssetFactoryContainerBuckets buckets(bucketCount)<pos=bucketsPtr.offset>;
+    }
+
+    if (chainedPtr.offset > 0) {
+        AssetFactoryContainerBuckets chained(chainCount)<pos=chainedPtr.offset>;
+    }
+
+    if (freeChainPtr.offset > 0) {
+        // points to the first free chain in the chainedPtr list
+        // AssetFactoryContainerBuckets freeChain<pos=freeChainPtr.offset>;
+    }
+} AssetFactoryContainerMap;
+
+typedef struct {
+    Ptr loader;
+    Ptr alloc;
+    Ptr init;
+    Ptr fs;
+} AssetFactory;
+
+typedef struct {
+    LuminousMutex mutex;
+    AssetFactoryContainerMap factoryHolder;
+    AssetFactory defaultFactory;
+} AssetFactoryContainer;
+
+typedef struct {
+    uint64 vtable;
+    if(IS_FORSPOKEN) {
+        // oh lord they thicc
+        AssetFactoryContainer factoryContainer<localpos=0x5200>;
+    } else {
+        AssetFactoryContainer factoryContainer<localpos=0x8e0>;
+    }
+} AssetFactoryHolder;
+
+// Forspoken: AssetFactoryHolder***
+// XV: AssetFactoryHolder**
+local PtrOffset factoryAddrAddrAddr(BASE_ADDR);
+Ptr factoryAddrAddr<pos=factoryAddrAddrAddr.offset>;
+if(IS_FORSPOKEN) {
+    Ptr factoryAddr<pos=factoryAddrAddr.offset>;
+    AssetFactoryHolder assetFactory<pos=factoryAddr.offset>;
+} else {
+    AssetFactoryHolder assetFactory<pos=factoryAddrAddr.offset>;
+}
