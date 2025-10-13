@@ -1,0 +1,78 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.1 Binary Template
+//
+//      File: MDMP
+//   Authors: neptuwunium (yretenai)
+//   Version: 1.0
+//------------------------------------------------
+
+// TODO: This doesn't understand ASLR. Parse Stream 4 to get the main module's base address.
+
+typedef struct {
+    uint32 magic;
+    uint32 version;
+    uint32 numberOfStreams;
+    uint32 streamDirectoryRva;
+    uint32 checksum;
+    uint32 timestamp;
+    uint64 flags;
+} MinidumpHeader;
+
+typedef struct {
+    uint32 type;
+    uint32 size;
+    uint32 offset;
+} MinidumpDirectory;
+
+typedef struct {
+    uint64 rva;
+    uint64 size;
+} MinidumpMemoryDescriptor64;
+
+typedef struct {
+    uint64 numberOfMemoryRanges;
+    uint64 baseOffset;
+    MinidumpMemoryDescriptor64 memoryRanges[numberOfMemoryRanges];
+} MinidumpMemory64List;
+
+MinidumpHeader mdmpHeader;
+Assert((mdmpHeader.flags & 0x00000002) != 0);
+MinidumpDirectory mdmpDir[mdmpHeader.numberOfStreams];
+local int i = 0;
+local byte hasMem64 = 0;
+for (i = 0; i < mdmpHeader.numberOfStreams; ++i) {
+    // TODO: also process stream 4 (ModuleList) so we can get the ASLR BaseRVA
+    if (mdmpDir[i].type != 9) { // Memory64ListStream
+        continue;
+    }
+
+    FSeek(mdmpDir[i].offset);
+    MinidumpMemory64List memory64;
+    hasMem64 = 1;
+}
+
+Assert(hasMem64 == 1);
+
+struct PtrOffset(uint64 ptr) {
+    local int64 offset = 0;
+    if (ptr > 0) {
+        local int64 currentOffset = memory64.baseOffset;
+        for(local int64 i = 0; i < memory64.numberOfMemoryRanges; ++i) {
+            if (memory64.memoryRanges[i].rva > ptr ||
+                memory64.memoryRanges[i].rva + memory64.memoryRanges[i].size < ptr) {
+                    currentOffset += memory64.memoryRanges[i].size;
+                    continue;
+            }
+
+            offset = currentOffset + (ptr - memory64.memoryRanges[i].rva);
+            break;
+        }
+    }
+};
+
+struct Ptr {
+    uint64 ptr;
+
+    local PtrOffset offsetCalc(ptr);
+    local int64 offset = offsetCalc.offset;
+};

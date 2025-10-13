@@ -1,0 +1,63 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.1 Binary Template
+//
+//      File: EntityManagerModule
+//   Authors: neptuwunium (yretenai)
+//   Version: 1.0
+//------------------------------------------------
+
+// Reads part of the entity manager structure that is not defined by Ebex structures
+
+local uint64 BASE_ADDR = 0x1479d3498; // call Luminous.EntitySystem.EntityManagerModule::GetInsntance() via Ebex Type Info
+
+// note:
+// If you do not have ASLR or use Wine, the BASE will be 0x140000000
+// If you do have ASLR, BASE will be some random address between 0x7800000000000000 and 0x7fffffffffffffff
+//    forspoken: 0x1479d3498 / BASE+0x79d3498 / .data+0x2e8098
+
+#include "../../Windows/Memory/MDMP.bt"
+
+typedef struct {
+	Ptr data;
+	uint32 size;
+	uint32 capacity;
+} DynamicArray;
+
+typedef struct {
+    uint64 debugInfoPtr;
+    LONG lockCount;
+    LONG recursionCount;
+    uint64 owningThread;
+    uint64 lockSemaphore;
+    uint64 spinCount;
+} CRITICAL_SECTION;
+
+typedef struct {
+    uint64 padding<hidden=true>; // often junk from the stack, not ever read
+    CRITICAL_SECTION mutex;
+} LuminousMutex;
+
+typedef struct {
+    uint64 vtbl;
+    LuminousMutex packagesMutex;
+    DynamicArray packagesPtr; // pending loads?
+    LuminousMutex packagesMutex2;
+    DynamicArray packages2Ptr;
+    // this entire struct is 0x770 bytes long, has multiple task schedulers and mutexes.
+
+    // the constructor for this type is at 0x1445de280
+} EntityManager;
+
+typedef struct {
+    uint64 vtbl;
+    Ptr entityManagerPtr;
+
+    if (entityManagerPtr.offset > 0) {
+        EntityManager entityManager<pos=entityManagerPtr.offset>;
+    }
+} EntityManagerModule;
+
+local PtrOffset modAddr(BASE_ADDR);
+
+Ptr entityManagerModulePtr<pos=modAddr.offset>;
+EntityManagerModule entityManagerModule<pos=entityManagerModulePtr.offset>;
