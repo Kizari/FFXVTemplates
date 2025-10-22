@@ -1,0 +1,193 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: bins.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: Generic template for resource archives
+//  Category: Resources
+// File Mask: *.win32.bins
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+local uint currentValueCount;
+local uint currentTableIndex;
+local uint alignmentPaddingSize;
+local int currentSubResourceIndex = -1;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+// ------------------------------------------------
+// Structures
+// ------------------------------------------------
+
+struct ResourceId
+{
+    uint32 type;
+    uint32 primary;
+    uint32 secondary;
+    uint32 flag;
+};
+
+struct BinHeader
+{
+    char identifier[12];
+    int size;
+    ResourceId resourceId;
+};
+
+struct DataIndex
+{
+    ResourceId resourceId;
+    uint32 offset;
+    uint32 size;
+};
+
+struct DataIndexTable
+{
+    uint32 count;
+    DataIndex indices[count];
+};
+
+struct ParamTableHeader
+{
+    uint32 version;
+    uint32 tableCount;
+    uint32 offsets[tableCount];
+};
+
+struct ParamTable_Tag
+{
+    uint32 id;
+    uint16 flag;
+    uint16 offset;
+};
+
+struct ParamTable_Table
+{
+    uint32 tableId;
+    uint32 tagCount;
+    uint32 elementCount;
+    uint32 elementSize;
+    uint32 booleanOffset;
+    uint32 arrayOffset;
+    uint32 stringOffset;
+    int32 dummy<bgcolor=0x000000>;
+    ParamTable_Tag tags[tagCount];
+};
+
+// A value in a parameter table can be either int32, uint32, or float32
+// Read it as each type so it's easier to discern which makes sense in the template results
+struct ParamTable_Value
+{
+    int32 intValue;
+    FSeek(FTell() - 4);
+    uint32 uintValue;
+    FSeek(FTell() - 4);
+    float floatValue;
+};
+
+struct ParamTable_Element
+{
+    uint32 id;
+    ParamTable_Value values[currentValueCount];
+};
+
+struct String
+{
+    string value;
+};
+
+struct StringBuffer
+{
+    byte guard<bgcolor=0x000000, hidden=true>;
+
+    local uint endOfStringBuffer = 0;
+    if (currentTableIndex < subResources[currentSubResourceIndex].paramTableHeader.tableCount)
+    {
+        endOfStringBuffer = dataIndexTable.indices[currentSubResourceIndex].offset + 32 + subResources[currentSubResourceIndex].paramTableHeader.offsets[currentTableIndex];
+    }
+    else
+    {
+        endOfStringBuffer = FileSize();
+    }
+
+    if (FTell() >= endOfStringBuffer)
+    {
+        FSeek(FTell() - 1);
+    }
+    else
+    {
+        while (FTell() < endOfStringBuffer)
+        {
+            String value;
+            byte next<hidden=true>;
+            FSeek(FTell() - 1);
+    
+            if (next == 0)
+            {
+                break;
+            }
+        }
+
+        Align(4);
+    }
+};
+
+struct ParamTable
+{
+    FSeek(dataIndexTable.indices[currentSubResourceIndex].offset + 32 + subResources[currentSubResourceIndex].paramTableHeader.offsets[currentTableIndex]);
+    ParamTable_Table table<bgcolor=0x00ff00>;
+
+    currentTableIndex++;
+    currentValueCount = (table.elementSize / 4) - 1;
+
+    ParamTable_Element elements[table.elementCount];
+
+    local int arrayBufferCount = (table.stringOffset - table.arrayOffset) / 4;
+    if (arrayBufferCount > 0)
+    {
+        ParamTable_Value arrayBuffer[arrayBufferCount]<bgcolor=0x0099ff>;
+    }
+    
+    if (table.elementCount > 0)
+    {
+        StringBuffer stringBuffer<bgcolor=0xff0000>;
+    }
+};
+
+struct SubResource
+{
+    currentSubResourceIndex++;
+    currentTableIndex = 0;
+    FSeek(dataIndexTable.indices[currentSubResourceIndex].offset);
+    BinHeader paramTableBinHeader<bgcolor=0xffff00>;
+    ParamTableHeader paramTableHeader<bgcolor=0xff00aa>;
+    ParamTable paramTables[paramTableHeader.tableCount]<optimize=false, bgcolor=0x00ffff>;
+    Align(256);
+};
+
+// ------------------------------------------------
+// Main Template Logic
+// ------------------------------------------------
+
+BinHeader resourceArchiveBinHeader<bgcolor=0xffff00>;
+DataIndexTable dataIndexTable<bgcolor=0xff00aa>;
+Align(256);
+
+SubResource subResources[dataIndexTable.count]<optimize=false>;

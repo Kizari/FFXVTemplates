@@ -1,0 +1,540 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: cmdl.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: Static Model Collision
+//  Category: Collision
+// File Mask: *.cmdl
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+void Align2(int blockSize) // Used for PhysX stuff since it's misaligned by 1 in cmdl
+{
+    local uint offset = FTell() + 1;
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+// ------------------------------------------------
+// Enumerations
+// ------------------------------------------------
+
+enum BlockType
+{
+  BLOCK_TYPE_NULL = 0x0,
+  BLOCK_TYPE_STATIC_BODY = 0x1,
+  BLOCK_TYPE_OVERLAP = 0x2,
+  BLOCK_TYPE_RAGDOLL = 0x3,
+  BLOCK_TYPE_CHAIN = 0x4,
+  BLOCK_TYPE_CLOTH = 0x5,
+  BLOCK_TYPE_CHARACTER_PROXY = 0x6,
+  BLOCK_TYPE_IK = 0x7,
+  BLOCK_TYPE_CLIPPING = 0x8,
+  BLOCK_TYPE_WORLD_WIND = 0x9,
+  BLOCK_TYPE_ANIMATED_SHAPE = 0xA,
+  BLOCK_TYPE_DYNAMIC = 0xB,
+};
+
+enum ShapeType
+{
+  SHAPE_TYPE_NULL = 0x0,
+  SHAPE_TYPE_SPHERE = 0x1,
+  SHAPE_TYPE_BOX = 0x2,
+  SHAPE_TYPE_CAPSULE = 0x3,
+  SHAPE_TYPE_CYLINDER = 0x4,
+  SHAPE_TYPE_ELLIPSE = 0x5,
+  SHAPE_TYPE_HEMISPHERE = 0x6,
+  SHAPE_TYPE_PLANE = 0x7,
+  SHAPE_TYPE_LOCKPLANE = 0x8,
+  SHAPE_TYPE_CONVEX = 0x9,
+  SHAPE_TYPE_TRIANGLE_MESH = 0xA,
+  SHAPE_TYPE_STRETCH_CAPSULE = 0xB,
+  SHAPE_TYPE_THREE_POINT_PLANE = 0xC,
+  SHAPE_TYPE_CONE = 0xD,
+  SHAPE_TYPE_ID_MESH = 0xE,
+  SHAPE_TYPE_CONSTRAINT_FIXED = 0xF,
+  SHAPE_TYPE_CONSTRAINT_DISTANCE = 0x10,
+  SHAPE_TYPE_CONSTRAINT_SPHERICAL = 0x11,
+  SHAPE_TYPE_CONSTRAINT_REVOLUTE = 0x12,
+  SHAPE_TYPE_CONSTRAINT_PRISMATIC = 0x13,
+};
+
+enum<uint16> PxConcreteType
+{
+	eUNDEFINED,
+
+	eHEIGHTFIELD,
+	eCONVEX_MESH,
+	eTRIANGLE_MESH,
+	eCLOTH_FABRIC,
+
+	eRIGID_DYNAMIC,
+	eRIGID_STATIC,
+	eSHAPE,
+	eMATERIAL,
+	eCONSTRAINT,
+	eCLOTH,
+	ePARTICLE_SYSTEM,
+	ePARTICLE_FLUID,
+	eAGGREGATE,
+	eARTICULATION,
+	eARTICULATION_LINK,
+	eARTICULATION_JOINT,
+	
+	ePHYSX_CORE_COUNT,
+    eFIRST_PHYSX_EXTENSION = 256,
+	eFIRST_VEHICLE_EXTENSION = 512,
+    eFIRST_USER_EXTENSION = 1024
+};
+
+// ------------------------------------------------
+// Data Index Binary
+// ------------------------------------------------
+
+struct ResourceId
+{
+    uint32 type;
+    uint32 primary;
+    uint32 secondary;
+    uint32 flag;
+};
+
+struct BinHeader
+{
+    char identifier[12];
+    int size;
+    ResourceId resourceId;
+};
+
+struct DataIndex
+{
+    ResourceId resourceId;
+    uint32 offset;
+    uint32 size;
+};
+
+struct DataIndexTable
+{
+    uint32 count;
+    DataIndex indices[count];
+};
+
+// ------------------------------------------------
+// Mesh Collision Binary
+// ------------------------------------------------
+
+struct Layer
+{
+    uint id;
+    uint count;
+    uint fixids[count];
+    uint reserved;
+};
+
+struct AttributeSet
+{
+    uint count;
+    uint attributes[count];
+};
+
+struct MeshCollisionBinary
+{
+    char magic[4];
+    uint version;
+    uint layerOffsetListOffset;
+    uint attributeOffset;
+    uint edgeBinaryOffset;
+    uint attributeSetOffsetListOffset;
+    uint collisionPriorityListOffset;
+    uint targetSizeListOffset;
+    uint movingStatesListOffset;
+
+    uint layerOffsetListCount<bgcolor=0xff00aa>;
+    uint layerOffsetList[layerOffsetListCount]<bgcolor=0xff00aa>;
+    Layer layers[layerOffsetListCount]<optimize=false, bgcolor=0xff00aa>;
+
+    uint attributeCount<bgcolor=0x00ffff>;
+    uint attributes[attributeCount]<bgcolor=0x00ffff>;
+
+    uint attributeSetOffsetListCount<bgcolor=0x0099ff>;
+    uint attributeSetOffsetList[attributeSetOffsetListCount]<bgcolor=0x0099ff>;
+    AttributeSet attributeSets[attributeSetOffsetListCount]<optimize=false, bgcolor=0x0099ff>;
+
+    uint collisionPriorityListCount<bgcolor=0x0000ff>;
+    uint collisionPriorityList[collisionPriorityListCount]<bgcolor=0x0000ff>;
+    uint collisionPriorities[collisionPriorityListCount]<bgcolor=0x0000ff>;
+
+    uint targetSizeListCount<bgcolor=0xffff00>;
+    uint targetSizeList[targetSizeListCount]<bgcolor=0xffff00>;
+    uint targetSizes[targetSizeListCount]<bgcolor=0xffff00>;
+
+    uint movingStatesListCount<bgcolor=0xff00aa>;
+    uint movingStatesList[movingStatesListCount]<bgcolor=0xff00aa>;
+    uint movingStates[movingStatesListCount]<bgcolor=0xff00aa>;
+};
+
+// ------------------------------------------------
+// PhysX Collection Binary
+// ------------------------------------------------
+
+struct PhysXCollectionBinaryHeader
+{
+    char magic[4];
+    ubyte versionMajorFirstHalf;
+    ubyte versionMajor;
+    ubyte versionMinor;
+    ubyte versionPatch;
+    uint binaryVersion;
+    uint buildNumber;
+    char platformTag[4];
+    uint markedPadding;
+};
+
+struct PhysXCollectionBinaryManifestEntry
+{
+    uint offset;
+    PxConcreteType type;
+    Align2(4);
+};
+
+struct PhysXCollectionBinaryExportReference
+{
+    uint64 id;
+    uint32 objectIndex;
+    Align2(18);
+};
+
+struct PhysXCollectionBinaryInternalPointerReference
+{
+    uint64 reference;
+    uint kind;
+    uint objectIndex;
+};
+
+struct PhysXCollectionBinaryInternalReferenceIndex
+{
+    uint reference;
+    uint kind;
+    uint objectIndex;
+};
+
+struct PxBase
+{
+    PxConcreteType concreteType;
+    uint16 baseFlags;
+};
+
+struct PxMaterial
+{
+    uint64 userDataPointer;
+    uint64 pxMaterialPointer;
+    uint materialIndex;
+    Align2(16);
+    float dynamicFriction;
+    float staticFriction;
+    float restitution;
+    uint16 flags;
+    ubyte frictionRestitutionCombineMode;
+    ubyte padding;
+    uint unknowns[2];
+    uint maybeReferenceCount;
+};
+
+struct RTreeMidphase
+{
+    uint64 meshInterfacePointer;
+    float geometryEpsilon;
+    Align2(16);
+    float boundsMin[4];
+    float boundsMax[4];
+    float inverseDiagonal[4];
+    float diagonalScaler[4];
+    uint pageSize;
+    uint rootPageCount;
+    uint levelsCount;
+    uint totalNodes;
+    uint totalPages;
+    uint flags; // USER_ALLOCATED=1, IS_DYNAMIC=2
+    uint reserved;
+    Align2(16);
+    uint64 pagesPointer;
+    Align2(16);
+};
+
+struct RTreePage
+{
+    // Page size = 4
+    float minX[4];
+    float minY[4];
+    float minz[4];
+    float maxX[4];
+    float maxY[4];
+    float maxZ[4];
+    uint pointers[4];
+};
+
+struct GuMeshInterface
+{
+    uint triangleCount;
+    uint vertexCount;
+    uint64 trianglesPointer;
+    uint64 verticesPointer;
+    uint has16BitIndices;
+    Align2(16);
+};
+
+struct PxTriangleMesh
+{
+    uint64 unknownPointer;
+    uint has16BitIndices;
+    Align2(16);
+    uint vertexCount;
+    uint triangleCount;
+    uint64 verticesPointer;
+    uint64 trianglesPointer;
+    Align2(16);
+    RTreeMidphase collisionModel;
+    float aabb[6];
+    uint64 extraTrigDataPointer;
+    ubyte flags;
+    Align2(16);
+    uint64 materialIndicesPointer;
+    uint64 faceRemapPointer;
+    uint64 adjacenciesPointer;
+    uint adjacenciesCount;
+    float convexEdgeThreshold;
+    GuMeshInterface meshInterface;
+    uint ownsMemory;
+    Align2(16);
+    uint64 meshFactoryPointer;
+    Align2(16);
+    Align2(128);
+
+    //float extraData[physxData.triangleMesh.collisionModel.totalNodes * 7]<bgcolor=0x0000ff>;
+    RTreePage pages[collisionModel.totalPages];
+    float vertices[physxData.triangleMesh.vertexCount * 3]<bgcolor=0x0000ff>;
+    Align2(16);
+    uint16 triangleIndices[physxData.triangleMesh.triangleCount * 3]<bgcolor=0xff00aa>;
+    Align2(16);
+    // Seems this may be extraTrigData—not sure how it works though
+    ubyte extraData3[physxData.triangleMesh.triangleCount]<bgcolor=0x0000ff>;
+    Align2(16);
+    uint16 materialIndices[physxData.triangleMesh.triangleCount]<bgcolor=0x0000ff>;
+    Align2(16);
+    uint faceRemap[physxData.triangleMesh.triangleCount]<bgcolor=0x0066ff>;
+};
+
+struct PxConvexMesh
+{
+    uint64 unknownPointer;
+    uint has16BitIndices;
+    Align2(16);
+    float aabb[6];
+    float centerOfMass[3];
+    uint16 edgeCount;
+    ubyte hullVertexCount;
+    ubyte polygonCount;
+    uint64 hullPolygonDataPointer;
+    uint64 bigConvexRawDataPointer;
+    float radius;
+    float extents[3];
+    uint count;
+    Align2(16);
+    uint64 bigConvexDataPointer;
+    float mass;
+    float inertia[9]; // 3x3 rotation matrix
+    uint64 meshFactoryPointer;
+    Align2(16);
+
+    //float extraData[physxData.triangleMesh.collisionModel.totalNodes * 7]<bgcolor=0x0000ff>;
+    float vertices[hullVertexCount * 11 + 1]<bgcolor=0x0000ff>;
+    Align2(16);
+    uint16 triangleIndices[polygonCount * 16 + 100]<bgcolor=0xff00aa>;
+    Align2(16);
+    uint16 extraData3[edgeCount + 30]<bgcolor=0x0000ff>;
+};
+
+struct PhysXCollectionBinary
+{
+    Align2(16);
+    uint objectCount;
+
+    Align2(16);
+    uint entryCount;
+    PhysXCollectionBinaryManifestEntry entries[entryCount];
+    uint dataEndOffset;
+
+    Align2(16);
+    uint importReferenceCount;
+    // TODO: read references (not sure if XV ever uses this)
+
+    Align2(16);
+    uint exportReferenceCount;
+    PhysXCollectionBinaryExportReference exportReferences[exportReferenceCount];
+
+    Align2(16);
+    uint internalPointerReferenceCount;
+    PhysXCollectionBinaryInternalPointerReference internalPointerReferences[internalPointerReferenceCount];
+    uint internalIndexReferenceCount;
+    PhysXCollectionBinaryInternalReferenceIndex internalReferenceIndices[internalIndexReferenceCount];
+    
+    Align2(16);
+    uint64 unknownPointer;
+
+    PxBase base<bgcolor=0x00ffff>;
+    Align2(16);
+    PxMaterial material<bgcolor=0x00ffff>;
+
+    Align2(16);
+    uint64 unknownPointer;
+
+    PxBase base2<bgcolor=0xffff00>;
+    Align2(16);
+
+    if (entries[1].type == eCONVEX_MESH)
+    {
+        PxConvexMesh convexMesh<bgcolor=0xffff00>;
+    }
+    else
+    {
+        PxTriangleMesh triangleMesh<bgcolor=0xffff00>;
+    }
+};
+
+// ------------------------------------------------
+// Physics Binary
+// ------------------------------------------------
+
+struct Shape
+{
+    ShapeType type;
+    int nameOffset;
+    int boneNameOffset;
+    int userStringOffset;
+    float translation[3];
+    float rotation[3];
+    float friction;
+    float restitution;
+    float coefficient;
+    float centerPivot[3];
+};
+
+struct StaticBody
+{
+    int shapeLinkOffset;
+    int nameOffset;
+    int userStringOffset;
+    Align(16);
+    Shape shape;
+};
+
+
+struct Block
+{
+    BlockType resourceType;
+    uint nameOffset;
+    uint userStringOffset;
+    ubyte enabled;
+    ubyte binaryVersion;
+    ubyte reserved[2];
+    uint userId;
+    uint reserved2;
+    
+    int bodiesOffset;
+    int bodiesCount;
+
+    int userVariablesOffset;
+    int userVariablesCount;
+
+    int extraDataOffset;
+    int extraDataCount;
+
+    uint partsId;
+
+    StaticBody bodies[bodiesCount]<bgcolor=0xffff00>;
+};
+
+struct PhysicsBinaryHeader
+{
+    char type[4];
+    char subtype[4];
+    uint version;
+    char endianType;
+    ubyte alignmentBits;
+    int16 offset;
+    int64 size;
+    int64 dateTime;
+    uint reserved[7];
+
+    int blockOffset;
+    uint blockCount;
+    uint unknown<bgcolor=0x0000ff>;
+    uint unknown2<bgcolor=0x0000ff>;
+    Block blocks[blockCount]<bgcolor=0x00ffff>;
+
+    uint maybeStringBinSize;
+    uint maybeReserved[3];
+    uint maybeSebdSize;
+
+    string physxBinaryCollection;
+    byte padding[131]<bgcolor=0x000000>;
+
+    PhysXCollectionBinaryHeader physxHeader<bgcolor=0xff0000>;
+    PhysXCollectionBinary physxData<bgcolor=0x0000ff>;
+
+    uint unknown3;
+    uint unknown4;
+    uint unknown5;
+    ushort unknown6;
+
+    byte stringBin[maybeStringBinSize]<bgcolor=0xff0000>;
+};
+
+// ------------------------------------------------
+// Main Template Logic
+// ------------------------------------------------
+
+BinHeader binHeader<bgcolor=0xffff00>;
+DataIndexTable dataIndexTable<bgcolor=0x00ffff>;
+Align(256);
+
+local uint i;
+
+for (i = 0; i < dataIndexTable.count; i++)
+{
+    if (dataIndexTable.indices[i].resourceId.type == 67110350)
+    {
+        PhysicsBinaryHeader physicsBinary<bgcolor=0xff00aa>;
+    }
+    else if (dataIndexTable.indices[i].resourceId.type == 67118428)
+    {
+        MeshCollisionBinary mesh<bgcolor=0xffff00>;
+    }
+
+    Align(256);
+}

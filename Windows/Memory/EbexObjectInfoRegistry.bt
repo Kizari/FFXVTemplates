@@ -1,0 +1,312 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.1 Binary Template
+//
+//      File: EbexObjectInfoRegistry
+//   Authors: neptuwunium (yretenai)
+//   Version: 1.0
+//------------------------------------------------
+
+// Reads the Ebex Object Info Registry for both FFXV and FORSPOKEN from Win32 full memory minidumps (dumps created task manager.)
+
+// note:
+// If you do not have ASLR or use Wine, the BASE will be 0x140000000
+// If you do have ASLR, BASE will be some random address between 0x7800000000000000 and 0x7fffffffffffffff
+// Here are the static offsets for the element array:
+//    ffxvfinal: 0x144f5bd30 / BASE+0x4f5bd30 / .data+0xaa7d30
+//    ffxvbench: 0x144dcf490 / BASE+0x4dcf490 / .data+0xa6c490
+//    ffxvdebug: 0x145f85970 / BASE+0x5f85970 / .data+0xce5970
+//    forspoken: 0x1477c5670 / BASE+0x77c5670 / .data+0x462670
+
+local uint64 BASE_ADDR = 0x140000000;
+local uint64 GAME_ADDR = 0x4f5bd30;
+local uint8 IS_FORSPOKEN = 0;
+
+// Can we use 010's process memory mode instead of Minidumps? -> ASLR will be annoying.
+#include "./MDMP.bt"
+
+typedef enum <uint32> {
+    FunctionFlagUnknown = 0x0,
+    FunctionFlagStatic = 0x1,
+    FunctionFlagObject = 0x2,
+} FunctionFlag;
+
+typedef enum <uint32> {
+    TypeFlagNone = 0x0,
+    TypeFlagConst = 0x1,
+    TypeFlagPointer = 0x2,
+    TypeFlagReference = 0x4,
+    TypeFlagVoid = 0x8,
+} TypeFlag;
+
+typedef enum <uint8> {
+    AttributeFlagNone = 0x0,
+    AttributeFlagPointer = 0x1,
+    AttributeFlagReference = 0x2,
+    AttributeFlagDynamicArray = 0x4,
+} AttributeFlag;
+
+typedef enum <uint8> {
+    PrimitiveTypeUnknown = 0x0,
+    PrimitiveTypeClassField = 0x1,
+    PrimitiveTypeInt8 = 0x2,
+    PrimitiveTypeInt16 = 0x3,
+    PrimitiveTypeInt32 = 0x4,
+    PrimitiveTypeInt64 = 0x5,
+    PrimitiveTypeUInt8 = 0x6,
+    PrimitiveTypeUInt16 = 0x7,
+    PrimitiveTypeUInt32 = 0x8,
+    PrimitiveTypeUInt64 = 0x9,
+    PrimitiveTypeSizeT = 0xa,
+    PrimitiveTypeBool = 0xb,
+    PrimitiveTypeFloat = 0xc,
+    PrimitiveTypeDouble = 0xd,
+    PrimitiveTypeString = 0xe,
+    PrimitiveTypePointer = 0xf,
+    PrimitiveTypeReference = 0x10,
+    PrimitiveTypeArray = 0x11,
+    PrimitiveTypePointerArray = 0x12,
+    PrimitiveTypeFixid = 0x13,
+    PrimitiveTypeFloat4 = 0x14,
+    PrimitiveTypeColor = 0x15,
+    PrimitiveTypeBuffer = 0x16,
+    PrimitiveTypeEnum = 0x17,
+    PrimitiveTypeIntrusivePointerArray = 0x18,
+    PrimitiveTypeDouble4 = 0x19,
+} PrimitiveType;
+
+typedef struct {
+    Ptr address;
+    uint32 memorySize;
+    union {
+        uint32 length : 24;
+        byte allocated : 1;
+        byte readOnly : 1;
+    } flags;
+
+    if (address.offset > 0) {
+        char name[flags.length]<pos=address.offset>;
+    }
+} EbonyString;
+
+typedef struct {
+    Ptr vtable;
+    uint64 refCount;
+} IntrusivePointerTarget;
+
+typedef struct {
+    Ptr data;
+    uint32 size;
+    uint32 capacity;
+} DynamicArray;
+
+typedef struct {
+    IntrusivePointerTarget base;
+    EbonyString name;
+    uint32 nameHash;
+    uint32 padding;
+    EbonyString typeName;
+    uint32 offset;
+    uint32 size;
+    uint16 itemCount;
+    PrimitiveType primitiveType;
+    PrimitiveType itemPrimitiveType;
+    AttributeFlag attr;
+} Property;
+
+// wrapper structs because 010 can't really do nested structs with size= *and* pos=
+// they all get read at the same position instead of + sizeof(T)
+typedef struct {
+    Ptr ptr;
+
+    if (ptr.offset > 0) {
+       Property property<pos=ptr.offset>;
+    }
+} PropertyPtr;
+
+typedef struct (int size) {
+    PropertyPtr ptrs[size]<optimize=false>;
+} PropertyList;
+
+typedef struct (int size) {
+    struct kv {
+        uint64 key;
+        PropertyPtr value;
+    } pairs[size]<optimize=false>;
+} PropertyMap;
+
+struct PropertyContainer;
+
+typedef struct {
+    IntrusivePointerTarget base;
+    EbonyString typeName;
+    uint32 hashCode;
+    uint32 versionHashCode;
+    uint16 allPropertiesClassFieldCount;
+    uint32 unknown;
+    uint8 padding[2];
+    Ptr parentPtr;
+    DynamicArray myPropertiesPtr;
+    DynamicArray allPropertiesPtr;
+
+    if (IS_FORSPOKEN == 1) {
+        DynamicArray myPropertiesMapPtr;
+        DynamicArray allPropertiesMapPtr;
+    } else {
+        // this is kind of ass to implement in bt since it's a giant double-linked list.
+        // luckily we can omit fields at the end of the struct since we're dealing with pointers not strides
+        // std:unordered_map<uint32_t, Property> allPropertiesMap;
+    }
+
+    // unless the type is abstract (like "BaseObject"), it will be in the global array
+    // skipping it in the bt because it is very exponential
+    if (parentPtr.offset > 0) {
+        // PropertyContainer parent<pos=parentPtr.offset>;
+    }
+
+    if (myPropertiesPtr.data.offset > 0) {
+        PropertyList myProperties(myPropertiesPtr.size)<pos=myPropertiesPtr.data.offset>;
+    }
+
+    if (allPropertiesPtr.data.offset > 0) {
+        PropertyList allProperties(allPropertiesPtr.size)<pos=allPropertiesPtr.data.offset>;
+    }
+
+    if (IS_FORSPOKEN == 1) {
+        // skip parsing maps since they're functionally identical to the arrays above
+        if (myPropertiesMapPtr.data.offset > 0) {
+            // PropertyMap myPropertiesMap(myPropertiesMapPtr.size)<pos=myPropertiesMapPtr.data.offset>;
+        }
+
+        if (allPropertiesMapPtr.data.offset > 0) {
+            // PropertyMap allPropertiesMap(allPropertiesMapPtr.size)<pos=allPropertiesMapPtr.data.offset>;
+        }
+    }
+} PropertyContainer;
+
+typedef struct {
+    PrimitiveType type;
+    uint8 padding[3];
+    TypeFlag typeFlag;
+    uint32 typeNameHash;
+    uint32 padding2;
+    Ptr typeNamePtr;
+
+    PrimitiveType itemType;
+    uint8 padding3[3];
+    TypeFlag itemTypeFlag;
+    uint32 itemTypeNameHash;
+    uint32 padding4;
+    Ptr itemTypeNamePtr;
+
+    // can't use pos= with strings since only 1 character gets read.
+    if (typeNamePtr.offset > 0) {
+        local int64 pos = FTell();
+        FSeek(typeNamePtr.offset);
+        string typeName;
+        FSeek(pos);
+    }
+
+    if (itemTypeNamePtr.offset > 0) {
+        local int64 pos2 = FTell();
+        FSeek(itemTypeNamePtr.offset);
+        string itemTypeName;
+        FSeek(pos2);
+    }
+} ObjectFunctionTypeData;
+
+// wrapper struct because 010 can't really do nested structs with size=
+typedef struct (int size) {
+    ObjectFunctionTypeData arguments[size]<optimize=false>;
+} ObjectFunctionTypeDataList;
+
+typedef struct {
+    Ptr namePtr;
+    uint32 nameHash;
+    FunctionFlag flags;
+    uint64 function; // ptr into .text
+    uint64 functionDynamic; // ptr into .text
+    ObjectFunctionTypeData returnType;
+    Ptr argumentTypesPtr;
+    uint32 argumentCount;
+    uint32 padding;
+
+    // can't use pos= with strings since only 1 character gets read.
+    if (namePtr.offset > 0) {
+        local int64 pos = FTell();
+        FSeek(namePtr.offset);
+        string name;
+        FSeek(pos);
+    }
+
+    if (argumentTypesPtr.offset > 0) {
+        ObjectFunctionTypeDataList argumentTypes(argumentCount)<pos=argumentTypesPtr.offset>;
+    }
+} ObjectFunction;
+
+// wrapper struct because 010 can't really do nested structs with size=
+typedef struct(int count) {
+    ObjectFunction functions[count]<optimize=false>;
+} ObjectFunctions;
+
+struct ObjectType;
+
+typedef struct {
+    // this structure is different between forspoken and ffxv
+    Ptr namePtr;
+    uint64 thisType;
+    Ptr baseTypePtr;
+    uint64 constructFunction; // ptr into .text
+    uint64 constructFunction2; // ptr into .text
+    uint64 singletonFunction; // ptr into .text
+
+    if (IS_FORSPOKEN == 1) {
+        uint64 deconstructFunction2; // ptr into .text
+    }
+
+    Ptr propertyContainerPtr;
+    Ptr functionsPtr;
+    uint32 functionCount;
+    int32 objectSize;
+
+    if (namePtr.offset > 0) {
+        local int64 pos = FTell();
+        FSeek(namePtr.offset);
+        string name;
+        FSeek(pos);
+    }
+
+    // unless the type is abstract (like "BaseObject"), it will be in the global array
+    // skipping it in the bt because it is very exponential
+    if (baseTypePtr.offset > 0) {
+        // ObjectType baseType<pos=baseTypePtr.offset>;
+    }
+
+    if (propertyContainerPtr.offset > 0) {
+        PropertyContainer propertyContainer<pos=propertyContainerPtr.offset>;
+    }
+
+    if (functionsPtr.offset > 0) {
+        ObjectFunctions functions(functionCount)<pos=functionsPtr.offset>;
+    }
+} ObjectType;
+
+typedef struct {
+    uint64 typeId;
+    Ptr ptr;
+
+    if(ptr.offset > 0) {
+        ObjectType object<pos=ptr.offset>;
+    }
+} ObjectTypeElement;
+
+typedef struct {
+    ObjectTypeElement element[0x1000]<optimize=false>;
+} ObjectTypeSlice;
+
+typedef struct {
+    ObjectTypeSlice map[0x20]<optimize=false>;
+} ObjectMap;
+
+local PtrOffset map_addr(BASE_ADDR + GAME_ADDR);
+
+ObjectMap map<optimize=false, pos=map_addr.offset>;

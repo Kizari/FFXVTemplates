@@ -1,0 +1,173 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: save.bt
+//   Authors: Kizari
+//   Version: 1
+//   Purpose: Save files
+//  Category: Data
+// File Mask: *.save
+//  ID Bytes: 
+//   History: 
+//     Notes: Save files may be encrypted, this template
+//            will only work on decrypted files
+//------------------------------------------------
+
+local uint currentItemSize;
+local uint bitOffset;
+local uint propertyOffset = 18;
+local uint previousOffset;
+local uint previousSize;
+local uint alignmentPaddingSize;
+
+struct Padding
+{
+    byte padding[alignmentPaddingSize];
+};
+
+void Align(int blockSize)
+{
+    local uint offset = FTell();
+    alignmentPaddingSize = blockSize + blockSize * (offset / blockSize) - offset;
+    if (alignmentPaddingSize > 0 && alignmentPaddingSize < blockSize)
+    {
+        Padding padding<bgcolor=0x000000, hidden=true>;
+    }
+}
+
+// ------------------------------------------------
+// Structures
+// ------------------------------------------------
+
+struct Unknown
+{
+    ushort unknown;
+    uint unknown2;
+    uint unknown3;
+    uint unknown4;
+    uint unknown5;
+    ushort unknown6;
+};
+
+struct Unknown2
+{
+    byte unknown[9];
+};
+
+struct Property
+{
+    uint nameLength;
+    char name[nameLength];
+    uint typeNameLength;
+    char typeName[typeNameLength];
+    uint offset;
+    uint size;
+    uint16 itemCount;
+    ubyte primitiveType;
+    ubyte itemPrimitiveType;
+    ubyte attribute;
+
+    local uint returnAddress = FTell();
+    FSeek(propertyOffset);
+    local uint i = 0;
+    currentItemSize = size / itemCount;
+
+    for (i = 0; i < itemCount; i++)
+    {
+        if (primitiveType == 11)
+        {
+            // See SQEX::Ebony::Base::Serialization::ArchiveReader::onData (bool signature)
+            if ((bitOffset & 7) == 7)
+            {
+                byte skip;
+            }
+        
+            bitOffset++;
+        }
+        else
+        {
+            if ((bitOffset & 7) != 0)
+            {
+                byte skip;
+            }
+
+            bitOffset = 0;
+
+            if (primitiveType == 1)
+            {
+                uint value;
+            }
+            else if (primitiveType == 4 || primitiveType == 23)
+            {
+                int value;
+            }
+            else if (primitiveType == 2)
+            {
+                char value;
+            }
+            else if (primitiveType == 5)
+            {
+                int64 value;
+            }
+            else
+            {
+                Printf("%d not supported\n", primitiveType);
+            }
+        }
+    }
+
+    previousSize = size;
+    previousOffset = offset;
+    propertyOffset = FTell();
+    FSeek(returnAddress);
+};
+
+struct PropertyContainer
+{
+    local uint returnAddress = FTell();
+    FSeek(propertyOffset);
+    Unknown unknown<bgcolor=0x0000ff>;
+    propertyOffset = FTell();
+    FSeek(returnAddress);
+
+    previousOffset = 0;
+    uint typeNameLength;
+    char typeName[typeNameLength];
+    int nameHashCode;
+    int versionHashCode;
+    uint64 maybeReserved;
+    uint16 propertyCount;
+    Property properties[propertyCount]<bgcolor=0xff00aa, optimize=false>;
+
+    if ((bitOffset & 7) != 0)
+    {
+        propertyOffset++;
+    }
+
+    bitOffset = 0;
+};
+
+struct Metadata
+{
+    uint propertyContainerCount;
+    PropertyContainer propertyContainers[propertyContainerCount]<optimize=false>;
+};
+
+struct Header
+{
+    char magic[4];
+    uint16 formatVersion;
+    uint16 reserved;
+    uint32 offsetToExternalPointerInfo;
+    uint32 offsetToMetadata;
+    ushort unknown;
+};
+
+// ------------------------------------------------
+// Main Template Logic
+// ------------------------------------------------
+
+Header header<bgcolor=0xffff00>;
+FSeek(header.offsetToMetadata);
+Metadata metadata<bgcolor=0x00ffff>;
+Unknown2 unknown2<bgcolor=0x0000ff>;

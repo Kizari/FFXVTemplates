@@ -1,0 +1,1072 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: system_data.save.bt
+//   Authors: Rinual
+//   Version: 1.0
+//   Purpose: Analyzing and debuging FFXV system_data saves
+//  Category: Save Files
+//   History: Surihix - Header, Footer, Encryption, Alex - Reserve data struct exploration and help
+//   (Needs a decrypted save, for example https://github.com/Surihix/FFXVSaveCrypt)
+//
+//------------------------------------------------
+LittleEndian();
+
+typedef int32 FIXID;
+
+typedef uint64 structid_t <format=hex, fgcolor=0x00C0FF>;
+typedef ubyte bool <read=(this == 0 ? "false" : "true")>;
+
+//enums
+ enum WEAPON_TYPE 
+ {                                       
+     WEAPON_TYPE_NONE                = 0xFFFFFFFF,
+     WEAPON_TYPE_SWORD               = 0x0, 
+     WEAPON_TYPE_LARGE_SWORD         = 0x1, 
+     WEAPON_TYPE_SPEAR               = 0x2,                                                                                  
+     WEAPON_TYPE_DAGGER              = 0x3,
+     WEAPON_TYPE_GUN                 = 0x4, 
+     WEAPON_TYPE_SHIELD              = 0x5,                                        
+     WEAPON_TYPE_MACHINE             = 0x6, 
+     WEAPON_TYPE_RIFLE               = 0x7,
+     WEAPON_TYPE_SUBMACHINE_GUN      = 0x8,
+     WEAPON_TYPE_GRENADE             = 0x9,
+     WEAPON_TYPE_ROCKET_LAUNCHER     = 0xA,
+     WEAPON_TYPE_MAGIC               = 0xC,
+     WEAPON_TYPE_RING_MAGIC          = 0xD,
+     WEAPON_TYPE_ITEM                = 0xE,
+     WEAPON_TYPE_CAMERA              = 0xF,
+     WEAPON_TYPE_PHANTOM_SWORD       = 0x14,
+     WEAPON_TYPE_PHANTOM_AXE         = 0x15,
+     WEAPON_TYPE_PHANTOM_BOW         = 0x16,
+     WEAPON_TYPE_PHANTOM_DUAL        = 0x17,
+     WEAPON_TYPE_PHANTOM_LONG        = 0x18,
+     WEAPON_TYPE_PHANTOM_SHURIKEN    = 0x19,
+     WEAPON_TYPE_PHANTOM_LARGE       = 0x1A,
+     WEAPON_TYPE_PHANTOM_SHIELD      = 0x1B,
+     WEAPON_TYPE_PHANTOM_MACE        = 0x1C,
+     WEAPON_TYPE_PHANTOM_WAND        = 0x1D,
+     WEAPON_TYPE_PHANTOM_SPEAR       = 0x1E,
+     WEAPON_TYPE_PHANTOM_KATANA      = 0x1F,
+     WEAPON_TYPE_PHANTOM_REGIS       = 0x20,
+     WEAPON_TYPE_AMOUNT              = 0x21,
+     WEAPON_TYPE_TOP                 = 0x0,
+     WEAPON_TYPE_ACCESSORY           = 0x30,
+     WEAPON_TYPE_ACCESSORY_NOCTIS    = 0x31,
+     WEAPON_TYPE_ACCESSORY_GLADIOLUS = 0x32,
+     WEAPON_TYPE_ACCESSORY_IGNIS     = 0x33,
+     WEAPON_TYPE_ACCESSORY_PROMPTO   = 0x34,
+     WEAPON_TYPE_ACCESSORY_FRIEND    = 0x35,
+     WEAPON_TYPE_KATANA              = 0x40,
+     WEAPON_TYPE_ENEMY_FIREARMS      = 0x41,
+     WEAPON_TYPE_NORMAL              = 0x50,
+     WEAPON_TYPE_PHANTOM             = 0x51,
+ };
+ 
+ enum WEAPON_CATEGORY
+ {
+     WEAPON_CATEGORY_NONE          = 0xFFFFFFFF,
+     WEAPON_CATEGORY_NORMAL        = 0x0,
+     WEAPON_CATEGORY_PHANTOM_SWORD = 0x1,
+     WEAPON_CATEGORY_MAGIC         = 0x2,
+     WEAPON_CATEGORY_RING          = 0x3,
+     WEAPON_CATEGORY_ITEM          = 0x4,
+     WEAPON_CATEGORY_ACCESSORY     = 0x5,
+     WEAPON_CATEGORY_AMOUNT        = 0x6,
+ };
+
+enum LocaleCategory {
+    LOCALE_WORLDWIDE            = 0x0, 
+    LOCALE_JAPANESE             = 0x1,
+    LOCALE_ENGLISH_US           = 0x2, 
+    LOCALE_FRENCH               = 0x3, 
+    LOCALE_ITALIAN              = 0x4, 
+    LOCALE_GERMAN               = 0x5, 
+    LOCALE_SPANISH_SPAIN        = 0x6,
+    LOCALE_RUSSIAN              = 0x7,
+    LOCALE_CHINESE_TRADITIONAL  = 0x8, 
+    LOCALE_CHINESE_SIMPLIFIED   = 0x9, 
+    LOCALE_KOREAN               = 0xA, 
+    LOCALE_PORTUGAL_BRAZILIAN   = 0xB, 
+    LOCALE_SPANISH_LATINAMERIC  = 0xC, 
+    LAST_LOCALE                 = 0xD  
+};
+
+enum GAME_MODE
+{
+    GAME_MODE_VERY_EASY = 0x0,
+    GAME_MODE_EASY      = 0x1,
+    GAME_MODE_NORMAL    = 0x2,
+    GAME_MODE_HARD      = 0x3,
+    GAME_MODE_VERY_HARD = 0x4,
+    GAME_MODE_AMOUNT    = 0x5,
+};
+
+enum GAME_STYLE
+{
+    GAME_STYLE_ACTIVE = 0x0,
+    GAME_STYLE_WAIT   = 0x1,
+    GAME_STYLE_AMOUNT = 0x2,
+};
+
+enum CONTROLLER_TYPE
+{
+    CONTROLLER_TYPE_A      = 0x0,
+    CONTROLLER_TYPE_B      = 0x1,
+    CONTROLLER_TYPE_C      = 0x2,
+    CONTROLLER_TYPE_AMOUNT = 0x3,
+};
+
+ enum RESULT_RANK 
+ {                                       
+     RESULT_RANK_NONE   = 0xFFFFFFFF,
+     RESULT_RANK_S      = 0x0,
+     RESULT_RANK_A      = 0x1,
+     RESULT_RANK_B      = 0x2,
+     RESULT_RANK_C      = 0x3,
+     RESULT_RANK_D      = 0x4,
+     RESULT_RANK_E      = 0x5,
+     RESULT_RANK_AMOUNT = 0x6,
+ };
+
+// Shared structs
+
+typedef struct STRING_T
+{
+    int stringLength; 
+    if (stringLength != 0)
+    {
+        char stringData[stringLength];
+    }
+} string_t <name="string_t", read=(this.stringLength == 0 ? "null" : this.stringData)>;
+
+typedef struct HEADER
+{
+    char magic[4]<comment="not decrypted correctly", bgcolor=cDkPurple>;
+    uint32 version<bgcolor=cDkRed>;
+    uint32 reserved;
+    uint32 footerStructsOffset<bgcolor=cWhite>;
+    uint32 formatId<bgcolor=cYellow>;
+    uint32 versionId<bgcolor=cBlue>;
+}Header;
+typedef struct STRUCTMEMBER
+{
+    string_t memberName<name="memberName", bgcolor=cLtGreen>;
+    string_t memberType<name="memberType", bgcolor=cDkGreen>;
+    uint32 relativeMemoryOffsetInStruct<bgcolor=cDkYellow>;
+    uint32 memberSize<bgcolor=cYellow>;
+    uint16 itemCount<bgcolor=cGreen>;
+    ubyte primitiveType<bgcolor=cWhite>;
+    ubyte itemPrimitiveType <bgcolor=cLtBlue>;
+    ubyte attr <bgcolor=cDkBlue>;		   
+}StructMember <name=this.memberName.stringData, read=this.memberType.stringData>;
+
+typedef struct STRUCTENTRY
+{
+    string_t structName<name="structName", bgcolor=cDkBlue>;
+    structid_t structId<bgcolor=cBlack>;
+    ubyte padding[8];
+    uint16 memberCount<bgcolor=cLtRed>;
+    struct STRUCTMEMBERS
+    {
+        StructMember structMember[memberCount]<optimize=false>;
+    }StructMembers<name="Struct Members">;
+} StructEntry<name=this.structName.stringData>;
+
+typedef struct FOOTERSTRUCTS
+{
+    uint32 footerStructsCount<bgcolor=cLtGreen>;
+    StructEntry structEntry[footerStructsCount]<optimize=false>;
+}FooterStructs;
+
+typedef struct ENCRYPTIONFOOTER
+{
+    uint64 iv1<bgcolor=cDkGreen>;
+    uint64 iv2<bgcolor=cDkGreen>;
+    uint64 tweak1<bgcolor=cDkGreen>;
+    uint64 tweak2<bgcolor=cDkGreen>;
+    uint32 seed<bgcolor=cDkGreen>;
+    uint64 nullPaddingA;
+    uint64 nullPaddingB;
+    ubyte end2Value<bgcolor=cDkGreen>;
+}EncryptionFooter;
+
+//-------Main Game Reserved Structs-----------
+
+union reservedStats_Block0 {
+  uint64 block;
+  struct {
+    uint8 ScreenScale;
+    bool IsMogChocoAnnounced : 1;
+    bool IsBoosterSuitAnnounced : 1;
+    bool IsFeatherMogChocoAnnounced : 1;
+    bool IsFeatherTitleHighlight : 1;
+    bool IsEPPTitleHighlight : 1;
+    bool IsEPITitleHighlight : 1;
+    bool IsMultiTitleHighlight : 1;
+    bool IsFeatherStart : 1;
+    bool IsMultiVoiceChatMicMute : 1;
+    uint8 IsMultiVoiceChatVolume : 7;
+    bool IsFeatherAnnounced : 1;
+    bool IsChapterSelectAnnounced : 1;
+    bool IsChapterSelectHighlight : 1;
+  } data;
+};
+
+union reservedStats_Block1 {
+  uint64 block;
+  struct {
+    uint8 EPG_Clear : 1;
+    uint8 EPG_Cloth : 1;
+    uint8 EPP_Clear : 1;
+    uint8 Feather_Clear : 1;
+    uint8 Feather_Cloth : 1;
+    uint8 Feather_ClearShield : 1;
+    uint8 MultiFood_Cid : 1;
+    uint8 MultiFood_Cindy : 1;
+    uint8 MultiFood_Iris : 1;
+    uint8 MultiFood_Cor : 1;
+    uint8 MultiFood_Aranea : 1;
+    uint8 MultiFood_Gentiana : 1;
+    uint8 MultiFood_Libertus : 1;
+    uint8 ClearedLastDungeon : 1;
+    uint8 EPI_Clear : 1;
+    uint8 EPI_Cloth : 1;
+    uint8 EPI_ClearIf : 1;    
+    uint8 Jet_Trial : 1;
+    uint8 Jet_Twitch_Prime : 1;
+    uint8 Jet_Steam_Workshop : 1;
+    uint8 EPA_Clear : 1;
+    uint8 Tb2_ : 1;
+    uint8 Ff14_Clear : 1;
+    uint8 EPL_Clear : 1;
+    uint8 EPN_Clear : 1;
+    uint8 EPH_Clear : 1;    
+  } data;
+};
+
+union reservedStats_Block2 {
+  uint64 block;
+  struct {
+    bool PerformanceMode : 1;
+  } data;
+};
+
+union reservedStats_Block3 {
+  uint64 block;
+  struct {
+    uint8 QuestionnaireNo;
+    bool QuestionnaireAnswer : 1;
+    bool SoundSpatialAudio : 1;
+  } data;
+};
+
+union reservedStats_Block4 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block5 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block6 {
+    uint64 block;
+    struct {        
+        bool Features : 1 <name="Hide treasures, photos, and players", comment="type: bool">;
+        uint8 Display : 2 <name="Adjust amount of treasures, photos and players shown", comment="0 = average, 1 = fewer, 2 = many", read=(this == 0 ? "average" : (this == 1 ? "fewer" : "many"))>;
+        bool Names : 1 <name="Hide treasures, photors, and players", comment="type: bool">;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block7 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block8 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block9 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block10 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block11 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block12 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block13 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block14 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block15 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block16 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block17 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block18 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+union reservedStats_Block19 {
+    uint64 block;
+    struct {
+        uint8 byte_0;
+        uint8 byte_1;
+        uint8 byte_2;
+        uint8 byte_3;
+        uint8 byte_4;
+        uint8 byte_5;
+        uint8 byte_6;
+        uint8 byte_7;
+    } data;
+};
+
+typedef struct reservedStatBitFields {
+    int32 countReservedStats <name="Reserved 64bit Stat Block Count", comment="int32", bgcolor=cDkRed>; //returns 20, which is correct as pdb defines it as a size of 20
+    reservedStats_Block0 reservedStats_0 <name="Menu Option", bgcolor=0xFFAAAA>;
+    reservedStats_Block1 reservedStats_1 <name="DLC Option", bgcolor=0xAAFFAA>; 
+    reservedStats_Block2 reservedStats_2 <name="Graphics Option",bgcolor=0xAAAAFF>;
+    reservedStats_Block3 reservedStats_3 <name="Extra Option",bgcolor=0xFFFFAA>;
+    reservedStats_Block4 reservedStats_4 <bgcolor=0xFFAAFF>;
+    reservedStats_Block5 reservedStats_5 <bgcolor=0xAAFFFF>;
+    reservedStats_Block6 reservedStats_6 <name="Live Options",bgcolor=0xFFD4AA>;
+    reservedStats_Block7 reservedStats_7 <bgcolor=0xD4FFAA>;
+    reservedStats_Block8 reservedStats_8 <bgcolor=0xAAD4FF>;
+    reservedStats_Block9 reservedStats_9 <bgcolor=0xFFAAC8>;
+    reservedStats_Block10 reservedStats_10 <bgcolor=0xC8FFAA>;
+    reservedStats_Block11 reservedStats_11 <bgcolor=0xAAC8FF>;
+    reservedStats_Block12 reservedStats_12 <bgcolor=0xFFDD88>;
+    reservedStats_Block13 reservedStats_13 <bgcolor=0xDDFF88>;
+    reservedStats_Block14 reservedStats_14 <bgcolor=0x88DDFF>;
+    reservedStats_Block15 reservedStats_15 <bgcolor=0xFFBBDD>;
+    reservedStats_Block16 reservedStats_16 <bgcolor=0xFFAAAA>;
+    reservedStats_Block17 reservedStats_17 <bgcolor=0xAAFFAA>;
+    reservedStats_Block18 reservedStats_18 <bgcolor=0xAAAAFF>;
+    reservedStats_Block19 reservedStats_19 <bgcolor=0xFFFFAA>;
+} reservedStatBitFields;
+
+typedef struct AppContentFlags {
+    int32 countAppContent <name="App Content Boolean Count", comment="int32", bgcolor=cDkRed>; //returns 100, which is correct as pdb defines it as a size of 100
+    bool appContent_0 : 1 <name="App Content 0", bgcolor=0xFFAAAA>;
+    bool appContent_1 : 1 <name="App Content 1", bgcolor=0xFFAAAA>;
+    bool appContent_2 : 1 <name="App Content 2", bgcolor=0xFFAAAA>;
+    bool appContent_3 : 1 <name="App Content 3", bgcolor=0xFFAAAA>;
+    bool appContent_4 : 1 <name="App Content 4", bgcolor=0xFFAAAA>;
+    bool appContent_5 : 1 <name="App Content 5", bgcolor=0xFFAAAA>;
+    bool appContent_6 : 1 <name="App Content 6", bgcolor=0xFFAAAA>;
+    bool appContent_7 : 1 <name="App Content 7", bgcolor=0xFFAAAA>;
+    bool appContent_8 : 1 <name="App Content 8", bgcolor=0xAAFFAA>;
+    bool appContent_9 : 1 <name="App Content 9", bgcolor=0xAAFFAA>;
+    bool appContent_10 : 1 <name="App Content 10", bgcolor=0xAAFFAA>;
+    bool appContent_11 : 1 <name="App Content 11", bgcolor=0xAAFFAA>;
+    bool appContent_12 : 1 <name="App Content 12", bgcolor=0xAAFFAA>;
+    bool appContent_13 : 1 <name="App Content 13", bgcolor=0xAAFFAA>;
+    bool appContent_14 : 1 <name="App Content 14", bgcolor=0xAAFFAA>;
+    bool appContent_15 : 1 <name="App Content 15", bgcolor=0xAAFFAA>;
+    bool appContent_16 : 1 <name="App Content 16", bgcolor=0xAAAAFF>;
+    bool appContent_17 : 1 <name="App Content 17", bgcolor=0xAAAAFF>;
+    bool appContent_18 : 1 <name="App Content 18", bgcolor=0xAAAAFF>;
+    bool appContent_19 : 1 <name="App Content 19", bgcolor=0xAAAAFF>;
+    bool appContent_20 : 1 <name="App Content 20", bgcolor=0xAAAAFF>;
+    bool appContent_21 : 1 <name="App Content 21", bgcolor=0xAAAAFF>;
+    bool appContent_22 : 1 <name="App Content 22", bgcolor=0xAAAAFF>;
+    bool appContent_23 : 1 <name="App Content 23", bgcolor=0xAAAAFF>;
+    bool appContent_24 : 1 <name="App Content 24", bgcolor=0xFFFFAA>;
+    bool appContent_25 : 1 <name="App Content 25", bgcolor=0xFFFFAA>;
+    bool appContent_26 : 1 <name="App Content 26", bgcolor=0xFFFFAA>;
+    bool appContent_27 : 1 <name="App Content 27", bgcolor=0xFFFFAA>;
+    bool appContent_28 : 1 <name="App Content 28", bgcolor=0xFFFFAA>;
+    bool appContent_29 : 1 <name="App Content 29", bgcolor=0xFFFFAA>;
+    bool appContent_30 : 1 <name="App Content 30", bgcolor=0xFFFFAA>;
+    bool appContent_31 : 1 <name="App Content 31", bgcolor=0xFFFFAA>;
+    bool appContent_32 : 1 <name="App Content 32", bgcolor=0xFFAAFF>;
+    bool appContent_33 : 1 <name="App Content 33", bgcolor=0xFFAAFF>;
+    bool appContent_34 : 1 <name="App Content 34", bgcolor=0xFFAAFF>;
+    bool appContent_35 : 1 <name="App Content 35", bgcolor=0xFFAAFF>;
+    bool appContent_36 : 1 <name="App Content 36", bgcolor=0xFFAAFF>;
+    bool appContent_37 : 1 <name="App Content 37", bgcolor=0xFFAAFF>;
+    bool appContent_38 : 1 <name="App Content 38", bgcolor=0xFFAAFF>;
+    bool appContent_39 : 1 <name="App Content 39", bgcolor=0xFFAAFF>;
+    bool appContent_40 : 1 <name="App Content 40", bgcolor=0xAAFFFF>;
+    bool appContent_41 : 1 <name="App Content 41", bgcolor=0xAAFFFF>;
+    bool appContent_42 : 1 <name="App Content 42", bgcolor=0xAAFFFF>;
+    bool appContent_43 : 1 <name="App Content 43", bgcolor=0xAAFFFF>;
+    bool appContent_44 : 1 <name="App Content 44", bgcolor=0xAAFFFF>;
+    bool appContent_45 : 1 <name="App Content 45", bgcolor=0xAAFFFF>;
+    bool appContent_46 : 1 <name="App Content 46", bgcolor=0xAAFFFF>;
+    bool appContent_47 : 1 <name="App Content 47", bgcolor=0xAAFFFF>;
+    bool appContent_48 : 1 <name="App Content 48", bgcolor=0xFFD4AA>;
+    bool appContent_49 : 1 <name="App Content 49", bgcolor=0xFFD4AA>;
+    bool appContent_50 : 1 <name="App Content 50", bgcolor=0xFFD4AA>;
+    bool appContent_51 : 1 <name="App Content 51", bgcolor=0xFFD4AA>;
+    bool appContent_52 : 1 <name="App Content 52", bgcolor=0xFFD4AA>;
+    bool appContent_53 : 1 <name="App Content 53", bgcolor=0xFFD4AA>;
+    bool appContent_54 : 1 <name="App Content 54", bgcolor=0xFFD4AA>;
+    bool appContent_55 : 1 <name="App Content 55", bgcolor=0xFFD4AA>;
+    bool appContent_56 : 1 <name="App Content 56", bgcolor=0xD4FFAA>;
+    bool appContent_57 : 1 <name="App Content 57", bgcolor=0xD4FFAA>;
+    bool appContent_58 : 1 <name="App Content 58", bgcolor=0xD4FFAA>;
+    bool appContent_59 : 1 <name="App Content 59", bgcolor=0xD4FFAA>;
+    bool appContent_60 : 1 <name="App Content 60", bgcolor=0xD4FFAA>;
+    bool appContent_61 : 1 <name="App Content 61", bgcolor=0xD4FFAA>;
+    bool appContent_62 : 1 <name="App Content 62", bgcolor=0xD4FFAA>;
+    bool appContent_63 : 1 <name="App Content 63", bgcolor=0xD4FFAA>;
+    bool appContent_64 : 1 <name="App Content 64", bgcolor=0xAAD4FF>;
+    bool appContent_65 : 1 <name="App Content 65", bgcolor=0xAAD4FF>;
+    bool appContent_66 : 1 <name="App Content 66", bgcolor=0xAAD4FF>;
+    bool appContent_67 : 1 <name="App Content 67", bgcolor=0xAAD4FF>;
+    bool appContent_68 : 1 <name="App Content 68", bgcolor=0xAAD4FF>;
+    bool appContent_69 : 1 <name="App Content 69", bgcolor=0xAAD4FF>;
+    bool appContent_70 : 1 <name="App Content 70", bgcolor=0xAAD4FF>;
+    bool appContent_71 : 1 <name="App Content 71", bgcolor=0xAAD4FF>;
+    bool appContent_72 : 1 <name="App Content 72", bgcolor=0xFFAAC8>;
+    bool appContent_73 : 1 <name="App Content 73", bgcolor=0xFFAAC8>;
+    bool appContent_74 : 1 <name="App Content 74", bgcolor=0xFFAAC8>;
+    bool appContent_75 : 1 <name="App Content 75", bgcolor=0xFFAAC8>;
+    bool appContent_76 : 1 <name="App Content 76", bgcolor=0xFFAAC8>;
+    bool appContent_77 : 1 <name="App Content 77", bgcolor=0xFFAAC8>;
+    bool appContent_78 : 1 <name="App Content 78", bgcolor=0xFFAAC8>;
+    bool appContent_79 : 1 <name="App Content 79", bgcolor=0xFFAAC8>;
+    bool appContent_80 : 1 <name="App Content 80", bgcolor=0xC8FFAA>;
+    bool appContent_81 : 1 <name="App Content 81", bgcolor=0xC8FFAA>;
+    bool appContent_82 : 1 <name="App Content 82", bgcolor=0xC8FFAA>;
+    bool appContent_83 : 1 <name="App Content 83", bgcolor=0xC8FFAA>;
+    bool appContent_84 : 1 <name="App Content 84", bgcolor=0xC8FFAA>;
+    bool appContent_85 : 1 <name="App Content 85", bgcolor=0xC8FFAA>;
+    bool appContent_86 : 1 <name="App Content 86", bgcolor=0xC8FFAA>;
+    bool appContent_87 : 1 <name="App Content 87", bgcolor=0xC8FFAA>;
+    bool appContent_88 : 1 <name="App Content 88", bgcolor=0xAAC8FF>;
+    bool appContent_89 : 1 <name="App Content 89", bgcolor=0xAAC8FF>;
+    bool appContent_90 : 1 <name="App Content 90", bgcolor=0xAAC8FF>;
+    bool appContent_91 : 1 <name="App Content 91", bgcolor=0xAAC8FF>;
+    bool appContent_92 : 1 <name="App Content 92", bgcolor=0xAAC8FF>;
+    bool appContent_93 : 1 <name="App Content 93", bgcolor=0xAAC8FF>;
+    bool appContent_94 : 1 <name="App Content 94", bgcolor=0xAAC8FF>;
+    bool appContent_95 : 1 <name="App Content 95", bgcolor=0xAAC8FF>;
+    bool appContent_96 : 1 <name="App Content 96", bgcolor=0xFFDD88>;
+    bool appContent_97 : 1 <name="App Content 97", bgcolor=0xFFDD88>;
+    bool appContent_98 : 1 <name="App Content 98", bgcolor=0xFFDD88>;
+    bool appContent_99 : 1 <name="App Content 99", bgcolor=0xFFDD88>;
+} AppContentFlags;
+
+//----Main Structs for Main Game----------
+
+typedef struct Black_Save_Config_SaveGameConfigMainStruct {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    LocaleCategory text_ <name="Text Language", comment="type: SQEX.Luminous.GameFramework.Locale.LocaleCategory", bgcolor=cBlue>;
+    LocaleCategory voice_ <name="Voice Language", comment="type: SQEX.Luminous.GameFramework.Locale.LocaleCategory", bgcolor=cDkBlue>;
+    int32 brightness_ <name="Brightness", comment="type: int32", bgcolor=cBlue>;
+    int32 soundMode_ <name="Sound Mode", comment="type: int32", bgcolor=cBlue>;
+    bool virticalCameraNormal_ : 1 <name="Vertical Camera Normal", comment="type: bool", bgcolor=cDkGreen>;
+    bool horizontalCameraNormal_ : 1 <name="Horizontal Camera Normal", comment="type: bool", bgcolor=cDkGreen>;
+    bool displayText_ : 1 <name="Display Text", comment="type: bool", bgcolor=cDkGreen>;
+    bool speakerText_ : 1 <name="Speaker Text", comment="type: bool", bgcolor=cDkGreen>;
+    bool vibrationEnable_ : 1 <name="Vibration Enabled", comment="type: bool", bgcolor=cDkGreen>;
+    bool firstBoot_ : 1 <name="First Boot", comment="type: bool", bgcolor=cDkGreen>;
+    bool newgamePlus_ : 1 <name="New Game Plus", comment="type: bool", bgcolor=cDkGreen>;
+    int32 masterVolume_ <name="Master Volume", comment="type: int32", bgcolor=cYellow>;
+    int32 bgmVolume_ <name="BGM Volume", comment="type: int32", bgcolor=cLtBlue>;
+    int32 voiceVolume_ <name="Voice Volume", comment="type: int32", bgcolor=cLtGreen>;
+    int32 seVolume_ <name="SE Volume", comment="type: int32", bgcolor=cLtRed>;
+    int32 cameraSpeed_ <name="Camera Speed", comment="type: int32", bgcolor=cDkGreen>;
+    int32 padButtonIconKind_ <name="Pad Button Icon Kind", comment="type: int32", bgcolor=cLtBlue>;
+    int32 autoSaveSlotNo_ <name="Auto Save Slot No", comment="type: int32", bgcolor=cLtGreen>;
+    int32 autoSaveSlotOldNo_ <name="Auto Save Slot Old No", comment="type: int32", bgcolor=cYellow>;
+    bool rotateNaviMap_ : 1 <name="Rotate Navi Map", comment="type: bool", bgcolor=cDkGreen>;
+    bool displayNaviMap_ : 1 <name="Display Navi Map", comment="type: bool", bgcolor=cDkGreen>;
+    bool displayNaviMapRoute_ : 1 <name="Display Navi Map Route", comment="type: bool", bgcolor=cDkGreen>;
+    bool displayKeyHelp_ : 1 <name="Display Key Help", comment="type: bool", bgcolor=cDkGreen>;
+    bool displayHUD_ : 1 <name="Display HUD", comment="type: bool", bgcolor=cDkGreen>;
+    int32 cameraLength_ <name="Camera Length", comment="type: int32", bgcolor=cDkBlue>;
+    bool isHUDFullscreen_ : 1 <name="Is HUD Fullscreen", comment="type: bool", bgcolor=cDkGreen>;
+    bool displayHelpMessage_ : 1 <name="Display Help Message", comment="type: bool", bgcolor=cDkGreen>;
+    bool displaySTGauge_ : 1 <name="Display ST Gauge", comment="type: bool", bgcolor=cDkGreen>;
+    bool is4KMode_ : 1 <name="Is 4K Mode", comment="type: bool", bgcolor=cDkGreen>;
+    GAME_MODE gameMode_ <name="Game Mode", comment="type: Black.Save.GAME_MODE", bgcolor=cLtGray>;
+    GAME_STYLE gameStyle_ <name="Game Style", comment="type: Black.Save.GAME_STYLE", bgcolor=cDkGray>;
+    CONTROLLER_TYPE controllerType_ <name="Controller Type", comment="type: Black.Save.CONTROLLER_TYPE", bgcolor=cDkBlue>;    
+    int32 reserved0_ <name="Reserved 0", comment="type: int32", bgcolor=cPurple>;
+    int32 reserved1_ <name="Reserved 1", comment="type: int32", bgcolor=cPurple>;
+    int32 reserved2_ <name="Reserved 2", comment="type: int32", bgcolor=cPurple>;
+    int32 reserved3_ <name="Reserved 3", comment="type: int32", bgcolor=cPurple>;
+    bool reserved4_ : 1 <name="Reserved 4", comment="type: bool", bgcolor=cLtGray>;
+    bool reserved5_ : 1 <name="Reserved 5", comment="type: bool", bgcolor=cLtGray>;
+    bool reserved6_ : 1 <name="Reserved 6", comment="type: bool", bgcolor=cLtGray>;
+    bool isHDRMode_ : 1 <name="Is HDR Mode", comment="type: bool", bgcolor=cDkGreen>;
+    reservedStatBitFields reservedStats_ <name="Reserved Bitfield Datablocks", read=Str("Datablocks: %d", this.countReservedStats), comment="Bitfield wrapper for 20 int64 blocks">;
+    AppContentFlags appContent <name="App Content Flags", read=Str("Flags: %d", this.countAppContent), comment="using defined struct due to bitfield array issues in 010">; 
+} Black_Save_Config_SaveGameConfigStruct;
+
+typedef struct Black_Save_Demo_SavePlatinumDemoStruct {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    STRING_T carbuncleName_ <name="Carbuncle Name", comment="type: char[256]", bgcolor=0xFFFF00, read=(this.stringLength == 0 ? "null" : this.stringData)>;
+    bool isClear_ <name="Is Clear", comment="type: bool", bgcolor=cRed>;
+    int64 total_seconds <name="Total Play Time (Seconds)", comment="type: int64_t", bgcolor=cWhite>;
+} Black_Save_Demo_SavePlatinumDemoStruct;
+
+//---------------------------------
+
+ //------EPG-----------
+ 
+typedef struct Black_Save_Config_SaveEpgStageScore
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;    
+    int32 totalScore <name="Total Score", bgcolor=0xAA44FF>;
+    //int32 pointCount <name="pointArrayCount", bgcolor=0xAA44FF>; //hard coded atm   
+    int32 EphPoints[6] <name="Episode Points", bgcolor=0x88AAFF>;
+} Black_Save_Config_SaveEpgStageScore;
+
+typedef struct Black_Save_Config_SaveEpgFinalScore
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    char ClearedMDay <name="Cleared Day", bgcolor=0xFF8888>;
+    char ClearedMonth <name="Cleared Month", bgcolor=0xFF6666>;
+    int16 ClearedYear <name="Cleared Year", bgcolor=0xFF4444>;
+    int64 PlayTime <name="Play Time", bgcolor=0x8888FF>;
+    //int32 scoreCount <name="Score Count", bgcolor=0xAA44FF>; //hard coded atm
+    Black_Save_Config_SaveEpgStageScore SaveEpgStageScore[3]<name="EpgStageScore", bgcolor=0xAA44FF>;
+    bool IsCleared <name="Is Cleared?", bgcolor=0xAAFFAA>;
+    uint32 itemScore <name="Item Score", bgcolor=0xFFFF00>;
+    uint32 totalScore <name="Total Score", bgcolor=0xFFFF00>;
+    uint32 unk[9] <name="Unknown Score: ", hidden=false>; //not sure what this data is supposed to be, nothing in the footer or pdb
+} Black_Save_Config_SaveEpgFinalScore;
+
+typedef struct Black_Save_Config_SaveGameConfigNoxEPG
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int32 hiScore <name="High Score", bgcolor=0xAA44FF>;
+    bool cleared <name="Game Cleared", bgcolor=0xFFAAAA>;
+    int32 playedCount <name="playedArrayCount", bgcolor=0xAA44FF>;
+    bool played_0 : 1 <name="Played 0", bgcolor=0xFFBBBB>;
+    bool played_1 : 1 <name="Played 1", bgcolor=0xFFCCCC>;
+    bool played_2 : 1 <name="Played 2", bgcolor=0xFFDDDD>;
+    bool played_3 : 1 <name="Played 3", bgcolor=0xFFEEEE>;
+    int32 scoreCount <name="Score Count", bgcolor=0xAA44FF>;    
+    Black_Save_Config_SaveEpgFinalScore EpgScoreRanking[scoreCount] <name="Episode Score Rankings", bgcolor=0x88AAFF>;
+  
+} Black_Save_Config_SaveGameConfigNoxEPG;
+
+//----------------------
+
+ //------Comrades----------- 
+
+typedef struct avatarSnapshotBinary
+{
+    uint binarySize; 
+    if (binarySize != 0)
+    {
+           ubyte binaryData[binarySize]<name="Avatar Thumbnail Data", optimize=false>;
+    }    
+}avatarSnapshotBinary;
+
+typedef struct Black_Save_Config_SaveMultiplayerName {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    STRING_T avataraName_ <name="Avatara Name", comment="type: char[256]", bgcolor=0xFFFF00, read=(this.stringLength == 0 ? "null" : this.stringData)>;
+    avatarSnapshotBinary avatarThumbnailData;
+  };
+  
+   typedef struct SaveWeaponEquipmentStruct 
+ {                                  
+     structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+     FIXID weaponFixid <name="Equipment ID">;
+     WEAPON_TYPE equipmentType;
+     WEAPON_CATEGORY equipmentCategory;
+     int32 bank_number;                          
+ };
+ 
+ typedef struct Black_Save_Item_SaveItemDataStruct
+{
+    structid_t structId <bgcolor=cBlack>;
+    FIXID id <name="Item Id", comment="type: SQEX.Ebony.Std.Fixid", bgcolor=cDkGreen>;
+    int32 amount <name="Amount", comment="type: int32_t", bgcolor=cDkBlue>;
+} Black_Save_Item_SaveItemDataStruct;
+  
+typedef struct avatarUsed {
+    int32 avatarUsedcount <name="avatarUsedcount", bgcolor=cBlack>;
+    bool avatarUsed_0 : 1 <name="Avatara 0", bgcolor=0xFFAAAA>;
+    bool avatarUsed_1 : 1 <name="Avatara 1", bgcolor=0xFFAAAA>;
+    bool avatarUsed_2 : 1 <name="Avatara 2", bgcolor=0xFFAAAA>;
+    bool avatarUsed_3 : 1 <name="Avatara 3", bgcolor=0xFFAAAA>;
+    bool avatarUsed_4 : 1 <name="Avatara 4", bgcolor=0xFFAAAA>;
+    bool avatarUsed_5 : 1 <name="Avatara 5", bgcolor=0xFFAAAA>;
+    bool avatarUsed_6 : 1 <name="Avatara 6", bgcolor=0xFFAAAA>;
+    bool avatarUsed_7 : 1 <name="Avatara 7", bgcolor=0xFFAAAA>;
+};
+
+typedef struct Black_Save_Multiplay_SaveAvatarEquipmentStruct
+{
+    structid_t struct_id <bgcolor=cBlack>;
+    int32 AvatarEquipmentCount <name="AvatarEquipmentCount", bgcolor=cBlack>;
+    SaveWeaponEquipmentStruct avatar_equipment[AvatarEquipmentCount] <name="Avatar Equipment", read=(this.weaponFixid), comment="type: Black::Save::Multiplay::SaveAvatarEquipmentStruct[8]", bgcolor=cDkBlue>;
+    uint32 AvatarAccessoryCount;
+    SaveWeaponEquipmentStruct avatar_accessory[AvatarAccessoryCount] <name="Avatar Accessory", read=(this.weaponFixid), comment="type: Black.Save.Equipment.SaveWeaponEquipmentStruct", bgcolor=cDkGreen>;
+    
+} Black_Save_Multiplay_SaveAvatarEquipmentStruct;
+
+typedef struct SaveMultiplayerColorHistory
+{
+    structid_t struct_id <bgcolor=cBlack>;
+    FIXID ItemID <name="Item FIXID", bgcolor=cBlack>;
+    int8 index <name="Index", comment="type: int8", bgcolor=cLtGray>;
+    int8 R <name="Blue", comment="type: int8", bgcolor=cRed>;
+    int8 G <name="Blue", comment="type: int8", bgcolor=cGreen>;
+    int8 B <name="Blue", comment="type: int8", bgcolor=cBlue>;
+} SaveMultiplayerColorHistory;
+
+typedef struct Black_Save_Item_SaveGameConfigLiveAvatarItem
+{
+    structid_t struct_id <bgcolor=cBlack>;
+    int32 ColorHistoryCount <name="AvatarEquipmentCount", bgcolor=cYellow>;
+    Black_Save_Item_SaveItemDataStruct SaveItemDataStruct[ColorHistoryCount] <name="Item Data", read=(this.id), bgcolor=cLtGray>;
+
+} Black_Save_Item_SaveGameConfigLiveAvatarItem;
+
+typedef struct Black_Save_Config_SaveGameConfigNoxMultiplayer {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int32 useCharacter <name="Use Character", comment="type: int32", bgcolor=cBlue>;
+    int32 avatar_useNo <name="Avatar Use Number", comment="type: int32", bgcolor=cBlue>;
+    int32 AvatarCount <name="AvatarCount", bgcolor=cBlack>;
+    Black_Save_Config_SaveMultiplayerName avatar_name[AvatarCount] <read=Str("Name: %s", this.avataraName_.stringData), name="Avatar Names", optimize=false, comment="type: Black::Save::Config::SaveMultiplayerName[8]", bgcolor=cLtBlue>;
+    avatarUsed avatar_Used <name="Avatar Used Flags", comment="type: bool[8]", bgcolor=cDkGreen>;    
+    int32 AvatarEquipmentCount <name="AvatarEquipmentCount", bgcolor=cBlack>;
+    Black_Save_Multiplay_SaveAvatarEquipmentStruct avatar_equipment[8] <name="Avatar Equipment", optimize=false, comment="type: Black::Save::Multiplay::SaveAvatarEquipmentStruct[8]", bgcolor=cDkBlue>;
+    int32 story_index <name="Story Index", comment="type: int32", bgcolor=cYellow>;
+    int32 ColorHistoryCount <name="AvatarEquipmentCount", bgcolor=cBlack>;
+    SaveMultiplayerColorHistory color_history[ColorHistoryCount] <name="Color History", read=(this.ItemID), comment="type: Black::Save::Config::SaveMultiplayerColorHistory[256]", bgcolor=cPurple>;
+} Black_Save_Config_SaveGameConfigNoxMultiplayer;
+
+//----------------------
+
+ //------EPI----------- 
+
+typedef struct Black_Save_Config_SaveEpiFinalScore
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    char ClearedMDay <name="Cleared Day", bgcolor=0xFF8888>;
+    char ClearedMonth <name="Cleared Month", bgcolor=0xFF6666>;
+    int16 ClearedYear <name="Cleared Year", bgcolor=0xFF4444>;
+    int64 PlayTime <name="Play Time", bgcolor=0x8888FF>;
+    RESULT_RANK Rank <name="Result Rank", bgcolor=0x44FF44>;
+    bool IsCleared <name="Is Cleared?", bgcolor=0xAAFFAA>;
+    int Score <name="Final Score", bgcolor=0xFFFF00>;
+} Black_Save_Config_SaveEpiFinalScore;
+
+typedef struct Black_Save_Config_SaveEpiScoreRanking
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int64 bestScore <name="Best Score", bgcolor=0x4488FF>;
+    int32 scoreCount <name="Score Count", bgcolor=0xAA44FF>;    
+    Black_Save_Config_SaveEpiFinalScore EpiScoreRanking[scoreCount] <name="Episode Score Rankings", bgcolor=0x88AAFF>;
+} Black_Save_Config_SaveEpiScoreRanking;
+
+typedef struct Black_Save_Config_SaveGameConfigNoxEPI
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    bool cleared : 1 <name="Game Cleared", bgcolor=0xFFAAAA>;
+    int32 playedCount <name="playedArrayCount", bgcolor=0xAA44FF>;
+    bool played_0 : 1 <name="Played 0", bgcolor=0xFFBBBB>;
+    bool played_1 : 1 <name="Played 1", bgcolor=0xFFCCCC>;
+    bool played_2 : 1 <name="Played 2", bgcolor=0xFFDDDD>;
+    bool played_3 : 1 <name="Played 3", bgcolor=0xFFEEEE>;
+    int32 hiScoreCount <name="High Score Count", bgcolor=0xAA44FF>;
+    int HiScore[hiScoreCount] <name="High Scores", bgcolor=0xFFFF00>;
+    int32 scoreBoardCount <name="Scoreboard Count", bgcolor=0xFF7744>;
+    Black_Save_Config_SaveEpiScoreRanking EpiScoreBoard[scoreBoardCount] <name="Episode Scoreboard", optimize=false, bgcolor=0xAA44FF>;
+    bool clearedIf <name="Cleared If", bgcolor=0xFFBBBB>;
+} Black_Save_Config_SaveGameConfigNoxEPI;
+
+//----------------------
+
+ //------EPA-----------
+ // this file doesnt have any info in the .pdb / debug, nore any enums
+
+typedef struct Black_Save_Config_SaveEpaFinalScore
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int64 PlayTime <name="Play Time", bgcolor=0x8888FF>;
+    char ClearedMDay <name="Cleared MDay", bgcolor=0xFF8888>;
+    char ClearedMonth <name="Cleared Month", bgcolor=0xFF6666>;
+    int16 ClearedYear <name="Cleared Year", bgcolor=0xFF4444>;
+    int32 TotalScore <name="Total Score", bgcolor=0xAA44FF>;
+    int32 resultInsobjScore <name="Result Insobj Score", bgcolor=0xFFAAAA>;
+    int32 maxCombo <name="Max Combo", bgcolor=0xFFEEEE>;
+    int32 resultKill <name="Result Kill", bgcolor=0xFFBBBB>;
+    int32 resultDeamon <name="Result Deamon", bgcolor=0xFFDDDD>;
+    int32 resultTrans <name="Result Trans", bgcolor=0xFF7744>;
+    int32 resultDamage <name="Result Damage", bgcolor=0xAA44FF>;
+    int32 resultTime <name="Result Time", bgcolor=0xFFAAAA>;    
+    //likely use an enum for these ranks
+    int8 maxComboRank <name="Max Combo Rank", bgcolor=0x8888FF>;
+    int8 killRank <name="Kill Rank", bgcolor=0xFF8888>;
+    int8 deamonRank <name="Deamon Rank", bgcolor=0xFF6666>;
+    int8 gtowerRank <name="GTower Rank", bgcolor=0xFF4444>;
+    int8 transRank <name="Trans Rank", bgcolor=0xAA44FF>;
+    int8 damageRank <name="Damage Rank", bgcolor=0xFFAAAA>;
+    int8 missionRank <name="Mission Rank", bgcolor=0xFFEEEE>;
+    int8 timeRank <name="Time Rank", bgcolor=0xFFBBBB>;
+    int8 totalRank <name="Total Rank", bgcolor=0xFFDDDD>;
+    int8 resultBreakTower <name="Result Break Tower", bgcolor=0xFFAAAA>;
+    int8 resultMission <name="Result Mission", bgcolor=0x8888FF>;
+    int8 scoreMode <name="Score Mode", bgcolor=0xFF6666>;
+    int8 totalScoreRank <name="Total Score Rank", bgcolor=0xFF4444>;
+    int32 timeScore <name="Time Score", bgcolor=0xAA44FF>;
+    int32 maxComboScore <name="Max Combo Score", bgcolor=0xFFAAAA>;
+    int32 damageScore <name="Damage Score", bgcolor=0xFFEEEE>;
+    int32 transScore <name="Trans Score", bgcolor=0xFFBBBB>;
+} Black_Save_Config_SaveEpaFinalScore;
+ 
+typedef struct Black_Save_Config_SaveEpaScoreRanking
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int64 bestScore <name="Best Score", bgcolor=0x4488FF>;
+    int32 scoreCount <name="Score Count", bgcolor=0xAA44FF>;    
+    Black_Save_Config_SaveEpaFinalScore EpaScoreRanking[scoreCount] <name="Episode Score Rankings", bgcolor=0x88AAFF>;
+} Black_Save_Config_SaveEpaScoreRanking;
+ 
+ typedef struct Black_Save_Config_SaveGameConfigNoxEPA {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int played;
+    bool played_0 : 1 <name="Played 0", bgcolor=0xFFAAAA>;
+    bool played_1 : 1 <name="Played 1", bgcolor=0xFFAAAA>;
+    bool played_2 : 1 <name="Played 2", bgcolor=0xFFAAAA>;
+    bool played_3 : 1 <name="Played 3", bgcolor=0xFFAAAA>;
+    bool played_4 : 1 <name="Played 4", bgcolor=0xFFAAAA>;
+    int32 scoreBoardCount <name="Scoreboard Count", bgcolor=0xFF7744>;
+    Black_Save_Config_SaveEpaScoreRanking EpaScoreBoard[scoreBoardCount] <name="Episode Scoreboard", optimize=false, bgcolor=0xAA44FF>;
+    bool cleared_0 : 1 <name="Cleared 0", bgcolor=0xFFAAAA>;
+    bool cleared_1 : 1 <name="Cleared 1", bgcolor=0xFFAAAA>;
+} Black_Save_Config_SaveGameConfigNoxEPA;
+
+//----------------------
+
+ //------EPH-----------
+ // this file doesnt have any info in the .pdb / debug, nore any enums
+ 
+typedef struct Black_Save_Config_SaveEphStageScore
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;    
+    int32 totalScore <name="Total Score", bgcolor=0xAA44FF>;
+    //int32 pointCount <name="pointArrayCount", bgcolor=0xAA44FF>; //hard coded atm   
+    int32 EphPoints[6] <name="Episode Points", bgcolor=0x88AAFF>;
+} Black_Save_Config_SaveEphStageScore;
+
+typedef struct Black_Save_Config_SaveEphFinalScore
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    char ClearedMDay <name="Cleared Day", bgcolor=0xFF8888>;
+    char ClearedMonth <name="Cleared Month", bgcolor=0xFF6666>;
+    int16 ClearedYear <name="Cleared Year", bgcolor=0xFF4444>;
+    int64 PlayTime <name="Play Time", bgcolor=0x8888FF>;
+    //int32 scoreCount <name="Score Count", bgcolor=0xAA44FF>; //hard coded atm
+    Black_Save_Config_SaveEphStageScore SaveEphStageScore[3]<name="EphStageScore", bgcolor=0xAA44FF>;
+    bool IsCleared <name="Is Cleared?", bgcolor=0xAAFFAA>;
+    int Score <name="Final Score", bgcolor=0xFFFF00>;
+} Black_Save_Config_SaveEphFinalScore;
+
+typedef struct Black_Save_Config_SaveGameConfigNoxEPH
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int32 hiScore <name="High Score", bgcolor=0xAA44FF>;
+    bool cleared : 1 <name="Game Cleared", bgcolor=0xFFAAAA>;
+    int32 playedCount <name="playedArrayCount", bgcolor=0xAA44FF>;
+    bool played_0 : 1 <name="Played 0", bgcolor=0xFFBBBB>;
+    bool played_1 : 1 <name="Played 1", bgcolor=0xFFCCCC>;
+    bool played_2 : 1 <name="Played 2", bgcolor=0xFFDDDD>;
+    bool played_3 : 1 <name="Played 3", bgcolor=0xFFEEEE>;
+    int32 scoreCount <name="Score Count", bgcolor=0xAA44FF>;    
+    Black_Save_Config_SaveEphFinalScore EphScoreRanking[scoreCount] <name="Episode Score Rankings", bgcolor=0x88AAFF>;
+} Black_Save_Config_SaveGameConfigNoxEPH;
+
+//----------------------
+
+ //------EPP----------- 
+ 
+ typedef struct Black_Save_Config_SaveEppStageScore
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int64 resultTime <name="Result Time", bgcolor=0x4488FF>;
+    int32 CoinCount <name="Coin Count", bgcolor=0xAA44FF>;     
+    int32 CoinBonus <name="Coin Bonus", bgcolor=0x44AAFF>;   
+    int32 KillCount <name="Kill Count", bgcolor=0xFF8888>;    
+    int32 KillBonus <name="Kill Bonus", bgcolor=0xFF6666>;    
+    int32 TotalBonus <name="Total Bonus", bgcolor=0xFF4444>;   
+} Black_Save_Config_SaveEppStageScore;
+ 
+typedef struct Black_Save_Config_SaveEppFinalScore
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    char ClearedMDay <name="Cleared Day", bgcolor=0xFF8888>;
+    char ClearedMonth <name="Cleared Month", bgcolor=0xFF6666>;
+    int16 ClearedYear <name="Cleared Year", bgcolor=0xFF4444>;
+    int64 PlayTime <name="Play Time", bgcolor=0x8888FF>;
+    int64 ResultTime <name="Result Time", bgcolor=0x8888FF>;
+    bool IsCleared <name="Is Cleared?", bgcolor=0xAAFFAA>;       
+    Black_Save_Config_SaveEppStageScore EppStageScore <name="Episode Stage Score", bgcolor=0x88AAFF>;
+} Black_Save_Config_SaveEppFinalScore;
+
+typedef struct Black_Save_Config_SaveEppScoreRanking
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int64 bestTime <name="Best Time", bgcolor=0x4488FF>;
+    int32 scoreCount <name="Score Count", bgcolor=0xAA44FF>;    
+    Black_Save_Config_SaveEppFinalScore EppScoreRanking[scoreCount] <name="Episode Score Rankings", bgcolor=0x88AAFF>;
+} Black_Save_Config_SaveEppScoreRanking;
+
+typedef struct Black_Save_Config_SaveGameConfigNoxEPP
+{
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+
+    bool cleared <name="Game Cleared", bgcolor=0xFFAAAA>;
+    int32 playedCount <name="playedArrayCount", bgcolor=0xAA44FF>;
+    bool played_0 : 1 <name="Played 0", bgcolor=0xFFBBBB>;
+    bool played_1 : 1 <name="Played 1", bgcolor=0xFFCCCC>;
+    bool played_2 : 1 <name="Played 2", bgcolor=0xFFDDDD>;
+    bool played_3 : 1 <name="Played 3", bgcolor=0xFFEEEE>;
+    int32 scoreBoardCount <name="Scoreboard Count", bgcolor=0xFF7744>;
+    Black_Save_Config_SaveEppScoreRanking EppScoreBoard[scoreBoardCount] <name="Episode Scoreboard", optimize=false, bgcolor=0xAA44FF>;
+} Black_Save_Config_SaveGameConfigNoxEPP;
+
+//----------------------
+
+struct FILE
+{
+    local structid_t structIdCheck = ReadUInt64(24);
+    local int64 fileSize = FileSize();
+    
+    Printf("Parsing save file. Enums names will load when finished, please be patient.\n");
+
+    // Define four possible StructID matches
+    if (structIdCheck == 3523785233440702464 || //main game
+        structIdCheck == 15918796153735528304 || //epa
+        structIdCheck == 3961468714940717321 || //comrades
+        structIdCheck == 7498438836359970672 || //epi              
+        structIdCheck == 11601100728324702064 || //epp        
+        structIdCheck == 6922382094450868080 || //epg
+        structIdCheck == 14966123857171824496) //eph
+    {
+        // Header
+        Header header<name="Header", optimize=false, open=false>; 
+
+        // Assign Save Struct based on StructID
+        if (structIdCheck == 3523785233440702464)
+        {
+           Printf("Main game System Data.\n");
+             ubyte pad0[6] <comment="padding", hidden=true>; 
+             Black_Save_Config_SaveGameConfigStruct SaveGameConfigStruct <name="ConfigStruct", optimize=false, open=false>;        
+             Black_Save_Demo_SavePlatinumDemoStruct SavePlatinumDemoStruct <name="PlatinumDemoStruct", optimize=false, open=false>;     
+        }
+        else if (structIdCheck == 6922382094450868080) //epp
+        {
+            Printf("EPG System Data .\n");
+            Black_Save_Config_SaveGameConfigNoxEPG SaveGameConfigNoxEPG <name="ConfigNoxEPG", optimize=false, open=false>;     
+        }
+        else if (structIdCheck == 11601100728324702064) //epp
+        {
+            Printf("EPP System Data .\n");
+            Black_Save_Config_SaveGameConfigNoxEPP SaveGameConfigNoxEPP <name="ConfigNoxEPP", optimize=false, open=false>;     
+        }
+        else if (structIdCheck == 15918796153735528304) //epa
+        {
+            Printf("EPA System Data .\n");
+            Black_Save_Config_SaveGameConfigNoxEPA SaveGameConfigNoxEPA <name="ConfigNoxEPA", optimize=false, open=false>;     
+        }
+        else if (structIdCheck == 3961468714940717321) //comrades
+        {
+            Printf("Comrades System Data .\n");
+            Black_Save_Config_SaveGameConfigNoxMultiplayer SaveGameConfigNoxMultiplayer <name="ConfigNoxMultiplayer", optimize=false, open=false>;     
+        }
+        else if (structIdCheck == 7498438836359970672) //epi
+        {
+            Printf("EPI System Data .\n");
+            Black_Save_Config_SaveGameConfigNoxEPI SaveGameConfigNoxEPI <name="ConfigNoxEPI", optimize=false, open=false>;     
+        }
+        else if (structIdCheck == 14966123857171824496) //eph
+        {
+            Printf("EPH System Data .\n");
+            Black_Save_Config_SaveGameConfigNoxEPH SaveGameConfigNoxEPH <name="ConfigNoxEPH", optimize=false, open=false>;     
+        }
+
+        // Footer Structs
+        FSeek(header.footerStructsOffset);
+        FooterStructs footerStructs<name="Footer Structs", optimize=false>;
+
+        // Encryption Footer
+        FSeek(fileSize - 53);
+        EncryptionFooter encryptionFooter<name="Encryption Footer", optimize=false>;
+    }
+    else
+    {
+        Printf("File is encrypted!");
+        FSeek(fileSize - 53);
+        EncryptionFooter encryptionFooter<name="Encryption Footer", optimize=false>;
+    }    
+
+    Printf("Template finished\n");
+
+}File<name="FFXV system_data.save file", open=true>;

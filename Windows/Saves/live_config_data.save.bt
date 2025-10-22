@@ -1,0 +1,256 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: live_config_data.save.bt
+//   Authors: Rinual
+//   Version: 1.0
+//   Purpose: Analyzing and debuging FFXV live_config_data saves
+//  Category: Save Files
+//   History: Surihix - Header, Footer, Encryption 
+//   (Needs a decrypted save, for example https://github.com/Surihix/FFXVSaveCrypt)
+//
+//------------------------------------------------
+LittleEndian();
+
+typedef int32 FIXID;
+
+typedef uint64 structid_t <format=hex, fgcolor=0x00C0FF>;
+typedef ubyte bool <read=(this == 0 ? "false" : "true")>;
+
+//enums
+ enum WEAPON_TYPE 
+ {                                       
+     WEAPON_TYPE_NONE                = 0xFFFFFFFF,
+     WEAPON_TYPE_SWORD               = 0x0, 
+     WEAPON_TYPE_LARGE_SWORD         = 0x1, 
+     WEAPON_TYPE_SPEAR               = 0x2,                                                                                  
+     WEAPON_TYPE_DAGGER              = 0x3,
+     WEAPON_TYPE_GUN                 = 0x4, 
+     WEAPON_TYPE_SHIELD              = 0x5,                                        
+     WEAPON_TYPE_MACHINE             = 0x6, 
+     WEAPON_TYPE_RIFLE               = 0x7,
+     WEAPON_TYPE_SUBMACHINE_GUN      = 0x8,
+     WEAPON_TYPE_GRENADE             = 0x9,
+     WEAPON_TYPE_ROCKET_LAUNCHER     = 0xA,
+     WEAPON_TYPE_MAGIC               = 0xC,
+     WEAPON_TYPE_RING_MAGIC          = 0xD,
+     WEAPON_TYPE_ITEM                = 0xE,
+     WEAPON_TYPE_CAMERA              = 0xF,
+     WEAPON_TYPE_PHANTOM_SWORD       = 0x14,
+     WEAPON_TYPE_PHANTOM_AXE         = 0x15,
+     WEAPON_TYPE_PHANTOM_BOW         = 0x16,
+     WEAPON_TYPE_PHANTOM_DUAL        = 0x17,
+     WEAPON_TYPE_PHANTOM_LONG        = 0x18,
+     WEAPON_TYPE_PHANTOM_SHURIKEN    = 0x19,
+     WEAPON_TYPE_PHANTOM_LARGE       = 0x1A,
+     WEAPON_TYPE_PHANTOM_SHIELD      = 0x1B,
+     WEAPON_TYPE_PHANTOM_MACE        = 0x1C,
+     WEAPON_TYPE_PHANTOM_WAND        = 0x1D,
+     WEAPON_TYPE_PHANTOM_SPEAR       = 0x1E,
+     WEAPON_TYPE_PHANTOM_KATANA      = 0x1F,
+     WEAPON_TYPE_PHANTOM_REGIS       = 0x20,
+     WEAPON_TYPE_AMOUNT              = 0x21,
+     WEAPON_TYPE_TOP                 = 0x0,
+     WEAPON_TYPE_ACCESSORY           = 0x30,
+     WEAPON_TYPE_ACCESSORY_NOCTIS    = 0x31,
+     WEAPON_TYPE_ACCESSORY_GLADIOLUS = 0x32,
+     WEAPON_TYPE_ACCESSORY_IGNIS     = 0x33,
+     WEAPON_TYPE_ACCESSORY_PROMPTO   = 0x34,
+     WEAPON_TYPE_ACCESSORY_FRIEND    = 0x35,
+     WEAPON_TYPE_KATANA              = 0x40,
+     WEAPON_TYPE_ENEMY_FIREARMS      = 0x41,
+     WEAPON_TYPE_NORMAL              = 0x50,
+     WEAPON_TYPE_PHANTOM             = 0x51,
+ };
+ 
+ enum WEAPON_CATEGORY
+ {
+     WEAPON_CATEGORY_NONE          = 0xFFFFFFFF,
+     WEAPON_CATEGORY_NORMAL        = 0x0,
+     WEAPON_CATEGORY_PHANTOM_SWORD = 0x1,
+     WEAPON_CATEGORY_MAGIC         = 0x2,
+     WEAPON_CATEGORY_RING          = 0x3,
+     WEAPON_CATEGORY_ITEM          = 0x4,
+     WEAPON_CATEGORY_ACCESSORY     = 0x5,
+     WEAPON_CATEGORY_AMOUNT        = 0x6,
+ };
+
+// Shared structs
+
+typedef struct STRING_T
+{
+    int stringLength; 
+    if (stringLength != 0)
+    {
+        char stringData[stringLength];
+    }
+} string_t <name="string_t", read=(this.stringLength == 0 ? "null" : this.stringData)>;
+
+//------------------
+typedef struct HEADER
+{
+    char magic[4]<comment="not decrypted correctly", bgcolor=cDkPurple>;
+    uint32 version<bgcolor=cDkRed>;
+    uint32 reserved;
+    uint32 footerStructsOffset<bgcolor=cWhite>;
+    uint32 formatId<bgcolor=cYellow>;
+    uint32 versionId<bgcolor=cBlue>;
+}Header;
+typedef struct STRUCTMEMBER
+{
+    string_t memberName<name="memberName", bgcolor=cLtGreen>;
+    string_t memberType<name="memberType", bgcolor=cDkGreen>;
+    uint32 relativeMemoryOffsetInStruct<bgcolor=cDkYellow>;
+    uint32 memberSize<bgcolor=cYellow>;
+    uint16 itemCount<bgcolor=cGreen>;
+    ubyte primitiveType<bgcolor=cWhite>;
+    ubyte itemPrimitiveType <bgcolor=cLtBlue>;
+    ubyte attr <bgcolor=cDkBlue>;		   
+}StructMember <name=this.memberName.stringData, read=this.memberType.stringData>;
+
+typedef struct STRUCTENTRY
+{
+    string_t structName<name="structName", bgcolor=cDkBlue>;
+    structid_t structId<bgcolor=cBlack>;
+    ubyte padding[8];
+    uint16 memberCount<bgcolor=cLtRed>;
+    struct STRUCTMEMBERS
+    {
+        StructMember structMember[memberCount]<optimize=false>;
+    }StructMembers<name="Struct Members">;
+} StructEntry<name=this.structName.stringData>;
+
+typedef struct FOOTERSTRUCTS
+{
+    uint32 footerStructsCount<bgcolor=cLtGreen>;
+    StructEntry structEntry[footerStructsCount]<optimize=false>;
+}FooterStructs;
+
+typedef struct ENCRYPTIONFOOTER
+{
+    uint64 iv1<bgcolor=cDkGreen>;
+    uint64 iv2<bgcolor=cDkGreen>;
+    uint64 tweak1<bgcolor=cDkGreen>;
+    uint64 tweak2<bgcolor=cDkGreen>;
+    uint32 seed<bgcolor=cDkGreen>;
+    uint64 nullPaddingA;
+    uint64 nullPaddingB;
+    ubyte end2Value<bgcolor=cDkGreen>;
+}EncryptionFooter;
+
+ //--------------
+ 
+typedef struct avatarSnapshotBinary
+{
+    uint binarySize; 
+    if (binarySize != 0)
+    {
+           ubyte binaryData[binarySize]<name="Avatar Thumbnail Data", optimize=false>;
+    }    
+}avatarSnapshotBinary;
+
+typedef struct Black_Save_Config_SaveMultiplayerName {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    STRING_T avataraName_ <name="Avatara Name", comment="type: char[256]", bgcolor=0xFFFF00, read=(this.stringLength == 0 ? "null" : this.stringData)>;
+    avatarSnapshotBinary avatarThumbnailData;
+  };
+  
+   typedef struct SaveWeaponEquipmentStruct 
+ {                                  
+     structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+     FIXID weaponFixid <name="Equipment ID">;
+     WEAPON_TYPE equipmentType;
+     WEAPON_CATEGORY equipmentCategory;
+     int32 bank_number;                          
+ };
+ 
+ typedef struct Black_Save_Item_SaveItemDataStruct
+{
+    structid_t structId <bgcolor=cBlack>;
+    FIXID id <name="Item Id", comment="type: SQEX.Ebony.Std.Fixid", bgcolor=cDkGreen>;
+    int32 amount <name="Amount", comment="type: int32_t", bgcolor=cDkBlue>;
+} Black_Save_Item_SaveItemDataStruct;
+  
+typedef struct avatarUsed {
+    int32 avatarUsedcount <name="avatarUsedcount", bgcolor=cBlack>;
+    bool avatarUsed_0 : 1 <name="Avatara 0", bgcolor=0xFFAAAA>;
+    bool avatarUsed_1 : 1 <name="Avatara 1", bgcolor=0xFFAAAA>;
+    bool avatarUsed_2 : 1 <name="Avatara 2", bgcolor=0xFFAAAA>;
+    bool avatarUsed_3 : 1 <name="Avatara 3", bgcolor=0xFFAAAA>;
+    bool avatarUsed_4 : 1 <name="Avatara 4", bgcolor=0xFFAAAA>;
+    bool avatarUsed_5 : 1 <name="Avatara 5", bgcolor=0xFFAAAA>;
+    bool avatarUsed_6 : 1 <name="Avatara 6", bgcolor=0xFFAAAA>;
+    bool avatarUsed_7 : 1 <name="Avatara 7", bgcolor=0xFFAAAA>;
+};
+
+typedef struct Black_Save_Multiplay_SaveAvatarEquipmentStruct
+{
+    structid_t struct_id <bgcolor=cBlack>;
+    int32 AvatarEquipmentCount <name="AvatarEquipmentCount", bgcolor=cBlack>;
+    SaveWeaponEquipmentStruct avatar_equipment[AvatarEquipmentCount] <name="Avatar Equipment", read=(this.weaponFixid), comment="type: Black::Save::Multiplay::SaveAvatarEquipmentStruct[8]", bgcolor=cDkBlue>;
+    uint32 AvatarAccessoryCount;
+    SaveWeaponEquipmentStruct avatar_accessory[AvatarAccessoryCount] <name="Avatar Accessory", read=(this.weaponFixid), comment="type: Black.Save.Equipment.SaveWeaponEquipmentStruct", bgcolor=cDkGreen>;
+    
+} Black_Save_Multiplay_SaveAvatarEquipmentStruct;
+
+typedef struct SaveMultiplayerColorHistory
+{
+    structid_t struct_id <bgcolor=cBlack>;
+    FIXID ItemID <name="Item FIXID", bgcolor=cBlack>;
+    int8 index <name="Index", comment="type: int8", bgcolor=cLtGray>;
+    int8 R <name="Red", comment="type: int8", bgcolor=cRed>;
+    int8 G <name="Green", comment="type: int8", bgcolor=cGreen>;
+    int8 B <name="Blue", comment="type: int8", bgcolor=cBlue>;
+} SaveMultiplayerColorHistory;
+
+typedef struct Black_Save_Item_SaveGameConfigLiveAvatarItem
+{
+    structid_t struct_id <bgcolor=cBlack>;
+    int32 ColorHistoryCount <name="AvatarEquipmentCount", bgcolor=cYellow>;
+    Black_Save_Item_SaveItemDataStruct SaveItemDataStruct[ColorHistoryCount] <name="Item Data", read=(this.id), bgcolor=cLtGray>;
+
+} Black_Save_Item_SaveGameConfigLiveAvatarItem;
+
+typedef struct Black_Save_Config_SaveGameConfigNoxMultiplayer {
+    structid_t struct_id <name="Struct ID", bgcolor=cBlack>;
+    int32 useCharacter <name="Use Character", comment="type: int32", bgcolor=cBlue>;
+    int32 avatar_useNo <name="Avatar Use Number", comment="type: int32", bgcolor=cBlue>;
+    int32 AvatarCount <name="AvatarCount", bgcolor=cBlack>;
+    Black_Save_Config_SaveMultiplayerName avatar_name[AvatarCount] <read=Str("Name: %s", this.avataraName_.stringData), name="Avatar Names", optimize=false, comment="type: Black::Save::Config::SaveMultiplayerName[8]", bgcolor=cLtBlue>;
+    avatarUsed avatar_Used <name="Avatar Used Flags", comment="type: bool[8]", bgcolor=cDkGreen>;    
+    int32 AvatarEquipmentCount <name="AvatarEquipmentCount", bgcolor=cBlack>;
+    Black_Save_Multiplay_SaveAvatarEquipmentStruct avatar_equipment[8] <name="Avatar Equipment", optimize=false, comment="type: Black::Save::Multiplay::SaveAvatarEquipmentStruct[8]", bgcolor=cDkBlue>;
+    int32 story_index <name="Story Index", comment="type: int32", bgcolor=cYellow>;
+    int32 ColorHistoryCount <name="AvatarEquipmentCount", bgcolor=cBlack>;
+    SaveMultiplayerColorHistory color_history[ColorHistoryCount] <name="Color History", read=(this.ItemID), comment="type: Black::Save::Config::SaveMultiplayerColorHistory[256]", bgcolor=cPurple>;
+} Black_Save_Config_SaveGameConfigNoxMultiplayer;
+
+//-----------
+ 
+struct FILE
+{
+    local structid_t structIdCheck = ReadUInt64(24);   
+    local int64 fileSize = FileSize();
+    if (structIdCheck == 3961468714940717321)
+    {
+       // Header
+       Header header<name="Header", optimize=false, open=false>; 
+       //Save Structs          
+       Black_Save_Config_SaveGameConfigNoxMultiplayer SaveGameConfigNoxMultiplayer <name="ConfigNoxMultiplayer", optimize=false, open=false>;        
+       Black_Save_Item_SaveGameConfigLiveAvatarItem SaveGameConfigLiveAvatarItem <name="ConfigLiveAvatarItem", optimize=false, open=false>;  
+       // Footer Structs
+       FSeek(header.footerStructsOffset);
+       FooterStructs footerStructs<name="Footer Structs", optimize=false>;
+       // Encryption Footer
+       FSeek(fileSize - 53);
+       EncryptionFooter encryptionFooter<name="Encryption Footer", optimize=false>;
+    }
+    else
+    {
+       Printf("File is encrypted!");
+       FSeek(fileSize - 53);
+       EncryptionFooter encryptionFooter<name="Encryption Footer", optimize=false>;
+    }    
+    Printf("Template finished\n");
+
+}File<name="FFXV live_config_data.save file", open=true>;
