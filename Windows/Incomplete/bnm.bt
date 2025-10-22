@@ -1,25 +1,202 @@
-// === WORK IN PROGRESS ===
+typedef ubyte bool <read=(this == 0 ? "false" : "true")>;
 
-struct Header
-{
-    char version[12];
-    uint padding;
+typedef struct STRING_BLOCK {
+    string data<fgcolor = 0x00FFFF>;
+    ubyte reserved[256 - sizeof(data)]<bgcolor=0x000000>;
+} StringBlock <read=this.data>;
 
-    uint totalSolvers;
-    uint totalBodies;
-    uint totalLinkNodes;
-    uint totalPlanes;
+typedef struct VECTOR3 {
+    float x, y, z;
+} Vector3<read=Str("%.3f, %.3f, %.3f", this.x, this.y, this.z)>;
 
+typedef struct BONAMIK_BODY{
+    unsigned int index<bgcolor=cGreen>;
+    
+    local uint nameAllocSize<hidden=true>;
+    nameAllocSize = 256;
+    
+    StringBlock name;
+    int parentId<bgcolor=cLtGreen>;
+    int childId<bgcolor=cLtGreen>;
+    uint groupId<bgcolor=cLtGreen>;
+    int colId[4]<bgcolor=cLtGreen>;
+    bool isKinematic<bgcolor=cRed>;
+    bool isCollision<bgcolor=cRed>;
+    bool isMultipleCollisionObject<bgcolor=cRed>;
+    byte padding<hidden=true, bgcolor=cNone>;
+    
+    float mass<bgcolor=cPurple>;
+    float inertia<bgcolor=cPurple>;
+    float radius<bgcolor=cPurple>;
+    float concaveRatio<bgcolor=cPurple>;
+    float damping<bgcolor=cPurple>;
+    float bounciness<bgcolor=cPurple>;
+    float friction<bgcolor=cPurple>;
+    float windDrag<bgcolor=cPurple>;
+    float windLift<bgcolor=cPurple>;
+    
+    uint colShape<bgcolor=cBlue>;
+    uint addiConstType<bgcolor=cBlue>;
+    
+    float addiConstStr<bgcolor=cPurple>;
+    float addiConstRad<bgcolor=cPurple>;
+    Vector3 localTransform<bgcolor=cPurple>;
+    Vector3 localRotation<bgcolor=cPurple>;
+    Vector3 localScale<bgcolor=cPurple>;
+    
+    uint collisionBatchNo<bgcolor=cBlue>;
+    
+    float lfCoeff<bgcolor=cPurple>;
+    float parkRate<bgcolor=cPurple>;
+    float maxLocalForce<bgcolor=cPurple>;
+    float lfDrag<bgcolor=cPurple>;
+    float lfLift<bgcolor=cPurple>;
+} BonamikBody<name=this.name.data>;
+
+struct BonamikSolver{
+    unsigned int index<bgcolor=cGreen>;
+    
+    local uint nameAllocSize<hidden=true>;
+    nameAllocSize = 256;
+    
+    string name<bgcolor=cYellow>;
+    nameAllocSize -= sizeof(name);
+    char allocNameData[nameAllocSize]<bgcolor=cBlack>;
+    
+    uint tagId<bgcolor=cLtGreen>;
+    uint collisionTagId<bgcolor=cLtGreen>;
+    
+    bool isEnable<bgcolor=cRed>;
+    bool isEnableGround<bgcolor=cRed>;
+    ushort padding<hidden=true, bgcolor=cNone>;
+    
+    float lodDistance<bgcolor=cPurple>;
+    uint colIter<bgcolor=cBlue>;
+    uint consIter<bgcolor=cBlue>;
+    uint coneIter<bgcolor=cBlue>;
+    uint linkIter<bgcolor=cBlue>;
+    uint solverIter<bgcolor=cBlue>;
+};
+
+typedef struct BONAMIK_LINK_BIN{
+    unsigned int parentId<bgcolor=cLtGreen>;
+    unsigned int childId<bgcolor=cLtGreen>;
+    char linkType;
+    bool isSelfCollision<bgcolor=cRed>;
+    bool enableJointTwist<bgcolor=cRed>;
+    bool enableCone<bgcolor=cRed>;
+    bool enableConeAnimation<bgcolor=cRed>;
+    byte padding_0[3]<hidden=true, bgcolor=cNone>;
+    
+    float linkStr;
+    float linkParentStr;
+    float coneInnerStr;
+    float coneOuterStr;
+    float coneParentStr;
+    float limitY;
+    float limitZ;
+    float coneOffsetY;
+    float coneOffsetZ;
+    float limitOffsetY;
+    float limitOffsetZ;
+    float pinRadius;
+    float pinStr;
+    bool isCollisionReceiver<bgcolor=cRed>;
+    bool isCollisionRepulsor<bgcolor=cRed>;
+    ushort padding_1<hidden=true, bgcolor=cNone>;
+    
+    float concaveRatio;
+    bool isLRA<bgcolor=cRed>;
+    byte padding_2[3]<hidden=true, bgcolor=cNone>;
+    
+    float LRAstr;
+    float LRAdamping;
+    unsigned int linkBatchNo<bgcolor=cBlue>;
+    unsigned int coneBatchNo<bgcolor=cBlue>;
+    unsigned int collisionBatchNo<bgcolor=cBlue>;
+}BonamikLink<read=this.linkType>;
+
+struct BonamikPlane{
+    unsigned int groupId<bgcolor=cLtGreen>;
+    int colId[4]<bgcolor=cBlue>;
+    int particleA<bgcolor=cBlue>;
+    int particleB<bgcolor=cBlue>;
+    int particleC<bgcolor=cBlue>;
+    float offset<bgcolor=cPurple>;
+    float thickness<bgcolor=cPurple>;
+    bool isCollision<bgcolor=cRed>;
+    byte padding[3]<hidden=true, bgcolor=cNone>;
+    
+    unsigned int collisionBatchNo<bgcolor=cBlue>;
+};
+
+typedef struct BONAMIK_SHAPE_MATCHING_BIN {
+    int32 totalParticle<fgcolor=0x00FF00>;
+    int32 regionSize;
+    float stiffness;
+    uint32 particleIds[totalParticle]<fgcolor=0x00CCFF>; 
+    uint32 reserved[50 - totalParticle]<bgcolor=0x000000>;
+} BonamikShapeMatchingBin;
+
+struct BonamikSceneManager{
+    bool isEnable<bgcolor=cRed>;
+    bool isUseGPU<bgcolor=cRed>;
+    ushort padding_0<hidden=true, bgcolor=cNone>;
+    
+    uint subStep<bgcolor=cGreen>;
+    float dt<bgcolor=cPurple>;
+    uint totalGroup<bgcolor=cBlue>;
+    char rootName[256]<bgcolor=cYellow>;
+    
+    bool isEnableLocalForce<bgcolor=cRed>;
+    bool isEnableGroundCollision<bgcolor=cRed>;
+    ushort padding_1<hidden=true, bgcolor=cNone>;
+    
+    float gravity[3]<bgcolor=cPurple>;
+    int refUpVec<bgcolor=cGreen>;
+    
+    unsigned int totalLinkBatches<bgcolor=cBlue>;
+    unsigned int totalLinksInBatch[15]<bgcolor=cDkBlue>;
+    
+    unsigned int totalConeBatches<bgcolor=cBlue>;
+    unsigned int totalConesInBatch[15]<bgcolor=cDkBlue>;
+    
+    unsigned int totalCollisionBatches<bgcolor=cBlue>;
+    unsigned int totalCollisionsInBatch[15]<bgcolor=cDkBlue>;
+    
+    unsigned int totalSelfCollisionBatches<bgcolor=cBlue>;
+    unsigned int totalSelfCollisionsInBatch[15]<bgcolor=cDkBlue>;
+};
+
+struct Header{
+    char versionString[12]<bgcolor=cYellow>;
+    uint padding<hidden=true, bgcolor=cNone>;
+    
+    uint solverCount<bgcolor=cBlue>;
+    uint bodyCount<bgcolor=cBlue>;
+    uint linkNodeCount<bgcolor=cBlue>;
+    uint planeCount<bgcolor=cBlue>;
+    
     uint totalShapeMatchingGroups;
     uint totalKinematics;
     uint totalConstraints;
     uint totalCones;
-
     uint totalLinks;
     uint totalCollisions;
     uint totalSelfCollisions;
     uint totalChainRootParticles;
-
     uint totalGrassInteractBodies;
     uint totalPossessions;
-} header;
+};
+
+struct BonamikBinary{
+    Header header<bgcolor=cDkBlue>;
+    BonamikSceneManager sceneManager;
+    BonamikSolver solvers[header.solverCount]<optimize=false, name=Str("%s ", this.name)>;
+    BonamikBody bodies[header.bodyCount]<optimize=false>;
+    BonamikLink linkNodes[header.linkNodeCount]<optimize=false, bgcolor=cPurple>;
+    BonamikPlane planes[header.planeCount]<optimize=false>;
+    BonamikShapeMatchingBin shape_matchings[header.totalShapeMatchingGroups]<optimize=false>;
+};
+
+BonamikBinary bonamikBinary;
