@@ -1,0 +1,418 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: FFXV AI Navigation Map Data
+//   Authors: Alex Cup
+//   Version: 2
+//   Purpose: Stores directory of navigation cells, environment parameters, conditions, 
+//            and a condition tree using Google's flatbuffers serialization library
+//            (flatbuffers version used was < 1.8.0) so vtables are not trimmed
+//  Category: AI
+// File Mask: *.nav_world_map
+//  ID Bytes: [32-bit root offset] 0x4E 0x57 0x4D 0x44 ("NWMD")
+//   History: 
+//------------------------------------------------
+
+typedef int32 itr<hidden=true>;
+
+typedef struct {
+    uint32 length;
+    char data[length] <fgcolor=cYellow>;
+} flatbuffers_string <read=this.data>;
+
+typedef struct {
+    uint32 length;
+    uint32 data[length] <fgcolor=0xFF55FF>;
+} _offset__flatbuffers_vector <read=this.length>;
+
+typedef struct {
+    int32 x;
+    int32 z;
+} NavCell2DData <read=Str("%d, %d", this.x, this.z)>;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} NavVector <read=Str("%.3f, %.3f, %.3f", this.x, this.y, this.z)>;
+
+typedef struct {
+    int32 x;
+    int32 y;
+    int32 z;
+} NavVectorInt <read=Str("%d, %d, %d", this.x, this.y, this.z)>;
+
+enum NavConditionType {
+    kBase = 0x0,
+    kFilteredOut = 0x1,
+    kFilteredIn = 0x2,
+    kTypeCount = 0x3,
+};
+
+typedef struct NavWorldMapCellConditionT {
+    NavCell2DData cell_key_ <bgcolor=0x007070>;
+    NavConditionType condition_;
+    int32 __padding0 <bgcolor=cNone>;
+} NavWorldMapCellCondition <read=Str("%d, %d (%s)", this.cell_key_.x, this.cell_key_.z, EnumToString(this.condition_))>;
+
+typedef struct {
+    uint32 length;
+    NavWorldMapCellCondition data[length];
+} _NavWorldMapCellCondition__flatbuffers_vector <read=this.length>;
+
+typedef struct {
+    uint32 length;
+    float data[length];
+} _float__flatbuffers_vector <read=this.length>;
+
+int checked_seek(uint16 field) {
+    if(!field) return 0;
+
+    FSeek(startof(vtableOffset) + field);
+    return 1;
+}
+
+void relative_seek(uint32& start) {
+    FSeek(startof(start) + start);
+}
+
+struct NavWorldMapData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 oField0; // id:uint32 = 0
+    uint16 oField1; // cells:[NavWorldMapCellData]
+    uint16 oField2; // environments: [NavWorldMapEnvironment]
+    uint16 oField3; // splitters_uri: [string]
+    uint16 oField4; // suspect: conditions:[NavWorldMapCondition]
+    uint16 oField5; // condition_tree:NavConditionTreeData
+};
+
+struct NavWorldMapCellData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 oField0; // cell_uri
+    uint16 oField1; // place on cell grid (x, y)
+    uint16 oField2; // is_Resident:bool
+};
+
+typedef struct NavWorldMapCellData_ViewT {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavWorldMapCellData_VT vtable <bgcolor=cGray>;
+
+    FSeek(_start);
+    int32 vtableOffset;
+
+    if(checked_seek(vtable.oField0)) {
+        uint32 cellUriOffset;
+        relative_seek(cellUriOffset);
+        flatbuffers_string cell_uri <bgcolor=0x008000>;
+    }
+
+    if(checked_seek(vtable.oField1))
+        NavCell2DData cell_location <bgcolor=0x009800>;
+    
+    if(checked_seek(vtable.oField2))
+        byte is_resident;
+} NavWorldMapCellData_View <read=this.cell_uri.data>;
+
+struct NavConditionTreeData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 oType;
+    uint16 oUserIndex;
+    uint16 oChildren;
+};
+
+struct NavConditionTreeData_ViewT;
+
+struct NavConditionTreeData_ViewT {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavConditionTreeData_VT vtable <bgcolor=cGray>;
+
+    FSeek(_start);
+    int32 vtableOffset;
+    if(checked_seek(vtable.oType)) {
+        byte type;
+    }
+
+    if(checked_seek(vtable.oUserIndex)) {
+        uint32 userIndex;
+    }
+
+    if(checked_seek(vtable.oChildren)) {
+        uint32 oChildren;
+        struct {
+            relative_seek(oChildren);
+            _offset__flatbuffers_vector childrenOffsets;
+            local itr i = 0;
+            while(i < childrenOffsets.length) {
+                relative_seek(childrenOffsets.data[i]);
+                NavConditionTreeData_ViewT child;
+                ++i;
+            }
+        } children <read=this.childrenOffsets.length>;
+    }
+};
+
+typedef NavConditionTreeData_ViewT NavConditionTreeData_View <bgcolor=cGreen>;
+
+struct NavConditionIdData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 oField0; // unknown0:string = ""
+    uint16 oField1; // unknown1:uint8 = 0
+};
+
+struct NavConditionIdData_View {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavConditionIdData_VT vtable <bgcolor=cGray>;
+    FSeek(_start);
+
+    int32 vtableOffset;
+    if(checked_seek(vtable.oField0)) {
+        uint32 oField0;
+        relative_seek(oField0);
+        flatbuffers_string field0;
+    }
+    if(checked_seek(vtable.oField1))
+        uint8 field1;
+};
+
+enum <int8> NavErodeAlgorithm {
+    kConservative = 0x0,
+    kFast = 0x1,
+    kPermissive = 0x2,
+    kAlgorithmCount = 0x3,
+};
+
+enum <int32> NavAutogenerationType {
+    Recast = 0x0,
+    DynamicRecast = 0x1,
+    ConnectedLayer = 0x2,
+    CollisionMaterial = 0x3,
+    SmartWayPoint = 0x4,
+    SartUser = 0x4E20,
+};
+
+struct NavAutoGenerationEnvironmentParametersData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 oField0; // environment_factory_type:NavAutoGenerationType
+    uint16 oField1; // cell_size:NavVector
+    uint16 oField2; // chunk_cell_size:NavVectorInt
+    uint16 oField3; // agent_radius:float
+    uint16 oField4; // agent_height:float
+    uint16 oField5; // walkable_slope_angle:float
+    uint16 oField6; // agent_max_climb:float
+    uint16 oField7; // origin:NavVector
+    uint16 oField8; // edge_max_len:float
+    uint16 oField9; // edge_max_error:float
+    uint16 oField10; // detail_sample_dist:float
+    uint16 oField11; // detail_sample_max_error:float
+    uint16 oField12; // region_min_size:int32
+    uint16 oField13; // region_merge_size:int32
+    uint16 oField14; // verts_per_poly:int32
+    uint16 oField15; // wall_facing_angle_threshold:float
+    uint16 oField16; // min_cover_height:float
+    uint16 oField17; // cover_down_extension_dist:float
+    uint16 oField18; // erode_algorithm:NavErodeAlgorithm
+    uint16 oField19; // narrow_passage_size:float
+    uint16 oField20; // large_passage_margin:float
+    uint16 oField21; // narrow_passage_margin:float
+    uint16 oField22; // narrow_passage_material_id:uint32
+    uint16 oField23; // ceiling_height_mask:uint32
+    uint16 oField24; // ceiling_height_material_id:uint32
+    uint16 oField25; // ceiling_height:[float]
+};
+
+typedef struct NavAutoGenerationEnvironmentParametersData_ViewT {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavAutoGenerationEnvironmentParametersData_VT vtable <bgcolor=cGray>;
+    FSeek(_start);
+
+    int32 vtableOffset;
+    if(checked_seek(vtable.oField0)) NavAutogenerationType environmentFactoryType;
+    if(checked_seek(vtable.oField1)) NavVector cellSize;
+    if(checked_seek(vtable.oField2)) NavVectorInt chunkCellSize;
+    if(checked_seek(vtable.oField3)) float agentRadius;
+    if(checked_seek(vtable.oField4)) float agentHeight;
+    if(checked_seek(vtable.oField5)) float walkableSlopeAngle;
+    if(checked_seek(vtable.oField6)) float agentMaxClimb;
+    if(checked_seek(vtable.oField7)) NavVector origin;
+    if(checked_seek(vtable.oField8)) float edgeMaxLen;
+    if(checked_seek(vtable.oField9)) float edgeMaxError;
+    if(checked_seek(vtable.oField10)) float detailSampleDist;
+    if(checked_seek(vtable.oField11)) float detailSampleMaxError;
+    if(checked_seek(vtable.oField12)) int regionMinSize;
+    if(checked_seek(vtable.oField13)) int regionMergeSize;
+    if(checked_seek(vtable.oField14)) int vertsPerPoly;
+    if(checked_seek(vtable.oField15)) float wallFacingAngleThreshold;
+    if(checked_seek(vtable.oField16)) float minCoverHeight;
+    if(checked_seek(vtable.oField17)) float coverDownExtensionDist;
+    if(checked_seek(vtable.oField18)) NavErodeAlgorithm erodeAlgorithm;
+    if(checked_seek(vtable.oField19)) float narrowPassageSize;
+    if(checked_seek(vtable.oField20)) float largePassageMargin;
+    if(checked_seek(vtable.oField21)) float narrowPassageMargin;
+    if(checked_seek(vtable.oField22)) uint32 narrowPassageMaterialId;
+    if(checked_seek(vtable.oField23)) uint32 ceilingHeightMask <format=hex>;
+    if(checked_seek(vtable.oField24)) uint32 ceilingHeightMaterialId;
+    if(checked_seek(vtable.oField25)) {
+        uint32 ceilingHeightsOffset;
+        relative_seek(ceilingHeightsOffset);
+        _float__flatbuffers_vector ceilingHeights;
+    }
+} NavAutoGenerationEnvironmentParametersData_View;
+
+struct NavWorldMapCondition_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 oField0;
+    uint16 oConditionCells;
+    uint16 oId;
+
+    // id: NavConditionIdData
+    // condition_cells:[NavWorldMapCellCondition]
+};
+
+typedef struct NavWorldMapCondition_ViewT {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavWorldMapCondition_VT vtable <bgcolor=cGray>;
+    FSeek(_start);
+
+    int32 vtableOffset;
+    if(checked_seek(vtable.oField0))
+        uint32 field0;
+
+    if(checked_seek(vtable.oConditionCells)) {
+        uint32 conditionCellsOffset;
+        relative_seek(conditionCellsOffset);
+        _NavWorldMapCellCondition__flatbuffers_vector condition_cells <bgcolor=0x008080>;
+    }
+
+    if(checked_seek(vtable.oId)) {
+        uint32 idOffset;
+        relative_seek(idOffset);
+        NavConditionIdData_View id <bgcolor=0x00A0A0>;
+    }
+} NavWorldMapCondition_View;
+
+struct NavWorldMapEnvironment_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 oField0; // id:uint32 = 0;
+    uint16 oField1; // autoGenerationParameters:table
+    uint16 oField2; // name:string
+    uint16 oField3; // field3:unknown
+};
+
+typedef struct NavWorldMapEnvironment_ViewT {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavWorldMapEnvironment_VT vtable <bgcolor=cGray>;
+    FSeek(_start);
+
+    int32 vtableOffset;
+    if(checked_seek(vtable.oField0))
+        uint32 id;
+
+    if(checked_seek(vtable.oField1)) {
+        uint32 oParameters;
+        relative_seek(oParameters);
+        NavAutoGenerationEnvironmentParametersData_View autoGenerationParameters <bgcolor=0x800000>;
+    }
+
+    if(checked_seek(vtable.oField2)) {
+        uint32 oName;
+        relative_seek(oName);
+        flatbuffers_string name <bgcolor=0xB00000>;
+    }
+
+    if(checked_seek(vtable.oField3))
+        uint32 field3;
+} NavWorldMapEnvironment_View <read=this.name.data>;
+
+struct NavWorldMapData_View {
+    FSeek(FTell() - ReadInt());
+    NavWorldMapData_VT vtable <bgcolor=cGray>;
+
+    FSeek(rootOffset);
+    int32 vtableOffset;
+
+    if(checked_seek(vtable.oField0)) {
+        uint32 id;
+    }
+
+    if(checked_seek(vtable.oField1)) {
+        uint32 oCells;
+        relative_seek(oCells);
+        struct {
+            _offset__flatbuffers_vector cellOffsets <bgcolor=0x00B000>;
+            local itr i = 0;
+            while(i < cellOffsets.length) {
+                relative_seek(cellOffsets.data[i]);
+                NavWorldMapCellData_View cell <bgcolor=0x00AA00>;
+                ++i;
+            }
+        } cells;
+    }
+
+    if(checked_seek(vtable.oField2)) {
+        uint32 oEnvironments;
+        FSeek(startof(oEnvironments) + oEnvironments);
+        struct {
+            _offset__flatbuffers_vector environmentOffsets <bgcolor=0xFF0000>;
+            local itr i = 0;
+            while(i < environmentOffsets.length) {
+                relative_seek(environmentOffsets.data[i]);
+                NavWorldMapEnvironment_View environment <bgcolor=0xCC0000>;
+                ++i;
+            }
+        } environments;
+    }
+
+    if(checked_seek(vtable.oField3)) {
+        uint32 o_splitters_uri;
+        relative_seek(o_splitters_uri);
+        struct {
+            _offset__flatbuffers_vector splitterOffsets <bgcolor=0x0000FF>;
+            local itr i = 0;
+            while(i < splitterOffsets.length) {
+                relative_seek(splitterOffsets.data[i]);
+                flatbuffers_string uri <bgcolor=0x0000CC>;
+                ++i;
+            }
+        } splitters_uri;
+    }
+
+    if(checked_seek(vtable.oField4)) {
+        uint32 oConditions;
+        FSeek(startof(oConditions) + oConditions);
+        struct {
+            _offset__flatbuffers_vector conditionOffsets <bgcolor=0x00CCFF>;
+            local itr i = 0;
+            while(i < conditionOffsets.length) {
+                relative_seek(conditionOffsets.data[i]);
+                NavWorldMapCondition_View condition <bgcolor=0x00CCCC>;
+                ++i;
+            }
+        } conditions;
+    }
+
+    if(checked_seek(vtable.oField5)) {
+        uint32 oConditionTree;
+        relative_seek(oConditionTree);
+        NavConditionTreeData_View conditionTree <bgcolor=0xFFFF00>;
+    }
+};
+
+int32 rootOffset;
+char identifier[4];
+Assert(identifier == "NWMD");
+FSeek(rootOffset);
+
+NavWorldMapData_View root;
