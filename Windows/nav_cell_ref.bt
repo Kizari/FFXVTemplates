@@ -1,0 +1,280 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: FFXV AI Navigation Cell Reference Data
+//   Authors: Alex Cup
+//   Version: 2.0.0
+//   Purpose: Seems to store data necessary for the game to choose between filtered and
+//            and unfiltered navigation meshes. Uses Google flatbuffers pre-1.8, vtables
+//            do not get trimmed.
+//  Category: AI
+// File Mask: *.nav_cell_ref
+//  ID Bytes: [32-bit root offset] 0x4E 0x43 0x52 0x44 ("NCRD")
+//   History: 
+//------------------------------------------------
+
+typedef int32 itr<hidden=true>;
+
+typedef struct {
+    uint32 length;
+    char data[length] <fgcolor=cYellow>;
+} flatbuffers_string <read=this.data>;
+
+typedef struct {
+    uint32 length;
+    uint32 data[length] <fgcolor=0xFF55FF>;
+} _offset__flatbuffers_vector <read=this.length>;
+
+typedef struct {
+    uint32 length;
+    uint32 data[length];
+} _uint__flatbuffers_vector <read=this.length>;
+
+typedef struct {
+    uint32 length;
+    uint16 data[length];
+} _ushort__flatbuffers_vector <read=this.length>;
+
+typedef struct {
+    int32 x;
+    int32 z;
+} NavCell2DData <read=Str("%d, %d", this.x, this.z)>;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} NavVector <read=Str("%.3f, %.3f, %.3f", this.x, this.y, this.z)>;
+
+typedef struct {
+    int32 x;
+    int32 y;
+    int32 z;
+} NavVectorInt <read=Str("%d, %d, %d", this.x, this.y, this.z)>;
+
+int checked_seek(uint16 field) {
+    if(!field) return 0;
+
+    FSeek(startof(vtableOffset) + field);
+    return 1;
+}
+
+void relative_seek(uint32& start) {
+    FSeek(startof(start) + start);
+}
+
+struct NavConditionIdData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 oField0; // unknown0:string = ""
+    uint16 oField1; // unknown1:uint8 = 0
+};
+
+struct NavConditionIdData_View {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavConditionIdData_VT vtable <bgcolor=cGray>;
+    FSeek(_start);
+
+    int32 vtableOffset;
+    if(checked_seek(vtable.oField0)) {
+        uint32 oField0;
+        relative_seek(oField0);
+        flatbuffers_string field0 <bgcolor=0xA00000>;
+    }
+    if(checked_seek(vtable.oField1))
+        uint8 field1;
+};
+
+struct NavCellRefRemeshData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 __f0;
+};
+
+struct NavCellRefRemeshData_View {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavCellRefRemeshData_VT vtable <bgcolor=cGray>;
+
+    FSeek(_start);
+    int32 vtableOffset;
+
+    if(checked_seek(vtable.__f0)) {
+        uint32 field0Offset;
+        relative_seek(field0Offset);
+        _ushort__flatbuffers_vector field0 <fgcolor=0x00C080>;
+    }
+};
+
+struct NavCellRefElementData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 __f0;
+    uint16 __f1;
+    uint16 __f2;
+    uint16 __f3;
+};
+
+typedef struct NavCellRefElementData_ViewT {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavCellRefElementData_VT vtable <bgcolor=cGray>;
+
+    FSeek(_start);
+    int32 vtableOffset;
+
+    if(checked_seek(vtable.__f0)) { 
+        uint32 uriOffset; 
+        relative_seek(uriOffset);
+        flatbuffers_string uri;
+    }
+
+    if(checked_seek(vtable.__f1))
+        uint32 start_filter_index;
+
+    if(checked_seek(vtable.__f2)) { uint32 field_2; }
+
+    if(checked_seek(vtable.__f3))
+        uint32 filter_size;
+} NavCellRefElementData_View <read=this.uri.data>;
+
+struct NavCellRefEnvironmentData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 __f0;
+    uint16 __f1;
+    uint16 __f2;
+    uint16 __f3;
+};
+
+struct NavCellRefEnvironmentData_View {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavCellRefEnvironmentData_VT vtable <bgcolor=cGray>;
+
+    FSeek(_start);
+    int32 vtableOffset;
+
+    if(checked_seek(vtable.__f0))
+        uint32 environment_fix_id;
+
+    if(checked_seek(vtable.__f1)) { 
+        uint32 elementsOffset;
+        relative_seek(elementsOffset);
+        struct {
+            _offset__flatbuffers_vector elementOffsets;
+            local itr i = 0;
+            while(i < elementOffsets.length) {
+                relative_seek(elementOffsets.data[i]);
+                NavCellRefElementData_View element <bgcolor=0x807030>;
+                ++i;
+            }
+        } elements <bgcolor=0x958045>;
+    }
+
+    if(checked_seek(vtable.__f2)) { 
+        uint32 remeshElementsOffset;
+        relative_seek(remeshElementsOffset);
+        struct {
+            _offset__flatbuffers_vector remeshElementOffsets;
+            local itr i = 0;
+            while(i < remeshElementOffsets.length) {
+                relative_seek(remeshElementOffsets.data[i]);
+                NavCellRefElementData_View remesh_element <bgcolor=0x800080>;
+                ++i;
+            }
+        } remesh_elements <bgcolor=0x950095>;
+    }
+
+    if(checked_seek(vtable.__f3)) { 
+        uint32 remeshDataOffset;
+        relative_seek(remeshDataOffset);
+        struct {
+            _offset__flatbuffers_vector remeshDataOffsets;
+            local itr i = 0;
+            while(i < remeshDataOffsets.length) {
+                relative_seek(remeshDataOffsets.data[i]);
+                NavCellRefRemeshData_View remesh_data <bgcolor=0x307080>;
+                ++i;
+            }
+        } remesh_table <bgcolor=0x458095>;
+    }
+
+};
+
+struct NavCellRefData_VT {
+    uint16 vtableLength <fgcolor=0xFFCCCC>;
+    uint16 tableLength <fgcolor=0xFFCCCC>;
+    uint16 __f0;
+    uint16 __f1;
+    uint16 __f2;
+    uint16 __f3;
+    uint16 __f4;
+    uint16 __f5;
+    uint16 __f6;
+};
+
+struct NavCellRefData_View {
+    local int64 _start <hidden=true> = FTell();
+    FSeek(_start - ReadInt());
+    NavCellRefData_VT vtable <bgcolor=cGray>;
+
+    FSeek(_start);
+    int32 vtableOffset;
+
+    if(checked_seek(vtable.__f0)) {
+        uint32 conditionsOffset;
+        relative_seek(conditionsOffset);
+        struct {
+            _offset__flatbuffers_vector conditionOffsets;
+            local itr i = 0;
+            while(i < conditionOffsets.length) {
+                relative_seek(conditionOffsets.data[i]);
+                NavConditionIdData_View condition <bgcolor=0xCC0000>;
+                ++i;
+            }
+        } conditions <bgcolor=0xFF0000>;
+    }
+    if(checked_seek(vtable.__f1)) {
+        uint32 conditionFilterDataOffset;
+        relative_seek(conditionFilterDataOffset);
+        _uint__flatbuffers_vector condition_filter_data <bgcolor=0x00FF00>; // this could swap with field 3
+    }
+    if(checked_seek(vtable.__f2)) {
+        uint32 environmentsOffset;
+        relative_seek(environmentsOffset);
+        struct {
+            _offset__flatbuffers_vector environmentOffsets;
+            local itr i = 0;
+            while(i < environmentOffsets.length) {
+                relative_seek(environmentOffsets.data[i]);
+                NavCellRefEnvironmentData_View environment <bgcolor=0xBF00BF>;
+                ++i;
+            }
+        } environments <bgcolor=0xFF00FF>;
+    }
+    if(checked_seek(vtable.__f3)) {
+        uint32 filterDataOffset;
+        relative_seek(filterDataOffset);
+        _uint__flatbuffers_vector filter_data <bgcolor=0x0000FF>;
+    }
+    if(checked_seek(vtable.__f4)) {
+        uint32 connectivityInfoUriOffset;
+        relative_seek(connectivityInfoUriOffset);
+        flatbuffers_string connectivity_info_uri <bgcolor=0x000000>;
+    }
+    if(checked_seek(vtable.__f5)) {
+        uint32 field_5;
+    }
+    if(checked_seek(vtable.__f6)) {
+        uint32 field_6;
+    }
+};
+
+int32 rootOffset;
+char identifier[4];
+Assert(identifier == "NCRD");
+
+FSeek(rootOffset);
+NavCellRefData_View root <bgcolor=0xFFFFFF>;
