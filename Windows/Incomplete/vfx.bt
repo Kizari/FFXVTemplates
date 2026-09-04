@@ -1,27 +1,1293 @@
-// === WORK IN PROGRESS ===
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: Luminous VFX Graph
+//   Authors: Alex Cup
+//   Version: 1.0.0
+//   Purpose: Serialized Luminous VFX Node Graph
+//  Category: VFX
+// File Mask: *.vfx
+//  ID Bytes: 44 4C 41 54 2E 56 46 58 2E 47 52 41 50 48 2E 42 (FLAT.VFX.GRAPH.B)
+//   History: 
+//------------------------------------------------
 
-// See SQEX::Luminous::VFXGraph::LmVFXGraphFlatBufferBinary::Initialize
+#define COLOR_COUNT 0x80F320
+#define COLOR_VTABLE_OFFSET 0x6060F0
+#define COLOR_GRAPH_NODE 0xFFFFFF
+#define COLOR_BASETYPE_BYTE 0x3030FF
+#define COLOR_BASETYPE_INT 0x3035FF
+#define COLOR_BASETYPE_FLOAT 0x303AFF
+#define COLOR_BASETYPE_STRING 0x3040FF
+#define COLOR_BASETYPE_ENUM 0x3045FF
+#define COLOR_BASETYPE_VECTOR2 0x304AFF
+#define COLOR_BASETYPE_VECTOR3 0x3050FF
+#define COLOR_BASETYPE_VECTOR4 0x3055FF
+#define COLOR_BASETYPE_MATRIX44 0x35A0FF
+#define COLOR_BASETYPE_INTARRAY 0x3060FF
+#define COLOR_BASETYPE_FLOATARRAY 0x3065FF
+#define COLOR_BASETYPE_VECTORARRAY 0x306AFF
 
-struct Header
-{
-    uint format;
-    Assert(format == 1413565510);
-    byte vfxGraphBinaryOffset;
-    char vfx[3];
-    byte u1;
-    char graph[5];
-    byte u2;
-    byte u3;
-} m_pBinaryHeader;
+typedef int32 offset32 <format=hex, fgcolor=0xE05050>;
+typedef int16 offset16 <format=hex, fgcolor=0x0000FF>;
+typedef int32 size32 <format=hex, fgcolor=0x00FF00>;
+typedef int16 size16 <format=hex, fgcolor=0x00FF00>;
+typedef int32 vtoffset <format=hex, fgcolor=COLOR_VTABLE_OFFSET>;
 
-struct FlatBufferBinaryHeader
-{
-    uint u1[11];
-    ushort u2;
-} m_pFlatBufferBinaryHeader;
+typedef struct type_Vector2_Struct {
+    float x;
+    float y;
+    uint64 padding;
+} Vector2_Struct<read=Str("%.3f, %.3f", this.x, this.y)>;
 
-struct LmUVFXGraphBinary
-{
-    uint u1;
-    uint u2;
-} m_vfxGraphBinary;
+typedef struct type_Vector3_Struct {
+    float x;
+    float y;
+    float z;
+    int padding;
+} Vector3_Struct<read=Str("%.3f, %.3f, %.3f", this.x, this.y, this.z)>;
+
+typedef struct type_Vector4_Struct {
+    float x;
+    float y;
+    float z;
+    float w;
+} Vector4_Struct<read=Str("%.3f, %.3f, %.3f, %.3f", this.x, this.y, this.z, this.w)>;
+
+struct Matrix44_Struct {
+    Vector4_Struct row0;
+    Vector4_Struct row1;
+    Vector4_Struct row2;
+    Vector4_Struct row3;
+};
+
+typedef struct type_FlatBufferString {
+    int size;
+    char data[size]<fgcolor=0x90D2FF>;
+} FlatBufferString<read=this.data>;
+
+enum NodeType {
+  LmRootNode = 0x100,
+  LmVFXGraphSpawnTrayNode = 0x102,
+  LmVFXGraphNestedVFXNode = 0x103,
+  LmVFXGraphNodeClusterNode = 0x104,
+  LmVFXGraphAbsNode_Float32 = 0x105,
+  LmVFXGraphAbsNode_Vector2 = 0x106,
+  LmVFXGraphAbsNode_Vector3 = 0x107,
+  LmVFXGraphAbsNode_Vector4 = 0x108,
+  LmVFXGraphActorNode = 0x109,
+  LmVFXGraphAddNode_Float32 = 0x10A,
+  LmVFXGraphAddNode_Vector2 = 0x10B,
+  LmVFXGraphAddNode_Vector3 = 0x10C,
+  LmVFXGraphAddNode_Vector4 = 0x10D,
+  LmGraphAndSignalNode_NOTIsValueNode_NOTIsForceStatic_ = 0x10E,
+  LmVFXGraphATanNode = 0x10F,
+  LmVFXGraphBillboardNode = 0x110,
+  LmVFXGraphBlendCurveNode = 0x111,
+  LmVFXGraphExpressionNode_Bool = 0x112,
+  LmVFXGraphBranchNode = 0x113,
+  LmVFXGraphCameraNode = 0x114,
+  LmVFXGraphChangeDirectionNode = 0x115,
+  LmVFXGraphChangeDirectionFixedAxisNode = 0x116,
+  LmVFXGraphChangeDirectionNoneNode = 0x117,
+  LmVFXGraphClampNode_Float32 = 0x118,
+  LmVFXGraphClampNode_Vector2 = 0x119,
+  LmVFXGraphClampNode_Vector3 = 0x11A,
+  LmVFXGraphClampNode_Vector4 = 0x11B,
+  LmVFXGraphDepthMapCollisionHandlingNode = 0x11C,
+  LmVFXGraphCompareNode_Float32 = 0x11D,
+  LmVFXGraphConstraintAxisNode = 0x11E,
+  LmVFXGraphControlPointinfoNode = 0x11F,
+  LmVFXGraphCosNode = 0x120,
+  LmVFXGraphCounterNode = 0x121,
+  LmVFXGraphCrossNode_Vector3 = 0x12B,
+  LmVFXGraphCrossNode_Vectoro4 = 0x12C,
+  LmVFXGraphDecalOptionsNode = 0x12D,
+  LmVFXGraphDegToRadNode = 0x12E,
+  LmVFXGraphDelayNode = 0x12F,
+  LmVFXGraphDeltaNode_Float32 = 0x130,
+  LmVFXGraphDeltaNode_Vector2 = 0x131,
+  LmVFXGraphDeltaNode_Vector3 = 0x132,
+  LmVFXGraphDeltaNode_Vector4 = 0x133,
+  LmVFXGraphDeltaTimeNode = 0x134,
+  LmVFXGraphDestroyNode = 0x135,
+  LmVFXGraphDivNode_Float32 = 0x136,
+  LmVFXGraphDivNode_Vector2 = 0x137,
+  LmVFXGraphDivNode_Vector3 = 0x138,
+  LmVFXGraphDivNode_Vector4 = 0x139,
+  LmVFXGraphDotNode_Vector2 = 0x13B,
+  LmVFXGraphDotNode_Vector3 = 0x13C,
+  LmVFXGraphDotNode_Vector4 = 0x13D,
+  LmVFXGraphDrawPrimitive = 0x13F,
+  LmVFXGraphDrawOptionsNode = 0x13E,
+  LmVFXGraphDrawTextureAnimNode = 0x140,
+  LmVFXGraphElapsedTimeNode = 0x141,
+  LmVFXGraphEmitterShapeBox = 0x142,
+  LmVFXGraphEmitterShapeCircle = 0x143,
+  LmVFXGraphEmitterShapeCylinder = 0x145,
+  LmVFXGraphEmitterShapeMesh = 0x146,
+  LmVFXGraphEmitterShapePlane = 0x148,
+  LmVFXGraphEmitterShapePoint = 0x149,
+  LmVFXGraphEmitterShapeSegment = 0x14A,
+  LmVFXGraphEmitterShapeSphere = 0x152,
+  LmVFXGraphEmitterShapeTorus = 0x153,
+  LmVFXGraphFieldCurlNoise = 0x154,
+  LmVFXGraphFloatNode_Float32 = 0x155,
+  LmVFXGraphFloatNode_Vector2 = 0x156,
+  LmVFXGraphFloat2ToFloatNode = 0x157,
+  LmVFXGraphFloatNode_Vector3 = 0x158,
+  LmVFXGraphFloat3MulMatrix44Node = 0x159,
+  LmVFXGraphFloat3ToFloatNode = 0x15A,
+  LmVFXGraphFloatNode_Vector4 = 0x15B,
+  LmVFXGraphFloat4ToFloatNode = 0x15C,
+  LmVFXGraphFloatBiasNode_Float32 = 0x15D,
+  LmVFXGraphFloatBiasNode_Vector2 = 0x15E,
+  LmVFXGraphFloatBiasNode_Vector3 = 0x15F,
+  LmVFXGraphFloatBiasNode_Vector4 = 0x160,
+  LmVFXGraphExpressionNode_Float32 = 0x161,
+  LmVFXGraphFloatFCurveNode = 0x162,
+  LmVFXGraphFloatFCurveLoopNode = 0x163,
+  LmVFXGraphFloatMulFloat2Node = 0x164,
+  LmVFXGraphFloatMulFloat3Node = 0x165,
+  LmVFXGraphFloatMulFloat4Node = 0x166,
+  LmVFXGraphCastNode_Float32ToInt32 = 0x167,
+  LmVFXGraphFloorNode_Float32 = 0x168,
+  LmVFXGraphFloorNode_Vector2 = 0x169,
+  LmVFXGraphFloorNode_Vector3 = 0x16A,
+  LmVFXGraphFloorNode_Vector4 = 0x16B,
+  LmGraphForNode = 0x16C,
+  LmVFXGraphForceVectorNode = 0x16D,
+  LmVFXGraphFovAngleNode = 0x16E,
+  LmVFXGraphGeneratorInterval = 0x16F,
+  LmVFXGraphGeneratorIntervalCycle = 0x170,
+  LmVFXGraphGetRotateNode = 0x171,
+  LmVFXGraphGetScaleNode = 0x172,
+  LmVFXGraphGetTranslateNode = 0x173,
+  LmVFXGraphGroundPositionNode = 0x174,
+  LmVFXGraphValue_Int32 = 0x177,
+  LmVFXGraphCastNode_Int32ToFloat32 = 0x178,
+  LmVFXGraphInverse44Node = 0x179,
+  LmVFXGraphLengthNode_Vector2 = 0x17B,
+  LmVFXGraphLengthNode_Vector3 = 0x17C,
+  LmVFXGraphLengthNode_Vector4 = 0x17D,
+  LmVFXGraphLerpNode_Float32 = 0x17E,
+  LmVFXGraphLerpNode_Vector2 = 0x17F,
+  LmVFXGraphLerpNode_Vector3 = 0x180,
+  LmVFXGraphLerpNode_Vector4 = 0x181,
+  LmVFXGraphLerpQuaternionNode = 0x182,
+  LmVFXGraphLifeNode = 0x183,
+  LmGraphInt32PropertyNode_NOTIsValueNode_ = 0x184,
+  LmGraphFloat32x2PropertyNode_NOTIsValueNode_ = 0x185,
+  LmGraphFloat32x2PropertyNode_IsValueNode_ = 0x186,
+  LmGraphFloat32x2PropertyNode_IsValueNode_NOTIsForceStatic_ = 0x187,
+  LmGraphFloat32x3PropertyNode_NOTIsValueNode_ = 0x188,
+  LmGraphFloat32x3PropertyNode_IsValueNode_ = 0x189,
+  LmGraphFloat32x3PropertyNode_IsValueNode_NOTIsForceStatic_ = 0x18A,
+  LmGraphFloat32x4PropertyNode_NOTIsValueNode_ = 0x18B,
+  LmGraphFloat32x4PropertyNode_IsValueNode_ = 0x18C,
+  LmGraphFloat32x4PropertyNode_IsValueNode_NOTIsForceStatic_ = 0x18D,
+  LmGraphFloat32PropertyNode_NOTIsValueNode_ = 0x18E,
+  LmGraphFloat32PropertyNode_IsValueNode_ = 0x18F,
+  LmGraphFloat32PropertyNode_IsValueNode_NOTIsForceStatic_ = 0x190,
+  LmGraphInPortNode = 0x191,
+  LmGraphInt32PropertyNode_IsValueNode_ = 0x192,
+  LmGraphInt32PropertyNode_NOTIsForceStatic_ = 0x193,
+  LmGraphMatrix44PropertyNode_NOTIsValueNode_ = 0x194,
+  LmGraphMatrix44PropertyNode_IsValueNode_ = 0x195,
+  LmGraphMatrix44PropertyNode_IsValueNode_NOTIsForceStatic_ = 0x196,
+  LmGraphOutPortNode = 0x197,
+  LmGraphLoggingNode = 0x198,
+  LmVFXGraphLogNode = 0x19A,
+  LmVFXGraphLog10Node = 0x19B,
+  LmVFXGraphLookAtNode = 0x19C,
+  LmVFXGraphMadNode_Float32 = 0x19D,
+  LmVFXGraphMadNode_Vector2 = 0x19E,
+  LmVFXGraphMadNode_Vector3 = 0x19F,
+  LmVFXGraphMadNode_Vector4 = 0x1A0,
+  LmVFXGraphMatrix33Node = 0x1A1,
+  LmVFXGraphMatrix44Node_Dynamic = 0x1A2,
+  LmVFXGraphMaxNode_Float32 = 0x1A3,
+  LmVFXGraphMaxNode_Vector2 = 0x1A4,
+  LmVFXGraphMaxNode_Vector3 = 0x1A5,
+  LmVFXGraphMaxNode_Vector4 = 0x1A6,
+  LmVFXGraphMinNode_Float32 = 0x1A7,
+  LmVFXGraphMinNode_Vector2 = 0x1A8,
+  LmVFXGraphMinNode_Vector3 = 0x1A9,
+  LmVFXGraphMinNode_Vector4 = 0x1AA,
+  LmVFXGraphModelNode = 0x1AB,
+  LmVFXGraphModelPoseNode = 0x1AC,
+  LmVFXGraphEmitMotionNormal = 0x1AD,
+  LmVFXGraphMulNode_Float32 = 0x1AE,
+  LmVFXGraphMulNode_Vector2 = 0x1AF,
+  LmVFXGraphMulNode_Vector3 = 0x1B0,
+  LmVFXGraphMulNode_Vector4 = 0x1B1,
+  LmVFXGraphMul33Node = 0x1B2,
+  LmVFXGraphMul44Node = 0x1B3,
+  LmVFXGraphNamedMaterialNode = 0x1B4,
+  LmVFXGraphNormalizeNode_Vector2 = 0x1B6,
+  LmVFXGraphNormalizeNode_Vector3 = 0x1B7,
+  LmVFXGraphNormalizeNode_Vector4 = 0x1B8,
+  LmVFXGraphNormalize44Node = 0x1B9,
+  LmVFXGraphNormalizeDegNode = 0x1BA,
+  LmVFXGraphNormalizeRadNode = 0x1BB,
+  LmVFXGraphOnceNode_Float32 = 0x1BC,
+  LmVFXGraphOnceNode_Vector2 = 0x1BD,
+  LmVFXGraphOnceNode_Vector3 = 0x1BE,
+  LmVFXGraphOnceNode_Vector4 = 0x1BF,
+  LmVFXGraphOnce44Node = 0x1C0,
+  LmGraphOrderedSignalNode_NOTIsValueNode_NOTIsForceStatic_ = 0x1C1,
+  LmGraphOrSignalNode_NOTIsValueNode_IsForceStatic_ = 0x1C2,
+  LmVFXGraphParameterEmitterNode = 0x1C3,
+  LmVFXGraphGpuParticleShapeModel = 0x1C4,
+  LmVFXGraphGpuParticleShapePoint = 0x1C5,
+  LmVFXGraphGpuParticleShapeSegment = 0x1C6,
+  LmVFXGraphGpuParticleShapeSprite = 0x1C7,
+  LmVFXGraphGpuParticleSystem = 0x1C8,
+  LmVFXGraphPoint2DTo3DNode = 0x1C9,
+  LmVFXGraphParticleBaseEffecterNode = 0x1CA,
+  LmVFXGraphPointHistoryNode = 0x1CD,
+  LmVFXGraphPointLight = 0x1CE,
+  LmVFXGraphPowNode = 0x1CF,
+  LmVFXGraphQuaternionNode = 0x1D0,
+  LmVFXGraphRadialBlurNode = 0x1D1,
+  LmVFXGraphRadToDegNode = 0x1D2,
+  LmVFXGraphRampNode_Float32 = 0x1D6,
+  LmVFXGraphRampNode_Vector2 = 0x1D7,
+  LmVFXGraphRampNode_Vector3 = 0x1D8,
+  LmVFXGraphRampNode_Vector4 = 0x1D9,
+  LmVFXGraphRandomFloatNode_Float32 = 0x1DE,
+  LmVFXGraphRandomFloatNode_Vector2 = 0x1DF,
+  LmVFXGraphRandomFloatNode_Vector3 = 0x1E0,
+  LmVFXGraphRandomFloatNode_Vector4 = 0x1E1,
+  LmVFXGraphRandomNoiseFloatNode = 0x1E2,
+  LmVFXGraphScreenDistortionNode = 0x1E3,
+  LmVFXGraphScreenSpaceCollisionHandlingNode = 0x1E4,
+  LmVFXGraphSetTranslateNode = 0x1E5,
+  LmVFXGraphPixelShaderNode = 0x1E6,
+  LmVFXGraphSignNode = 0x1E7,
+  LmVFXGraphSignalNode = 0x1E8,
+  LmVFXGraphSinNode = 0x1E9,
+  LmVFXGraphSpotLight = 0x1EA,
+  LmVFXGraphSqrtNode = 0x1EB,
+  LmVFXGraphValue_LmUESRTType = 0x1EC,
+  LmVFXGraphSubNode_Float32 = 0x1ED,
+  LmVFXGraphSubNode_Vector2 = 0x1EE,
+  LmVFXGraphSubNode_Vector3 = 0x1EF,
+  LmVFXGraphSubNode_Vector4 = 0x1F0,
+  LmVFXGraphSumNode_Float32 = 0x1F1,
+  LmVFXGraphSumNode_Vector2 = 0x1F2,
+  LmVFXGraphSumNode_Vector3 = 0x1F3,
+  LmVFXGraphSumNode_Vector4 = 0x1F4,
+  LmVFXGraphSwitchNode_Float32 = 0x1F5,
+  LmVFXGraphSwitchNode_Vector2 = 0x1F6,
+  LmVFXGraphSwitchNode_Vector3 = 0x1F7,
+  LmVFXGraphSwitchNode_Vector4 = 0x1F8,
+  LmVFXGraphSwitchNode_Matrix44 = 0x1F9,
+  LmVFXGraphSystemPropertiesNode = 0x1FA,
+  LmVFXGraphTailPolygonNode = 0x1FB,
+  LmVFXGraphTanNode = 0x1FC,
+  LmVFXGraphTransform33Node = 0x1FE,
+  LmVFXGraphTransform44Node = 0x1FF,
+  LmVFXGraphVariableNode_Float32 = 0x202,
+  LmVFXGraphVariableNode_Vector2 = 0x203,
+  LmVFXGraphVariableNode_Vector3 = 0x204,
+  LmVFXGraphVariableNode_Vector4 = 0x205,
+  LmVFXGraphVariableNode_Matrix44 = 0x206,
+  LmVFXGraphWindReceiverNode = 0x207,
+  LmVFXGraphMatrix44Node = 0x208,
+  LmVFXGraphSoundNode = 0x209,
+  LmVFXGraphMovableSoundNode = 0x20B,
+  LmVFXGraphCameraShakeNode = 0x20C,
+  LmVFXGraphWindDirectional = 0x20F,
+  LmVFXGraphWindPoint = 0x210,
+  LmVFXGraphElementIDNode = 0x211,
+  LmVFXGraphMaterialParametersNode = 0x212,
+  LmTVFXGraphNamedValueNode_Float32 = 0x213,
+  LmTVFXGraphNamedValueNode_Vector2 = 0x214,
+  LmTVFXGraphNamedValueNode_Vector3 = 0x215,
+  LmTVFXGraphNamedValueNode_Vector4 = 0x216,
+  LmVFXGraphCompareNode_Int32 = 0x217,
+  LmVFXGraphFlexiblePointNode = 0x218,
+  LmVFXGraphBreakPointNode = 0x219,
+  LmVFXGraphDebugSignalNode = 0x21B,
+  LmVFXGraphEmitterShapeVegy = 0x21C,
+  LmVFXGraphVegyNode = 0x21D,
+  LmVFXGraphShadowUpdateNode = 0x21E,
+  LmVFXGraphRoundNode_Float32 = 0x220,
+  LmVFXGraphRoundNode_Vector2 = 0x221,
+  LmVFXGraphRoundNode_Vector3 = 0x222,
+  LmVFXGraphRoundNode_Vector4 = 0x223,
+  LmVFXGraphColorNode_Vector3 = 0x224,
+  LmVFXGraphColorNode_Vector4 = 0x225,
+  LmVFXGraphDrawSegment = 0x226,
+  LmVFXGraphPointListNode = 0x227,
+  LmVFXGraphThunderPointListNode = 0x228,
+  LmVFXGraphRayNode = 0x229,
+  LmVFXGraphCollisionMaskNode = 0x22A,
+  LmVFXGraphOnceNode_Int32 = 0x22B,
+  LmVFXGraphPointListInfoNode = 0x22C,
+  LmVFXGraphPointListInterpolationNode = 0x22D,
+  LmVFXGraphDrawPlane = 0x22E,
+  LmVFXGraphHistoryPointListNode = 0x22F,
+  LmVFXGraphParticleMeshEffecterNode = 0x230,
+  LmVFXGraphOccludeNode = 0x231,
+  LmVFXGraphDrawSprite = 0x232,
+  LmVFXGraphDrawSpriteAnim = 0x233,
+  LmVFXGraphLensDirectionalPointListNode = 0x235,
+  LmVFXGraphGetPointNode = 0x236,
+  LmVFXGraphTextureNode = 0x237,
+  LmVFXGraphEmitterShapePointList = 0x238,
+  LmVFXGraphEmitterShapeTexture = 0x239,
+  LmVFXGraphSearchObjectNode = 0x23A,
+  LmVFXGraphGroundTextureNode = 0x23B,
+  LmVFXGraphShaderParameterShiftNode = 0x23C,
+  LmVFXGraphActorShaderParameterShiftNode = 0x23D,
+  LmVFXGraphOncePointListNode = 0x240,
+  LmVFXGraphDirectionalLightInfoNode = 0x242,
+  LmVFXGraphObstacleMapNode = 0x241,
+  LmVFXGraphWeatherInfoNode = 0x244,
+  LmVFXGraphPerlinNoise1DNode = 0x246,
+  LmVFXGraphRandomFloatNode_Int32 = 0x247,
+  LmVFXGraphPoint3DTo2DNode = 0x248,
+  LmVFXGraphPostEffectColorFilterNode = 0x251,
+  LmVFXGraphPostEffectColorHueNode = 0x252,
+  LmVFXGraphPostEffectColorSaturationNode = 0x253,
+  LmVFXGraphPostEffectColorSaturationClampNode = 0x254,
+  LmVFXGraphPostEffectColorSaturationKidoNode = 0x255,
+  LmVFXGraphPostEffectColorToneCurveNode = 0x256,
+  LmVFXGraphPostEffectExposureNode = 0x257,
+  LmVFXGraphPostEffectGlareNode = 0x258,
+  LmVFXGraphPostEffectSharpenNode = 0x259,
+  LmVFXGraphPostEffectVignetteNode = 0x25A,
+  LmGraphCPUTimeNode = 0x25C,
+  LmGraphEmptyNode = 0x25D,
+  LmVFXGraphEmitterInfoNode = 0x25E,
+  LmVFXGraphATan2Node = 0x25F,
+  LmGraphPlatformNode_NOTIsValueNode_ = 0x260,
+  LmVFXGraphVariableNode_Bool = 0x262,
+  LmVFXGraphVariableNode_Int32 = 0x263,
+  LmVFXGraphDelayNonLifeNode = 0x264,
+  LmVFXGraphGeneratorSignal = 0x265,
+  LmVFXGraphSwitchNode_Int32 = 0x266,
+  LmVFXGraphAndNode = 0x267,
+  LmVFXGraphNotNode = 0x268,
+  LmVFXGraphOrNode = 0x269,
+  LmVFXGraphXorNode = 0x26A,
+  LmVFXGraphHitSignalNode = 0x26B,
+  LmGraphObjectPropertyNode_NOTIsValueNode_ = 0x26D,
+  LmVFXGraphWindTornado = 0x26E,
+  LmVFXGraphFieldInfoNode = 0x26F,
+  LmVFXGraphSystemAlphaNode = 0x271,
+  LmVFXGraphRemoteEventRequestNode = 0x273,
+  LmVFXGraphRemoteEventRequestDurationNode = 0x274,
+  LmVFXGraphBranchCollisionIdNode = 0x275,
+  LmTVFXGraphGetMaterialParameterNode_Float32 = 0x276,
+  LmTVFXGraphGetMaterialParameterNode_Vector2 = 0x277,
+  LmTVFXGraphGetMaterialParameterNode_Vector3 = 0x278,
+  LmTVFXGraphGetMaterialParameterNode_Vector4 = 0x279,
+  LmVFXGraphActorActionTargetNode = 0x27B,
+  LmVFXGraphActorInfoNode = 0x27C,
+  LmVFXGraphNvFlowCollider = 0x27D,
+  LmVFXGraphNvFlowEmitter = 0x27E,
+  LmVFXGraphNvFlowGrid = 0x27F,
+  LmVFXGraphEmitterShapeBufferedMesh = 0x280,
+  LmVFXGraphParticleBezierMeshEffecterNode = 0x281,
+  LmVFXGraphParticleBufferedMeshEffecterNode = 0x282,
+  LmVFXGraphNvFlowGridMaterial = 0x283,
+  LmVFXGraphNvFlowRenderMaterial = 0x284,
+  LmGraphStringPropertyNode_NOTIsValueNode_ = 0x285,
+  LmGraphStringPropertyNode_IsValueNode_ = 0x286,
+  LmGraphStringPropertyNode_IsValueNode_NOTIsForceStatic_ = 0x287,
+  LmVFXGraphBoneMatrixNode = 0x288,
+  LmVFXGraphGraphicsOptionsNode = 0x28B,
+  LmVFXGraphScreenPositionAlignNode = 0x28C,
+  
+};
+
+enum LinkType {
+    LinkTypeUnknown = 0x0,
+    LinkTypeSignal = 0x1,
+    LinkTypeCreateSignal = 0x2,
+    LinkTypeOnce = 0x3,
+    LinkTypeEveryFrame = 0x4,
+};
+
+enum EBaseType {
+  kBaseType_None = 0x0,
+  kBaseType_Byte = 0x1,
+  kBaseType_Bool = 0x2,
+  kBaseType_Int16 = 0x3,
+  kBaseType_Int32 = 0x4,
+  kBaseType_Int64 = 0x5,
+  kBaseType_Ubyte = 0x6,
+  kBaseType_Uint16 = 0x7,
+  kBaseType_Uint32 = 0x8,
+  kBaseType_Uint64 = 0x9,
+  kBaseType_Float = 0xA,
+  kBaseType_Double = 0xB,
+  kBaseType_String = 0xC,
+  kBaseType_Vector2 = 0xD,
+  kBaseType_Vector3 = 0xE,
+  kBaseType_Vector4 = 0xF,
+  kBaseType_Color = 0x10,
+  kBaseType_Matrix33 = 0x11,
+  kBaseType_Matrix34 = 0x12,
+  kBaseType_Matrix44 = 0x13,
+  kBaseType_Quaternion = 0x14,
+  kBaseType_Euler = 0x15,
+  kBaseType_Enum = 0x16,
+  kBaseType_ByteArray = 0x17,
+  kBaseType_UbyteArray = 0x18,
+  kBaseType_Int16Array = 0x19,
+  kBaseType_Int32Array = 0x1A,
+  kBaseType_Int64Array = 0x1B,
+  kBaseType_Uint32Array = 0x1C,
+  kBaseType_Uint16Array = 0x1D,
+  kBaseType_Uint64Array = 0x1E,
+  kBaseType_FloatArray = 0x1F,
+  kBaseType_DoubleArray = 0x20,
+  kBaseType_StringArray = 0x21,
+  kBaseType_Vector2Array = 0x22,
+  kBaseType_Vector3Array = 0x23,
+  kBaseType_Vector4Array = 0x24,
+  kBaseType_ColorArray = 0x25,
+  kBaseType_Matrix33Array = 0x26,
+  kBaseType_Matrix34Array = 0x27,
+  kBaseType_Matrix44Array = 0x28,
+  kBaseType_QuaternionArray = 0x29,
+  kBaseType_EulerArray = 0x2A,
+  kBaseType_EnumArray = 0x2B,
+  kBaseType_Count = 0x2C,
+  kBaseType_VFXType = 0x400,
+  kVFXType_Box = 0x400,
+  kVFXType_kSphere = 0x401,
+  kVFXType_kPointer = 0x402,
+  kVFXType_kVectorData = 0x403,
+  kVFXType_kOffset = 0x404,
+  kVFXType_kOffsetArray = 0x405,
+  kVFXType_kFCurve = 0x406,
+};
+
+enum EValueType {
+    EValueType_Invalid = 0x0,
+    EValueType_Bool = 0x1,
+    EValueType_Int32 = 0x2,
+    EValueType_Float32 = 0x3,
+    EValueType_Vector2 = 0x4,
+    EValueType_Vector3 = 0x5,
+    EValueType_Vector4 = 0x6,
+    EValueType_Matrix44 = 0x7,
+    EValueType_String = 0x8,
+    EValueType_Pointer = 0x9,
+    EValueType_Int32Array = 0xA,
+    EValueType_FCurve = 0xB,
+    EValueType_FloatArray = 0xC,
+    EValueType_Vector4Array = 0xF,
+    EValueType_LmUEAlphaBlendType = 0x12,
+    EValueType_LmUERenderFaceType = 0x20,
+    EValueType_LmUESignedAreaType = 0x24,
+};
+
+ubyte JumpToField(offset32& o, int32 i) {
+    local int16 fieldOffset = ReadShort((startof(o) - o) + 4 + 2 * i);
+    if(fieldOffset) {
+        FSeek(startof(o) + fieldOffset);
+        return 1;
+    }
+    return 0;
+}
+
+typedef struct type_FloatArray_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[1]<bgcolor=cGray>;
+    } vTable;
+
+    JumpToField(vTableOffset, 0);
+    offset32 o_data;
+    FSeek(startof(o_data) + o_data);
+    int count<fgcolor=COLOR_COUNT>;
+    float data[count];
+} FloatArray_Table<read=this.count>;
+
+typedef struct type_Int32Array_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[1]<bgcolor=cGray>;
+    } vTable;
+
+    JumpToField(vTableOffset, 0);
+    offset32 o_data;
+    FSeek(startof(o_data) + o_data);
+    int count<fgcolor=COLOR_COUNT>;
+    int data[count];
+} Int32Array_Table<read=this.count>;
+
+typedef struct type_Vector3Array_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[1]<bgcolor=cGray>;
+    } vTable;
+
+    JumpToField(vTableOffset, 0);
+    offset32 o_data;
+    FSeek(startof(o_data) + o_data);
+    int count<fgcolor=COLOR_COUNT>;
+    Vector3_Struct data[count];
+} Vector3Array_Table<read=this.count>;
+
+typedef struct type_Vector4Array_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[1]<bgcolor=cGray>;
+    } vTable;
+
+    JumpToField(vTableOffset, 0);
+    offset32 o_data;
+    FSeek(startof(o_data) + o_data);
+    int count<fgcolor=COLOR_COUNT>;
+    Vector4_Struct data[count];
+} Vector4Array_Table<read=this.count>;
+
+struct BaseTypeInfo_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[42]<bgcolor=cGray>;
+    } vTable;
+
+    if(JumpToField(vTableOffset, 0))        
+        offset32 byteOffset;
+    if(JumpToField(vTableOffset, 1))        
+        offset32 boolOffset;
+    if(JumpToField(vTableOffset, 2))        
+        offset32 int16Offset;
+    if(JumpToField(vTableOffset, 3))        
+        offset32 int32Offset;
+    if(JumpToField(vTableOffset, 4))        
+        offset32 int64Offset;
+    if(JumpToField(vTableOffset, 5))        
+        offset32 UbyteOffset;
+    if(JumpToField(vTableOffset, 6))        
+        offset32 Uint16Offset;
+    if(JumpToField(vTableOffset, 7))        
+        offset32 Uint32Offset;
+    if(JumpToField(vTableOffset, 8))        
+        offset32 Uint64Offset;
+    if(JumpToField(vTableOffset, 9))        
+        offset32 floatOffset;
+    if(JumpToField(vTableOffset, 10))        
+        offset32 doubleOffset;
+    if(JumpToField(vTableOffset, 11))        
+        offset32 stringOffset;
+    if(JumpToField(vTableOffset, 12))        
+        offset32 enumOffset;
+    if(JumpToField(vTableOffset, 13))        
+        offset32 vector2Offset;
+    if(JumpToField(vTableOffset, 14))        
+        offset32 vector3Offset;
+    if(JumpToField(vTableOffset, 15))        
+        offset32 vector4Offset;
+    if(JumpToField(vTableOffset, 16))        
+        offset32 colorOffset;
+    if(JumpToField(vTableOffset, 17))        
+        offset32 matrix33Offset;
+    if(JumpToField(vTableOffset, 18))        
+        offset32 matrix34Offset;
+    if(JumpToField(vTableOffset, 19))        
+        offset32 matrix44Offset;
+    if(JumpToField(vTableOffset, 20))        
+        offset32 quaternionOffset;
+    if(JumpToField(vTableOffset, 21))        
+        offset32 eulerOffset;
+    if(JumpToField(vTableOffset, 22))        
+        offset32 byteArrayOffset;
+    if(JumpToField(vTableOffset, 23))        
+        offset32 boolArrayOffset;
+    if(JumpToField(vTableOffset, 24))        
+        offset32 int16ArrayOffset;
+    if(JumpToField(vTableOffset, 25))        
+        offset32 int32ArrayOffset;
+    if(JumpToField(vTableOffset, 26))        
+        offset32 int64ArrayOffset;
+    if(JumpToField(vTableOffset, 27))        
+        offset32 enumArrayOffset;
+    if(JumpToField(vTableOffset, 28))        
+        offset32 uint16ArrayOffset;
+    if(JumpToField(vTableOffset, 29))        
+        offset32 uint32ArrayOffset;
+    if(JumpToField(vTableOffset, 30))        
+        offset32 uint64ArrayOffset;
+    if(JumpToField(vTableOffset, 31))        
+        offset32 floatArrayOffset;
+    if(JumpToField(vTableOffset, 32))        
+        offset32 doubleArrayOffset;
+    if(JumpToField(vTableOffset, 33))        
+        offset32 stringArrayOffset;
+    if(JumpToField(vTableOffset, 34))        
+        offset32 vector2ArrayOffset;
+    if(JumpToField(vTableOffset, 35))        
+        offset32 vector4ArrayOffset;
+    // Not sure about these
+    if(JumpToField(vTableOffset, 36))        
+        offset32 vector3ArrayOffset;
+    if(JumpToField(vTableOffset, 37))        
+        offset32 colorArraryOffset;
+    if(JumpToField(vTableOffset, 38))        
+        offset32 matrix33ArrayOffset;
+    if(JumpToField(vTableOffset, 39))        
+        offset32 matrix34ArrayOffset;
+    if(JumpToField(vTableOffset, 40))        
+        offset32 matrix44ArrayOffset;
+    if(JumpToField(vTableOffset, 41))        
+        offset32 quaternionArrayOffset;
+
+    if(exists(byteOffset)) {
+        FSeek(startof(byteOffset) + byteOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            byte data[count];
+        } byteData<read=this.count, bgcolor=COLOR_BASETYPE_BYTE>;
+    }
+    if(exists(boolOffset)) {
+        FSeek(startof(boolOffset) + boolOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            ubyte data[count];
+        } boolData;
+    }
+    if(exists(int16Offset)) {
+        FSeek(startof(int16Offset) + int16Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            int16 data[count];
+        } int16Data;
+    }
+    if(exists(int32Offset)) {
+        FSeek(startof(int32Offset) + int32Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            int32 data[count];
+        } int32Data<read=this.count, bgcolor=COLOR_BASETYPE_INT>;
+    }
+    if(exists(int64Offset)) {
+        FSeek(startof(int64Offset) + int64Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            int64 data[count];
+        } int64Data;
+    }
+    if(exists(UbyteOffset)) {
+        FSeek(startof(UbyteOffset) + UbyteOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            ubyte data[count];
+        } ubyteData;
+    }
+    if(exists(Uint16Offset)) {
+        FSeek(startof(Uint16Offset) + Uint16Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            uint16 data[count];
+        } uint16Data;
+    }
+    if(exists(Uint32Offset)) {
+        FSeek(startof(Uint32Offset) + Uint32Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            uint32 data[count];
+        } uint32Data;
+    }
+    if(exists(Uint64Offset)) {
+        FSeek(startof(Uint64Offset) + Uint64Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            uint64 data[count];
+        } uint64Data;
+    }
+    if(exists(floatOffset)) {
+        FSeek(startof(floatOffset) + floatOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            float data[count];
+        } floatData<read=this.count, bgcolor=COLOR_BASETYPE_FLOAT>;
+    }
+    if(exists(doubleOffset)) {
+        FSeek(startof(doubleOffset) + doubleOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            double data[count];
+        } doubleData;
+    }
+    if(exists(stringOffset)) {
+        FSeek(startof(stringOffset) + stringOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            local int i<hidden=true>;
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                FlatBufferString data;
+            }
+        } stringData<read=this.count, bgcolor=COLOR_BASETYPE_STRING>;
+    }
+    if(exists(enumOffset)) {
+        FSeek(startof(enumOffset) + enumOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            int data[count];
+        } enumData<read=this.count, bgcolor=COLOR_BASETYPE_ENUM>;
+    }
+    if(exists(vector2Offset)) {
+        FSeek(startof(vector2Offset) + vector2Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            Vector2_Struct data[count];
+        } vector2Data<read=this.count, bgcolor=COLOR_BASETYPE_VECTOR2>;
+    }
+    if(exists(vector3Offset)) {
+        FSeek(startof(vector3Offset) + vector3Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            Vector3_Struct data[count];
+        } vector3Data<read=this.count, bgcolor=COLOR_BASETYPE_VECTOR3>;
+    }
+    if(exists(vector4Offset)) {
+        FSeek(startof(vector4Offset) + vector4Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            Vector4_Struct data[count];
+        } vector4Data<read=this.count, bgcolor=COLOR_BASETYPE_VECTOR4>;
+    }
+    if(exists(colorOffset)) {
+        FSeek(startof(colorOffset) + colorOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+        } colorData;
+    }
+    if(exists(matrix33Offset)) {
+        FSeek(startof(matrix33Offset) + matrix33Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+        } matrix33Data;
+    }
+    if(exists(matrix34Offset)) {
+        FSeek(startof(matrix34Offset) + matrix34Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+        } matrix34Data;
+    }
+    if(exists(matrix44Offset)) {
+        FSeek(startof(matrix44Offset) + matrix44Offset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            Matrix44_Struct data[count];
+        } matrix44Data<read=this.count, bgcolor=COLOR_BASETYPE_MATRIX44>;
+    }
+    if(exists(int32ArrayOffset)) {
+        FSeek(startof(int32ArrayOffset) + int32ArrayOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            local int i <hidden=true>;
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                Int32Array_Table int32Array;
+            }
+        } int32ArrayData<read=this.count, bgcolor=COLOR_BASETYPE_INTARRAY>;
+    }
+    if(exists(floatArrayOffset)) {
+        FSeek(startof(floatArrayOffset) + floatArrayOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            local int i <hidden=true>;
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                FloatArray_Table floatArray;
+            }
+        } floatArrayData<read=this.count, bgcolor=COLOR_BASETYPE_FLOATARRAY>;
+    }
+    if(exists(vector4ArrayOffset)) {
+        FSeek(startof(vector4ArrayOffset) + vector4ArrayOffset);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            local int i <hidden=true>;
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                Vector4Array_Table vector4Array;
+            }
+        } vector4ArrayData<read=this.count, bgcolor=COLOR_BASETYPE_VECTORARRAY>;
+    }
+};
+
+typedef struct type_Value_Struct {
+    EBaseType baseType;
+    uint valueIndex;
+} Value_Struct;
+
+typedef struct type_GraphNodeDataBase_Struct {
+    uint instanceId;
+    NodeType typeId;
+} GraphNodeDataBase_Struct;
+
+typedef struct type_GraphNodeMemberBase_Struct {
+    uint memberId<format=hex>;
+    uint nameHash<format=hex>;
+} GraphNodeMemberBase_Struct<bgcolor=0x708070>;
+
+typedef struct type_GraphNodePort_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[2]<bgcolor=cGray>;
+    } vTable;
+
+    if(JumpToField(vTableOffset, 0))
+        GraphNodeMemberBase_Struct identity;
+    if(JumpToField(vTableOffset, 1))
+        uint argumentTypes;
+} GraphNodePort_Table<read=Str("%Xh | %Xh", this.identity.memberId, this.identity.nameHash)>;
+
+typedef struct type_GraphNodeProperty_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[3]<bgcolor=cGray>;
+    } vTable;
+
+    if(JumpToField(vTableOffset, 0))
+        GraphNodeMemberBase_Struct identity;
+    if(JumpToField(vTableOffset, 1))
+        EValueType valueType;
+    if(JumpToField(vTableOffset, 2))
+        Value_Struct valueReference;
+
+} GraphNodeProperty_Table<read=Str("%Xh | %s | index: %d", this.identity.memberId, EnumToString(this.valueType), this.valueReference.valueIndex)>;
+
+typedef struct type_GraphNodeData_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[4]<bgcolor=cGray>;
+    } vTable;
+
+    if(JumpToField(vTableOffset, 0))
+        GraphNodeDataBase_Struct identity;
+
+    if(JumpToField(vTableOffset, 1))
+        offset32 o_propertyOffsets;
+
+    if(JumpToField(vTableOffset, 2))
+        offset32 o_inPortOffsets;
+
+    if(JumpToField(vTableOffset, 3))
+        offset32 o_outPortOffsets;
+
+    local int i <hidden=true>;
+    if(exists(o_propertyOffsets)){
+        FSeek(startof(o_propertyOffsets) + o_propertyOffsets);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                GraphNodeProperty_Table property;
+            }
+        } properties<read=this.count>;
+    }
+    if(exists(o_inPortOffsets)){
+        FSeek(startof(o_inPortOffsets) + o_inPortOffsets);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                GraphNodePort_Table inPort;
+            }
+        } inPorts<read=this.count>;
+    }
+    if(exists(o_outPortOffsets)){
+        FSeek(startof(o_outPortOffsets) + o_outPortOffsets);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                GraphNodePort_Table outPort;
+            }
+        } outPorts<read=this.count>;
+    }
+} GraphNodeData_Table<read=Str("%Xh | %s", this.identity.instanceId, EnumToString(this.identity.typeId)), bgcolor=COLOR_GRAPH_NODE>;
+
+typedef struct type_GraphNodeTray_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[3]<bgcolor=cGray>;
+    } vTable;
+
+    if(JumpToField(vTableOffset, 0))
+        uint instanceId;
+    if(JumpToField(vTableOffset, 1))
+        uint typeId;
+
+    if(JumpToField(vTableOffset, 2)) {
+        offset32 o_references;
+        FSeek(startof(o_references) + o_references);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            int reference[count]<format=hex>;
+        } references;
+    }
+} GraphNodeTray_Table<read=Str("%Xh | %d nodes", this.instanceId, this.references.count), bgcolor=0x907070>;
+
+typedef struct type_GraphLinkData_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[7]<bgcolor=cGray>;
+    } vTable;
+
+    if(JumpToField(vTableOffset, 0))
+        uint instanceId<format=hex>;
+    if(JumpToField(vTableOffset, 1))
+        uint sourceNodeId<format=hex>;
+    if(JumpToField(vTableOffset, 2))
+        uint sourceMemberId<format=hex>;
+    if(JumpToField(vTableOffset, 3))
+        uint destinationNodeId<format=hex>;
+    if(JumpToField(vTableOffset, 4))
+        uint destinationMemberId<format=hex>;
+    if(JumpToField(vTableOffset, 5))
+        LinkType linkType<format=hex>;
+    if(JumpToField(vTableOffset, 6))
+        uint unknown<format=hex>;
+} GraphLinkData_Table<read=Str("%Xh | %Xh:%Xh => %Xh:%Xh",
+                           exists(this.instanceId) ? this.instanceId : 0,
+                           this.sourceNodeId,
+                           this.sourceMemberId,
+                           this.destinationNodeId,
+                           this.destinationMemberId), bgcolor=0x807080>;
+
+struct GraphContainer_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[4]<bgcolor=cGray>;
+    } vTable;
+
+    JumpToField(vTableOffset, 0);
+    offset32 o_nodeOffsets;
+
+    JumpToField(vTableOffset, 1);
+    offset32 o_trayOffsets;
+
+    JumpToField(vTableOffset, 2);
+    offset32 o_signalLinkOffsets;
+
+    JumpToField(vTableOffset, 3);
+    offset32 o_propertyLinkOffsets;
+
+    local int i <hidden=true>;
+
+    FSeek(startof(o_nodeOffsets) + o_nodeOffsets);
+    struct {
+        int count<fgcolor=COLOR_COUNT>;
+        offset32 offsets[count];
+        for(i = 0; i < count; i++) {
+            FSeek(startof(offsets[i]) + offsets[i]);
+            GraphNodeData_Table node;
+        }
+    } nodes<read=this.count>;
+
+    FSeek(startof(o_trayOffsets) + o_trayOffsets);
+    struct {
+        int count<fgcolor=COLOR_COUNT>;
+        offset32 offsets[count];
+        for(i = 0; i < count; i++) {
+            FSeek(startof(offsets[i]) + offsets[i]);
+            GraphNodeTray_Table tray;
+        }
+    } trays<read=this.count>;
+
+    FSeek(startof(o_signalLinkOffsets) + o_signalLinkOffsets);
+    struct {
+        int count<fgcolor=COLOR_COUNT>;
+        offset32 offsets[count];
+        for(i = 0; i < count; i++) {
+            FSeek(startof(offsets[i]) + offsets[i]);
+            GraphLinkData_Table signalLink;
+        }
+    } signalLinks<read=this.count>;
+
+    FSeek(startof(o_propertyLinkOffsets) + o_propertyLinkOffsets);
+    struct {
+        int count<fgcolor=COLOR_COUNT>;
+        offset32 offsets[count];
+        for(i = 0; i < count; i++) {
+            FSeek(startof(offsets[i]) + offsets[i]);
+            GraphLinkData_Table propertyLink;
+        }
+    } propertyLinks<read=this.count>;
+
+};
+
+typedef struct type_GraphVersionInfo_Struct {
+    int32 self;
+    int32 tool;
+    int32 converter;
+} GraphVersionInfo_Struct<read=Str("self = %d, tool = %d, converter = %d", this.self, this.tool, this.converter)>;
+
+struct GraphHeader_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[1]<bgcolor=cGray>;
+    } vTable;
+
+    FSeek(startof(vTableOffset) + ReadShort(p + 4));
+    GraphVersionInfo_Struct versionInfo;
+};
+
+struct GraphBinary_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[3]<bgcolor=cGray>;
+    } vTable;
+
+
+    JumpToField(vTableOffset, 0);
+    offset32 graphHeaderOffset;
+
+    JumpToField(vTableOffset, 1);
+    offset32 graphContainerOffset;
+
+    JumpToField(vTableOffset, 2);
+    offset32 baseTypeInfoOffset;
+
+    FSeek(startof(graphHeaderOffset) + graphHeaderOffset);
+    GraphHeader_Table graphHeader;
+
+    FSeek(startof(graphContainerOffset) + graphContainerOffset);
+    GraphContainer_Table graphContainer;
+
+    FSeek(startof(baseTypeInfoOffset) + baseTypeInfoOffset);
+    BaseTypeInfo_Table baseTypeInfo;
+};
+
+typedef struct type_AnchorPoint_Struct {
+    float time;
+    float x;
+    float y;
+    float z;
+} AnchorPoint_Struct<read=Str("%.3fs | %.3f, %.3f, %.3f", this.time, this.x, this.y, this.z)>;
+
+struct VfxGraphFCurve_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[4]<bgcolor=cGray>;
+    } vTable;
+
+
+    if(JumpToField(vTableOffset, 0))
+        int loopIn;
+
+    if(JumpToField(vTableOffset, 1))
+        int loopOut;
+
+    if(JumpToField(vTableOffset, 2))
+        int curveLoopType;
+
+    JumpToField(vTableOffset, 3);
+    offset32 o_anchorPointOffsets;
+
+    local int i <hidden=true>;
+    if(exists(o_anchorPointOffsets)) {
+        FSeek(startof(o_anchorPointOffsets) + o_anchorPointOffsets);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            AnchorPoint_Struct anchorPoint[count];
+        } anchorPoints<read=this.count>;
+    }
+};
+
+struct VfxDummyType_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[1]<bgcolor=cGray>;
+    } vTable;
+};
+
+struct VfxTypeData_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[7]<bgcolor=cGray>;
+    } vTable;
+
+    if(JumpToField(vTableOffset, 0))
+        offset32 o_boxOffsets;
+    if(JumpToField(vTableOffset, 1))
+        offset32 o_sphereOffsets;
+    if(JumpToField(vTableOffset, 2))
+        offset32 o_pointerOffsets;
+    if(JumpToField(vTableOffset, 3))
+        offset32 o_vectorOffsets;
+    if(JumpToField(vTableOffset, 4))
+        offset32 o_offsetOffsets;
+    if(JumpToField(vTableOffset, 5))
+        offset32 o_offsetArrayOffsets;
+    if(JumpToField(vTableOffset, 6))
+        offset32 o_fCurveOffsets;
+
+    local int i <hidden=true>;
+    if(exists(o_boxOffsets)) {
+    }
+    if(exists(o_sphereOffsets)) {
+    }
+    if(exists(o_pointerOffsets)) {
+        FSeek(startof(o_pointerOffsets) + o_pointerOffsets);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                VfxDummyType_Table pointer;
+            }
+        } pointers<read=this.count>;
+    }
+    if(exists(o_vectorOffsets)) {
+        FSeek(startof(o_vectorOffsets) + o_vectorOffsets);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                VfxDummyType_Table vector;
+            }
+        } vectors<read=this.count>;
+    }
+    if(exists(o_offsetOffsets)) {
+    }
+    if(exists(o_offsetArrayOffsets)) {
+    }
+    if(exists(o_fCurveOffsets)) {
+        FSeek(startof(o_fCurveOffsets) + o_fCurveOffsets);
+        struct {
+            int count<fgcolor=COLOR_COUNT>;
+            offset32 offsets[count];
+            for(i = 0; i < count; i++) {
+                FSeek(startof(offsets[i]) + offsets[i]);
+                VfxGraphFCurve_Table fcurve<read=this.anchorPoints.count>;
+            }
+        } fCurves<read=this.count>;
+    }
+
+};
+
+struct VfxGraphBinary_Table {
+    vtoffset vTableOffset;
+    local int64 p<hidden=true> = startof(vTableOffset) - vTableOffset;
+
+    FSeek(p);
+    struct {
+        int16 vTableLength<bgcolor=cWhite>;
+        int16 tableLength<bgcolor=cWhite>;
+        int16 offsets[2]<bgcolor=cGray>;
+    } vTable;
+
+    JumpToField(vTableOffset, 0);
+    offset32 graphBinaryOffset;
+
+    JumpToField(vTableOffset, 1);
+    offset32 vfxTypeDataOffset;
+
+    FSeek(startof(graphBinaryOffset) + graphBinaryOffset);
+    GraphBinary_Table graphBinary;
+
+    FSeek(startof(vfxTypeDataOffset) + vfxTypeDataOffset);
+    VfxTypeData_Table vfxTypeData;
+};
+
+struct VfxHeader {
+    char identifier[16];
+    Assert(identifier == "FLAT.VFX.GRAPH.B");
+
+    offset32 rootTableOffset;
+};
+
+VfxHeader header;
+FSeek(startof(header.rootTableOffset) + header.rootTableOffset);
+VfxGraphBinary_Table vfxGraphBinary;
